@@ -1,0 +1,7 @@
+<Solution>
+  <Configurations>
+    <Platform Name="x64" />
+    <Platform Name="x86" />
+  </Configurations>
+  <Project Path="Calcolatore di dati statistici/Calcolatore di dati statistici.vcxproj" Id="8b185525-7605-4e91-ab24-ace4c2eb26a7" />
+</Solution>
