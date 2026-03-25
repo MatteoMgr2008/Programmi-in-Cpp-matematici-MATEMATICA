@@ -133,7 +133,7 @@
   <ItemGroup>
     <ClInclude Include="Calcolatore di dati statistici.h" />
     <ClInclude Include="framework.h" />
-    <ClInclude Include="Operazioni.h" />
+    <ClInclude Include="OperazioniBase.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="targetver.h" />
   </ItemGroup>
@@ -146,7 +146,7 @@
     <ClCompile Include="imgui\imgui_impl_win32.cpp" />
     <ClCompile Include="imgui\imgui_tables.cpp" />
     <ClCompile Include="imgui\imgui_widgets.cpp" />
-    <ClCompile Include="Operazioni.cpp" />
+    <ClCompile Include="OperazioniBase.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Calcolatore di dati statistici.rc" />
