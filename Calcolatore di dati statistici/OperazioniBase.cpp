@@ -20,5 +20,5 @@ float OperazioniBase::calcoloPotenza(float valore_base, float valore_esponente)
 
 float OperazioniBase::calcoloRadice(float valore_base, float valore_indice)
 {
-	//radice = 
+	//radice
 }
