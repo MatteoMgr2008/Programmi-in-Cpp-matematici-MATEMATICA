@@ -1,5 +1,7 @@
 #include "OperazioniBase.h"
 
+using namespace std;
+
 OperazioniBase::OperazioniBase()
 {
 	this->storico_risultati_calcoli_base = list<RisultatoOperazione>();

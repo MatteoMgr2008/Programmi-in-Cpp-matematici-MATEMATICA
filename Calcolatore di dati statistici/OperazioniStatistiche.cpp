@@ -1,5 +1,7 @@
 #include "OperazioniStatistiche.h"
 
+using namespace std;
+
 OperazioniStatistiche::OperazioniStatistiche()
 {
 
