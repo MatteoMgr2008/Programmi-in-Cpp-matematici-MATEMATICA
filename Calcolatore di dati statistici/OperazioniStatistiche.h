@@ -3,13 +3,13 @@
 #include "OperazioniBase.h"
 #include <vector>
 #include <list>
+#include <map>
 
 using namespace std;
 
-class OperazioniStatistiche
+class OperazioniStatistiche : public OperazioniBase
 {
 	private:
-		RisultatoOperazione risultato_corrente;
 		list<RisultatoOperazione> storico_risultati_calcoli_statistici;
 	public:
 		OperazioniStatistiche();
@@ -22,9 +22,9 @@ class OperazioniStatistiche
 		float calcoloVarianza(vector<float> valori);
 		float calcoloMediana(vector<float> valori);
 		float calcoloModa(vector<float> valori);
-		float calcoloFrequenzaRelativa(vector<float> valori, float valore);
-		float calcoloFrequenzaAssoluta(vector<float> valori, float valore);
-		float calcoloPercentile(vector<float> valori, float percentile);
+		map<float,int> calcoloFrequenzaRelativa(map<float, int> frequenza_assoluta);
+		map<float,int> calcoloFrequenzaAssoluta(vector<float> valori);
+		float calcoloPercentile(map<float,int> frequenza_relativa, float percentile);
 		float calcoloScartoQuadraticoMedio(vector<float> valori);
 		float calcoloScartoSempliceMedio(vector<float> valori);
 		void aggiungiCalcoloStoricoOperazioniStatistiche();

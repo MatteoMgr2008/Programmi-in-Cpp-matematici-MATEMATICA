@@ -17,8 +17,9 @@ struct RisultatoOperazione
 
 class OperazioniBase
 {
-	private:
+	protected:	
 		RisultatoOperazione risultato_corrente;
+	private:
 		list<RisultatoOperazione> storico_risultati_calcoli_base;
 	public:
 		OperazioniBase();
@@ -26,5 +27,6 @@ class OperazioniBase
 		float calcoloRadice(float valore_base, float valore_indice);
 		float calcoloLogaritmo(float valore_base, float valore_argomento);
 		float calcoloSommatoria(vector<float> valori_sommatoria);
+		float calcoloProduttoria(vector<float> valori_produttoria);
 		void aggiungiCalcoloStoricoOperazioniBase();
 };

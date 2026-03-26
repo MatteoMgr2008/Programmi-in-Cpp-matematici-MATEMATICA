@@ -4,6 +4,7 @@ using namespace std;
 
 OperazioniBase::OperazioniBase()
 {
+	this->risultato_corrente = { {}, "", 0.0f };
 	this->storico_risultati_calcoli_base = list<RisultatoOperazione>();
 }
 
@@ -40,6 +41,15 @@ float OperazioniBase::calcoloSommatoria(vector<float> valori_sommatoria)
 	}
 	this->risultato_corrente = { valori_sommatoria, "sommatoria", risultato_sommatoria };
 	return risultato_sommatoria;
+}
+
+float OperazioniBase::calcoloProduttoria(vector<float> valori_produttoria)
+{
+	float risultato_produttoria = 1.0f;
+	for (int i = 0; i < sizeof(valori_produttoria); i++)
+	{
+		risultato_produttoria *= valori_produttoria[i];
+	}
 }
 
 void OperazioniBase::aggiungiCalcoloStoricoOperazioniBase()
