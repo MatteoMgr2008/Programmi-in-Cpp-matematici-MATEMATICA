@@ -17,12 +17,13 @@ float OperazioniBase::calcoloLogaritmo(float valore_base, float valore_argomento
 
 float OperazioniBase::calcoloPotenza(float valore_base, float valore_esponente)
 {
+	float risultato_potenza = 1.0f;
 	for (int i = 0; i < valore_esponente; i++)		
 	{
-		valore_base *= valore_base;
+		risultato_potenza *= valore_base;
 	}	
-	this->risultato_corrente = { {valore_base, valore_esponente}, "potenza", valore_base };
-	return valore_base;
+	this->risultato_corrente = { {valore_base, valore_esponente}, "potenza", risultato_potenza };
+	return risultato_potenza;
 }
 
 float OperazioniBase::calcoloRadice(float valore_base, float valore_indice)
@@ -50,6 +51,8 @@ float OperazioniBase::calcoloProduttoria(vector<float> valori_produttoria)
 	{
 		risultato_produttoria *= valori_produttoria[i];
 	}
+	this->risultato_corrente = { valori_produttoria, "produttoria", risultato_produttoria };
+	return risultato_produttoria;
 }
 
 void OperazioniBase::aggiungiCalcoloStoricoOperazioniBase()
