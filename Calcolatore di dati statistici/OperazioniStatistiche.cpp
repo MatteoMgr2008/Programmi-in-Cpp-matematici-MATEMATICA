@@ -23,13 +23,13 @@ float OperazioniStatistiche::calcoloMediaGeometrica(vector<float> valori)
 
 float OperazioniStatistiche::calcoloMediaArmonica(vector<float> valori)
 {
+	vector<float> valori_originali = valori;
 	for (int i = 0; i < valori.size(); i++)
 	{
 		valori[i] = 1.0f / valori[i];
 	}
 	float risultato_media_armonica = valori.size() / calcoloSommatoria(valori);
-	this->risultato_corrente = { valori, "media armonica", risultato_media_armonica };
-	return risultato_media_armonica;
+	this->risultato_corrente = { valori_originali, "media armonica", risultato_media_armonica };
 }
 
 float OperazioniStatistiche::calcoloMediaQuadratica(vector<float> valori)
@@ -38,7 +38,7 @@ float OperazioniStatistiche::calcoloMediaQuadratica(vector<float> valori)
 	{
 		valori[i] = calcoloPotenza(valori[i], 2.0f);
 	}
-	float risultato_media_quadratica = sqrt(calcoloMediaAritmetica(valori)/valori.size());
+	float risultato_media_quadratica = sqrt(calcoloMediaAritmetica(valori));
 	this->risultato_corrente = { valori, "media quadratica", risultato_media_quadratica };
 	return risultato_media_quadratica;
 }
@@ -63,14 +63,14 @@ float OperazioniStatistiche::calcoloDeviazioneStandard(vector<float> valori)
 		valori[i] = calcoloPotenza(valori[i] - media, 2.0f);
 	}
 
-	float risultato_deviazione_standard = sqrt(calcoloMediaAritmetica(valori) / valori.size());
+	float risultato_deviazione_standard = sqrt(calcoloMediaAritmetica(valori));
 	this->risultato_corrente = { valori, "deviazione standard", risultato_deviazione_standard };
 	return risultato_deviazione_standard;
 }
 
 float OperazioniStatistiche::calcoloVarianza(vector<float> valori)
 {
-	float risultato_varianza = sqrt(calcoloDeviazioneStandard(valori));
+	float risultato_varianza = calcoloPotenza(calcoloDeviazioneStandard(valori), 2.0f);
 	this->risultato_corrente = { valori, "varianza", risultato_varianza };
 	return risultato_varianza;
 }
@@ -144,15 +144,16 @@ map<float, int> OperazioniStatistiche::calcoloFrequenzaAssoluta(vector<float> va
 
 float OperazioniStatistiche::calcoloPercentile(map<float,int> frequenza_relativa, float percentile)
 {
-	float risultato_percentile = 0.0f;
+	float frequenza_cumulata = 0.0f;
 	for (auto& coppia : frequenza_relativa)
 	{
-		if (coppia.second >= risultato_percentile)
+		frequenza_cumulata += coppia.second;
+		if (frequenza_cumulata >= percentile)
 		{
-			risultato_percentile = coppia.first;
+			return coppia.first;
 		}
 	}
-	return risultato_percentile;
+	return 0.0f;
 }
 
 float OperazioniStatistiche::calcoloScartoQuadraticoMedio(vector<float> valori)
