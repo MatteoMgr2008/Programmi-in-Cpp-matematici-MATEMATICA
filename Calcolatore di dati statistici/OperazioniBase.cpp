@@ -36,7 +36,7 @@ float OperazioniBase::calcoloRadice(float valore_base, float valore_indice)
 float OperazioniBase::calcoloSommatoria(vector<float> valori_sommatoria)
 {
 	float risultato_sommatoria = 0.0f;
-	for (int i = 0; i < sizeof(valori_sommatoria); i++)
+	for (int i = 0; i < (int)valori_sommatoria.size(); i++)
 	{
 		risultato_sommatoria += valori_sommatoria[i];
 	}
@@ -47,7 +47,7 @@ float OperazioniBase::calcoloSommatoria(vector<float> valori_sommatoria)
 float OperazioniBase::calcoloProduttoria(vector<float> valori_produttoria)
 {
 	float risultato_produttoria = 1.0f;
-	for (int i = 0; i < sizeof(valori_produttoria); i++)
+	for (int i = 0; i < (int)valori_produttoria.size(); i++)
 	{
 		risultato_produttoria *= valori_produttoria[i];
 	}

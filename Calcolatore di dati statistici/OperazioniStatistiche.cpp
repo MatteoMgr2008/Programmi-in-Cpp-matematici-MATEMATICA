@@ -23,7 +23,7 @@ float OperazioniStatistiche::calcoloMediaGeometrica(vector<float> valori)
 
 float OperazioniStatistiche::calcoloMediaArmonica(vector<float> valori)
 {
-	for (int i = 0; i < sizeof(valori); i++)
+	for (int i = 0; i < valori.size(); i++)
 	{
 		valori[i] = 1.0f / valori[i];
 	}
@@ -34,7 +34,7 @@ float OperazioniStatistiche::calcoloMediaArmonica(vector<float> valori)
 
 float OperazioniStatistiche::calcoloMediaQuadratica(vector<float> valori)
 {
-	for (int i = 0; i < sizeof(valori); i++)
+	for (int i = 0; i < valori.size(); i++)
 	{
 		valori[i] = calcoloPotenza(valori[i], 2.0f);
 	}
@@ -45,7 +45,7 @@ float OperazioniStatistiche::calcoloMediaQuadratica(vector<float> valori)
 
 float OperazioniStatistiche::calcoloMediaPonderata(vector<float> valori, vector<float> pesi)
 {
-	for (int i = 0; i < sizeof(valori); i++)
+	for (int i = 0; i < valori.size(); i++)
 	{
 		valori[i] *= pesi[i];
 	}
@@ -58,7 +58,7 @@ float OperazioniStatistiche::calcoloDeviazioneStandard(vector<float> valori)
 {
 	float media = calcoloMediaAritmetica(valori);
 
-	for (int i = 0; i < sizeof(valori); i++)
+	for (int i = 0; i < valori.size(); i++)
 	{
 		valori[i] = calcoloPotenza(valori[i] - media, 2.0f);
 	}
@@ -78,15 +78,13 @@ float OperazioniStatistiche::calcoloVarianza(vector<float> valori)
 float OperazioniStatistiche::calcoloMediana(vector<float> valori)
 {
 	// ordinamento dei valori per il calcolo della mediana
-	for (int i = 0; i < sizeof(valori); i++)
+	for (int i = 0; i < (int)valori.size(); i++)
 	{
-		for (int j = 0; j < sizeof(valori) - 1; j++)
+		for (int j = 0; j < (int)valori.size() - 1; j++)
 		{
 			if (valori[j] > valori[j + 1])
 			{
-				float temp = valori[j];
-				valori[j] = valori[j + 1];
-				valori[j + 1] = temp;
+				swap(valori[j], valori[j + 1]); // ordinamento dei valori con l'algoritmo bubble sort (scambio di posizione tra i valori)
 			}
 		}
 	}
