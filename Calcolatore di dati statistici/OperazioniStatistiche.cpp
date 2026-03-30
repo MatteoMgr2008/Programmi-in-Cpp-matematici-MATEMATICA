@@ -30,6 +30,7 @@ float OperazioniStatistiche::calcoloMediaArmonica(vector<float> valori)
 	}
 	float risultato_media_armonica = valori.size() / calcoloSommatoria(valori);
 	this->risultato_corrente = { valori_originali, "media armonica", risultato_media_armonica };
+	return risultato_media_armonica;
 }
 
 float OperazioniStatistiche::calcoloMediaQuadratica(vector<float> valori)
