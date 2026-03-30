@@ -19,7 +19,7 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
     const GLFWvidmode* mode = glfwGetVideoMode(glfwGetPrimaryMonitor());
 
     // Crea una finestra GLFW con dimensione dello schermo e titolo
-    GLFWwindow* window = glfwCreateWindow(mode->width, mode->height, "Calcolatore di dati statistici", NULL, NULL);
+    GLFWwindow* window = glfwCreateWindow(mode->width, mode->height, "Software calcolatore di dati statistici", NULL, NULL);
     glfwMakeContextCurrent(window); // Imposta il contesto OpenGL su questa finestra
     glfwSwapInterval(1); // Attiva V-Sync (sincronizzazione verticale)
 
