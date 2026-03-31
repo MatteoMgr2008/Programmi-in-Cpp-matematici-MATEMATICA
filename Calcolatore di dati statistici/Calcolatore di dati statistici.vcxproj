@@ -134,6 +134,7 @@
     <ClInclude Include="Calcolatore di dati statistici.h" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="HeptaSlabFont.h" />
+    <ClInclude Include="Homepage.h" />
     <ClInclude Include="imgui\imgui_impl_glfw.h" />
     <ClInclude Include="imgui\imgui_impl_opengl3.h" />
     <ClInclude Include="OperazioniBase.h" />
@@ -143,6 +144,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Calcolatore di dati statistici.cpp" />
+    <ClCompile Include="Homepage.cpp" />
     <ClCompile Include="imgui\imgui.cpp" />
     <ClCompile Include="imgui\imgui_demo.cpp" />
     <ClCompile Include="imgui\imgui_draw.cpp" />

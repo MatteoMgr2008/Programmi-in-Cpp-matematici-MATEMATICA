@@ -1,13 +1,25 @@
+// Definizione di alcune macro per includere le funzionalità di ImGui e GLFW
+#define GLFW_EXPOSE_NATIVE_WIN32
+
+// Librerie necessarie per il progetto
+#include <Windows.h>
 #include "imgui.h"
-#include "HeptaSlabFont.h"
-#include <io.h>
-#include <cstdio>
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
 #include <GLFW/glfw3.h>
 #include <GLFW/glfw3native.h>
-#include <Windows.h>
+#include <io.h>
+#include <cstdio>
 
+// Schermate (pagine) del programma
+#include "Homepage.h"
+
+// Fonts del programma
+#include "HeptaSlabFont.h"
+
+// Icone del programma
+
+// Spazio dei nomi standard (per evitare di scrivere std:: prima di ogni cosa)
 using namespace std;
 
 // Funzione principale per le applicazioni Windows (sostituisce il main)
@@ -53,10 +65,8 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
 
-        // Finestra di test
-        ImGui::Begin("Test del font");
-        ImGui::Text("Testo di prova con il font HeptaSlab!");
-        ImGui::End();
+		// Collega la schermata principale (homepage) al ciclo di rendering, in modo che venga disegnata ogni frame
+        Homepage();
 
         // Rendering ImGui
         ImGui::Render();
