@@ -143,13 +143,13 @@ map<float,int> OperazioniStatistiche::calcoloFrequenzaRelativa(map<float,int> ri
 	return risultato_frequenza_relativa;
 }
 
-float OperazioniStatistiche::calcoloPercentile(map<float,int> risultato_frequenza_relativa, float percentile)
+float OperazioniStatistiche::calcoloPercentile(map<float,int> risultato_frequenza_relativa, float valore_percentile)
 {
 	float frequenza_cumulata = 0.0f;
 	for (auto& coppia : risultato_frequenza_relativa)
 	{
 		frequenza_cumulata += coppia.second;
-		if (frequenza_cumulata >= percentile)
+		if (frequenza_cumulata >= valore_percentile)
 		{
 			return coppia.first;
 		}
