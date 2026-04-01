@@ -93,10 +93,13 @@
     </ResourceCompile>
   </ItemGroup>
   <ItemGroup>
-    <Image Include="small.ico">
+    <Image Include="Calcolatore di dati statistici.ico">
       <Filter>File di risorse</Filter>
     </Image>
-    <Image Include="Calcolatore di dati statistici.ico">
+    <Image Include="..\..\..\..\..\..\..\Downloads\IconaLogoSoftware.ico">
+      <Filter>File di risorse</Filter>
+    </Image>
+    <Image Include="..\..\..\..\..\..\..\Downloads\IconaLogoSoftware.png">
       <Filter>File di risorse</Filter>
     </Image>
   </ItemGroup>

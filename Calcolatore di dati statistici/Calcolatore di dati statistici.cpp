@@ -18,6 +18,7 @@
 #include "HeptaSlabFont.h"
 
 // Icone del programma
+#include "resource.h" // Per includere le icone dal file "Calcolatore di dati statistici.rc"
 
 // Spazio dei nomi standard (per evitare di scrivere std:: prima di ogni cosa)
 using namespace std;
@@ -34,6 +35,14 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
     GLFWwindow* window = glfwCreateWindow(mode->width, mode->height, "Software calcolatore di dati statistici", NULL, NULL);
     glfwMakeContextCurrent(window); // Imposta il contesto OpenGL su questa finestra
     glfwSwapInterval(1); // Attiva V-Sync (sincronizzazione verticale)
+
+    // Aggiunge l'icona (ovvero il logo del software) alla finestra
+    HWND hwnd = glfwGetWin32Window(window);
+    HICON hIcon = LoadIcon(hInstance, MAKEINTRESOURCE(IDI_CALCOLATOREDIDATISTATISTICI));
+    if (hIcon) {
+        SendMessageA(hwnd, WM_SETICON, ICON_SMALL, (LPARAM)hIcon);
+        SendMessageA(hwnd, WM_SETICON, ICON_BIG, (LPARAM)hIcon);
+    }
 
     // Massimizza la finestra
     glfwMaximizeWindow(window);

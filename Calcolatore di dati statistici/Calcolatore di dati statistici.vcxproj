@@ -161,8 +161,9 @@
     <ResourceCompile Include="Calcolatore di dati statistici.rc" />
   </ItemGroup>
   <ItemGroup>
+    <Image Include="..\..\..\..\..\..\..\Downloads\IconaLogoSoftware.ico" />
+    <Image Include="..\..\..\..\..\..\..\Downloads\IconaLogoSoftware.png" />
     <Image Include="Calcolatore di dati statistici.ico" />
-    <Image Include="small.ico" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
