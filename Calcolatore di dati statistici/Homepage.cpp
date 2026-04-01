@@ -15,8 +15,8 @@ void Homepage() {
     ImGui::Dummy(ImVec2(0.0f, 100.0f));
 
     // Ottieni il theme manager
-    //ThemeManager& themeManager = ThemeManager::getInstance();
-    //int theme = themeManager.getCurrentThemeInt();
+    // ThemeManager& themeManager = ThemeManager::getInstance();
+    // int theme = themeManager.getCurrentThemeInt();
 
 	// Visualizza il titolo del programma
 	string titoloSoftware = "Calcolatore di dati statistici";
