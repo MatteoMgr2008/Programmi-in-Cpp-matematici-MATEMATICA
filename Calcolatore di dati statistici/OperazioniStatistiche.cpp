@@ -106,14 +106,14 @@ float OperazioniStatistiche::calcoloMediana(vector<float> valori)
 
 float OperazioniStatistiche::calcoloModa(vector<float> valori)
 {
-	map<float, int> frequenza_assoluta = calcoloFrequenzaAssoluta(valori);
+	map<float, int> risultato_frequenza_assoluta = calcoloFrequenzaAssoluta(valori);
 	float risultato_moda = 0.0f;
-	int max_frequenza = 0;
-	for (auto& coppia : frequenza_assoluta)
+	int frequenza_massima = 0;
+	for (auto& coppia : risultato_frequenza_assoluta)
 	{
-		if (coppia.second > max_frequenza)
+		if (coppia.second > frequenza_massima)
 		{
-			max_frequenza = coppia.second;
+			frequenza_massima = coppia.second;
 			risultato_moda = coppia.first;
 		}
 	}
@@ -121,32 +121,32 @@ float OperazioniStatistiche::calcoloModa(vector<float> valori)
 	return risultato_moda;
 }
 
-map<float,int> OperazioniStatistiche::calcoloFrequenzaRelativa(map<float,int> frequenza_assoluta)
-{	
-	map<float, int> frequenza_relativa;
-
-	for (auto& coppia : frequenza_assoluta)	
-	{
-		frequenza_relativa[coppia.first] = (float)coppia.second / frequenza_assoluta.size();
-	}
-	return frequenza_relativa;
-}
-
 map<float, int> OperazioniStatistiche::calcoloFrequenzaAssoluta(vector<float> valori)
 {
-	map<float, int> frequenza_assoluta;
+	map<float, int> risultato_frequenza_assoluta;
 
-	for (int i=0; i<valori.size(); i++)
+	for (int i = 0; i < valori.size(); i++)
 	{
-		frequenza_assoluta[valori[i]]++;
+		risultato_frequenza_assoluta[valori[i]]++;
 	}
-	return frequenza_assoluta;
+	return risultato_frequenza_assoluta;
 }
 
-float OperazioniStatistiche::calcoloPercentile(map<float,int> frequenza_relativa, float percentile)
+map<float,int> OperazioniStatistiche::calcoloFrequenzaRelativa(map<float,int> risultato_frequenza_assoluta)
+{	
+	map<float, int> risultato_frequenza_relativa;
+
+	for (auto& coppia : risultato_frequenza_assoluta)	
+	{
+		risultato_frequenza_relativa[coppia.first] = (float)coppia.second / risultato_frequenza_assoluta.size();
+	}
+	return risultato_frequenza_relativa;
+}
+
+float OperazioniStatistiche::calcoloPercentile(map<float,int> risultato_frequenza_relativa, float percentile)
 {
 	float frequenza_cumulata = 0.0f;
-	for (auto& coppia : frequenza_relativa)
+	for (auto& coppia : risultato_frequenza_relativa)
 	{
 		frequenza_cumulata += coppia.second;
 		if (frequenza_cumulata >= percentile)
@@ -165,6 +165,13 @@ float OperazioniStatistiche::calcoloScartoQuadraticoMedio(vector<float> valori)
 float OperazioniStatistiche::calcoloScartoSempliceMedio(vector<float> valori)
 {
 	return 0.0f;
+}
+
+float OperazioniStatistiche::calcoloGaussiana(float valore_media, float valore_varianza, float valore_x) 
+{
+	float n = 1 / calcoloRadice(2 * numbers::pi_v<long double>*calcoloPotenza(valore_varianza, 2), 2);
+	float risultato_gaussiana = n * calcoloPotenza(1 / numbers::e_v<long double>, calcoloPotenza(valore_x - valore_media, 2) / (2 * calcoloPotenza(valore_varianza, 2)));
+	return risultato_gaussiana;
 }
 
 void OperazioniStatistiche::aggiungiCalcoloStoricoOperazioniStatistiche()

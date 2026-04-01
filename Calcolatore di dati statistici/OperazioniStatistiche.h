@@ -5,6 +5,7 @@
 #include <list>
 #include <map>
 #include <algorithm>
+#include <numbers>
 
 using namespace std;
 
@@ -23,10 +24,11 @@ class OperazioniStatistiche : public OperazioniBase
 		float calcoloVarianza(vector<float> valori);
 		float calcoloMediana(vector<float> valori);
 		float calcoloModa(vector<float> valori);
-		map<float,int> calcoloFrequenzaRelativa(map<float, int> frequenza_assoluta);
+		map<float,int> calcoloFrequenzaRelativa(map<float, int> risultato_frequenza_assoluta);
 		map<float,int> calcoloFrequenzaAssoluta(vector<float> valori);
-		float calcoloPercentile(map<float,int> frequenza_relativa, float percentile);
+		float calcoloPercentile(map<float,int> risultato_frequenza_relativa, float percentile);
 		float calcoloScartoQuadraticoMedio(vector<float> valori);
 		float calcoloScartoSempliceMedio(vector<float> valori);
+		float calcoloGaussiana(float valore_media, float valore_varianza, float valore_x);
 		void aggiungiCalcoloStoricoOperazioniStatistiche();
 };
