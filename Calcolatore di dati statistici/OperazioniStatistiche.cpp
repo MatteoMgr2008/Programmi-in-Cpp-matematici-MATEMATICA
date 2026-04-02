@@ -4,7 +4,7 @@ using namespace std;
 
 OperazioniStatistiche::OperazioniStatistiche()
 {
-	this->risultato_corrente = { {}, "", 0.0f };
+	this->risultato_corrente = { vector<float>{}, "", 0.0f };
 }
 
 float OperazioniStatistiche::calcoloMediaAritmetica(vector<float> valori)
@@ -35,37 +35,38 @@ float OperazioniStatistiche::calcoloMediaArmonica(vector<float> valori)
 
 float OperazioniStatistiche::calcoloMediaQuadratica(vector<float> valori)
 {
+	vector<float> valori_originali = valori;
 	for (int i = 0; i < valori.size(); i++)
 	{
 		valori[i] = calcoloPotenza(valori[i], 2.0f);
 	}
 	float risultato_media_quadratica = sqrt(calcoloMediaAritmetica(valori));
-	this->risultato_corrente = { valori, "media quadratica", risultato_media_quadratica };
+	this->risultato_corrente = { valori_originali, "media quadratica", risultato_media_quadratica };
 	return risultato_media_quadratica;
 }
 
 float OperazioniStatistiche::calcoloMediaPonderata(vector<float> valori, vector<float> pesi)
 {
+	vector<float> valori_originali = valori;
 	for (int i = 0; i < valori.size(); i++)
 	{
 		valori[i] *= pesi[i];
 	}
 	float risultato_media_ponderata = calcoloSommatoria(valori) / calcoloSommatoria(pesi);
-	this->risultato_corrente = { valori, "media ponderata", risultato_media_ponderata };
+	this->risultato_corrente = { pair<vector<float>, vector<float>>{valori_originali, pesi}, "media ponderata", risultato_media_ponderata };
 	return risultato_media_ponderata;
 }
 
 float OperazioniStatistiche::calcoloDeviazioneStandard(vector<float> valori)
 {
+	vector<float> valori_originali = valori;
 	float media = calcoloMediaAritmetica(valori);
-
 	for (int i = 0; i < valori.size(); i++)
 	{
 		valori[i] = calcoloPotenza(valori[i] - media, 2.0f);
 	}
-
 	float risultato_deviazione_standard = sqrt(calcoloMediaAritmetica(valori));
-	this->risultato_corrente = { valori, "deviazione standard", risultato_deviazione_standard };
+	this->risultato_corrente = { valori_originali, "deviazione standard", risultato_deviazione_standard };
 	return risultato_deviazione_standard;
 }
 
@@ -90,6 +91,7 @@ float OperazioniStatistiche::calcoloMediana(vector<float> valori)
 		}
 	}
 
+	// calcolo della mediana
 	float risultato_mediana = 0.0f;
 	if (valori.size() % 2 == 0)
 	{
@@ -124,22 +126,22 @@ float OperazioniStatistiche::calcoloModa(vector<float> valori)
 map<float, int> OperazioniStatistiche::calcoloFrequenzaAssoluta(vector<float> valori)
 {
 	map<float, int> risultato_frequenza_assoluta;
-
 	for (int i = 0; i < valori.size(); i++)
 	{
 		risultato_frequenza_assoluta[valori[i]]++;
 	}
+	this->risultato_corrente = { valori, "frequenza assoluta", risultato_frequenza_assoluta };
 	return risultato_frequenza_assoluta;
 }
 
 map<float,int> OperazioniStatistiche::calcoloFrequenzaRelativa(map<float,int> risultato_frequenza_assoluta)
 {	
 	map<float, int> risultato_frequenza_relativa;
-
 	for (auto& coppia : risultato_frequenza_assoluta)	
 	{
 		risultato_frequenza_relativa[coppia.first] = (float)coppia.second / risultato_frequenza_assoluta.size();
 	}
+	this->risultato_corrente = { risultato_frequenza_assoluta, "frequenza relativa", risultato_frequenza_relativa };
 	return risultato_frequenza_relativa;
 }
 
@@ -151,26 +153,36 @@ float OperazioniStatistiche::calcoloPercentile(map<float,int> risultato_frequenz
 		frequenza_cumulata += coppia.second;
 		if (frequenza_cumulata >= valore_percentile)
 		{
-			return coppia.first;
+			float risultato_percentile = coppia.first;
+			this->risultato_corrente = { pair<map<float,int>, float>{risultato_frequenza_relativa, valore_percentile}, "percentile", risultato_percentile };
+			return risultato_percentile;
 		}
 	}
-	return 0.0f;
-}
-
-float OperazioniStatistiche::calcoloScartoQuadraticoMedio(vector<float> valori)
-{
-	return calcoloDeviazioneStandard(valori);
+	float risultato_percentile = 0.0f;
+	this->risultato_corrente = { pair<map<float,int>, float>{risultato_frequenza_relativa, valore_percentile}, "percentile", risultato_percentile };
+	return risultato_percentile;
 }
 
 float OperazioniStatistiche::calcoloScartoSempliceMedio(vector<float> valori)
 {
-	return 0.0f;
+	//TODO: IMPLEMENTARE/RIVEDERE meglio il calcolo dello scarto semplice medio
+	float risultato_scarto_semplice_medio = 0.0f;
+	this->risultato_corrente = { valori, "scarto semplice medio", risultato_scarto_semplice_medio };
+	return risultato_scarto_semplice_medio;
+}
+
+float OperazioniStatistiche::calcoloScartoQuadraticoMedio(vector<float> valori)
+{
+	float risultato_scarto_quadratico_medio = calcoloDeviazioneStandard(valori);
+	this->risultato_corrente = { valori, "scarto quadratico medio", risultato_scarto_quadratico_medio };
+	return risultato_scarto_quadratico_medio;
 }
 
 float OperazioniStatistiche::calcoloGaussiana(float valore_media, float valore_varianza, float valore_x) 
 {
 	float n = 1 / calcoloRadice(2 * numbers::pi_v<long double>*calcoloPotenza(valore_varianza, 2), 2);
 	float risultato_gaussiana = n * calcoloPotenza(1 / numbers::e_v<long double>, calcoloPotenza(valore_x - valore_media, 2) / (2 * calcoloPotenza(valore_varianza, 2)));
+	this->risultato_corrente = { vector<float>{valore_media, valore_varianza, valore_x}, "gaussiana", risultato_gaussiana };
 	return risultato_gaussiana;
 }
 

@@ -5,14 +5,15 @@
 #include <string>
 #include <vector>
 #include <iostream>
+#include <variant>
 
 using namespace std;
 
 struct RisultatoOperazione
 {
-	vector<float> valori_operazione;
+	variant<pair<vector<float>, vector<float>>, pair<map<float, int>, float>, vector<float>, map<float, int>> valori_operazione;
 	string tipo_operazione;
-	float risultato_operazione;
+	variant<float, map<float, int>> risultato_operazione;
 };
 
 class OperazioniBase
