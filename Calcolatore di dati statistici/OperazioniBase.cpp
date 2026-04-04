@@ -4,7 +4,7 @@ using namespace std;
 
 OperazioniBase::OperazioniBase()
 {
-	this->risultato_corrente = { {}, "", 0.0f };
+	this->risultato_corrente = { vector<float>{}, "", 0.0f };
 	this->storico_risultati_calcoli_base = list<RisultatoOperazione>();
 }
 
