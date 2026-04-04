@@ -14,7 +14,10 @@ class OperazioniStatistiche : public OperazioniBase
 	private:
 		list<RisultatoOperazione> storico_risultati_calcoli_statistici;
 	public:
+		// Costruttore della classe OperazioniStatistiche
 		OperazioniStatistiche();
+
+		// Dichiarazione dei metodi per le operazioni statistiche
 		float calcoloMediaAritmetica(vector<float> valori);
 		float calcoloMediaGeometrica(vector<float> valori);
 		float calcoloMediaArmonica(vector<float> valori);
@@ -30,5 +33,9 @@ class OperazioniStatistiche : public OperazioniBase
 		float calcoloScartoQuadraticoMedio(vector<float> valori);
 		float calcoloScartoSempliceMedio(vector<float> valori);
 		float calcoloGaussiana(float valore_media, float valore_varianza, float valore_x);
+
+		// Dichiarazione dei metodi per la gestione dello storico dei calcoli
 		void aggiungiCalcoloStoricoOperazioniStatistiche();
+		void inizializzaStoricoOperazioniStatistiche(int indice_calcolo_storico);
+		void leggiStoricoOperazioniStatistiche();
 };

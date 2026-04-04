@@ -190,3 +190,13 @@ void OperazioniStatistiche::aggiungiCalcoloStoricoOperazioniStatistiche()
 {
 	this->storico_risultati_calcoli_statistici.push_back(this->risultato_corrente);
 }
+
+void OperazioniStatistiche::inizializzaStoricoOperazioniStatistiche(int indice_calcolo_storico)
+{
+
+}
+
+void OperazioniStatistiche::leggiStoricoOperazioniStatistiche()
+{
+
+}

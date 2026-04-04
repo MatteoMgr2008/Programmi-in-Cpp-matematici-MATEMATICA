@@ -23,11 +23,18 @@ class OperazioniBase
 	private:
 		list<RisultatoOperazione> storico_risultati_calcoli_base;
 	public:
+		// Costruttore della classe OperazioniBase
 		OperazioniBase();
+
+		// Dichiarazione dei metodi per le operazioni di base
 		float calcoloPotenza(float valore_base, float valore_esponente);
 		float calcoloRadice(float valore_base, float valore_indice);
 		float calcoloLogaritmo(float valore_base, float valore_argomento);
 		float calcoloSommatoria(vector<float> valori_sommatoria);
 		float calcoloProduttoria(vector<float> valori_produttoria);
+
+		// Dichiarazione dei metodi per la gestione dello storico dei calcoli
 		void aggiungiCalcoloStoricoOperazioniBase();
+		void inizializzaStoricoOperazioniBase(int indice_calcolo_storico);
+		void leggiStoricoOperazioniBase();
 };

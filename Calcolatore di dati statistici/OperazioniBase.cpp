@@ -59,3 +59,13 @@ void OperazioniBase::aggiungiCalcoloStoricoOperazioniBase()
 {
 	this->storico_risultati_calcoli_base.push_back(this->risultato_corrente);
 }
+
+void OperazioniBase::inizializzaStoricoOperazioniBase(int indice_calcolo_storico)
+{
+
+}
+
+void OperazioniBase::leggiStoricoOperazioniBase()
+{
+
+}
