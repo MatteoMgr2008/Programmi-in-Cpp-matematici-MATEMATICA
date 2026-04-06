@@ -65,6 +65,10 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
     ImGui_ImplGlfw_InitForOpenGL(window, true);
     ImGui_ImplOpenGL3_Init("#version 130"); // Specifica la versione di GLSL da usare
 
+	bool upload_file_dati = false; // Variabile per mostrare la schermata di upload dei file di dati
+	bool visualizza_funzioni_statistiche = false; // Variabile per mostrare la schermata di visualizzazione delle funzioni statistiche e di base
+	bool uscita_software = false; // Variabile per mostrare la schermata di uscita dal software
+
     // Ciclo principale dell'applicazione (finché la finestra non viene chiusa dall'utente)
     while (!glfwWindowShouldClose(window)) {
         glfwPollEvents(); // Gestisce gli eventi in input (mouse, tastiera, ecc...)
@@ -74,8 +78,23 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
 
-		// Collega la schermata principale (homepage) al ciclo di rendering, in modo che venga disegnata ogni frame
-        Homepage();
+        // Mostra una schermata diversa in base allo stato della variabile
+        if (upload_file_dati == true) {
+            // Mostra la schermata per l'upload dei file di dati
+
+        }
+        else if (visualizza_funzioni_statistiche == true) {
+            // Mostra la schermata per visualizzare le funzioni statistiche
+
+        }
+        else if (uscita_software == true) {
+            // Mostra la schermata per l'uscita dal software
+
+		}
+        else {
+			// Mostra la schermata principale (homepage)
+			Homepage(upload_file_dati, visualizza_funzioni_statistiche, uscita_software);
+        }
 
         // Rendering ImGui
         ImGui::Render();
