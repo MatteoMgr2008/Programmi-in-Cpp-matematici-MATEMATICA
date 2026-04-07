@@ -55,6 +55,13 @@ float OperazioniBase::calcoloProduttoria(vector<float> valori_produttoria)
 	return risultato_produttoria;
 }
 
+float OperazioniBase::calcoloValoreAssoluto(float valore_non_assoluto)
+{
+	float risultato_valore_assoluto = this->calcoloRadice(this->calcoloPotenza(valore_non_assoluto, 2.0f), 2.0f);
+	this->risultato_corrente = { vector<float>{valore_non_assoluto}, "valore assoluto", risultato_valore_assoluto };
+	return risultato_valore_assoluto;
+}
+
 void OperazioniBase::aggiungiCalcoloStoricoOperazioniBase()
 {
 	this->storico_risultati_calcoli_base.push_back(this->risultato_corrente);

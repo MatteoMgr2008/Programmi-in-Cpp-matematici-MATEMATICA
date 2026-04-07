@@ -46,16 +46,17 @@ void SchermataTestFunzioni(bool& test_funzioni_statistiche) {
         "01) Potenza",
         "02) Radice",
         "03) Logaritmo",
-        "04) Sommatoria",
-        "05) Produttoria",
-        "06) Media Aritmetica",
-        "07) Media Geometrica",
-        "08) Media Armonica",
-        "09) Media Quadratica",
-        "10) Deviazione Standard",
-        "11) Varianza",
-        "12) Mediana",
-        "13) Moda"
+		"04) Valore assoluto",
+        "05) Sommatoria",
+        "06) Produttoria",
+        "07) Media Aritmetica",
+        "08) Media Geometrica",
+        "09) Media Armonica",
+        "10) Media Quadratica",
+        "11) Deviazione Standard",
+        "12) Varianza",
+        "13) Mediana",
+        "14) Moda"
     };
 
     ImGui::Combo("Scegli un'operazione", &operazioneSelezionata, nomiOperazioni, IM_ARRAYSIZE(nomiOperazioni));
@@ -92,20 +93,20 @@ void SchermataTestFunzioni(bool& test_funzioni_statistiche) {
                 if (operazioneSelezionata == 1) risultatoTesto = to_string(ops.calcoloPotenza(floatParam1, floatParam2));
                 else if (operazioneSelezionata == 2) risultatoTesto = to_string(ops.calcoloRadice(floatParam1, floatParam2));
                 else if (operazioneSelezionata == 3) risultatoTesto = to_string(ops.calcoloLogaritmo(floatParam1, floatParam2));
-                
-                else if (lista_val.empty() && operazioneSelezionata >= 4) {
+                else if (operazioneSelezionata == 4) risultatoTesto = to_string(ops.calcoloValoreAssoluto(floatParam1));
+                else if (lista_val.empty() && operazioneSelezionata >= 5) {
                     risultatoTesto = "Errore: lista di valori vuota o non valida.";
                 }
-                else if (operazioneSelezionata == 4) risultatoTesto = to_string(ops.calcoloSommatoria(lista_val));
-                else if (operazioneSelezionata == 5) risultatoTesto = to_string(ops.calcoloProduttoria(lista_val));
-                else if (operazioneSelezionata == 6) risultatoTesto = to_string(ops.calcoloMediaAritmetica(lista_val));
-                else if (operazioneSelezionata == 7) risultatoTesto = to_string(ops.calcoloMediaGeometrica(lista_val));
-                else if (operazioneSelezionata == 8) risultatoTesto = to_string(ops.calcoloMediaArmonica(lista_val));
-                else if (operazioneSelezionata == 9) risultatoTesto = to_string(ops.calcoloMediaQuadratica(lista_val));
-                else if (operazioneSelezionata == 10) risultatoTesto = to_string(ops.calcoloDeviazioneStandard(lista_val));
-                else if (operazioneSelezionata == 11) risultatoTesto = to_string(ops.calcoloVarianza(lista_val));
-                else if (operazioneSelezionata == 12) risultatoTesto = to_string(ops.calcoloMediana(lista_val));
-                else if (operazioneSelezionata == 13) risultatoTesto = to_string(ops.calcoloModa(lista_val));
+                else if (operazioneSelezionata == 5) risultatoTesto = to_string(ops.calcoloSommatoria(lista_val));
+                else if (operazioneSelezionata == 6) risultatoTesto = to_string(ops.calcoloProduttoria(lista_val));
+                else if (operazioneSelezionata == 7) risultatoTesto = to_string(ops.calcoloMediaAritmetica(lista_val));
+                else if (operazioneSelezionata == 8) risultatoTesto = to_string(ops.calcoloMediaGeometrica(lista_val));
+                else if (operazioneSelezionata == 9) risultatoTesto = to_string(ops.calcoloMediaArmonica(lista_val));
+                else if (operazioneSelezionata == 10) risultatoTesto = to_string(ops.calcoloMediaQuadratica(lista_val));
+                else if (operazioneSelezionata == 11) risultatoTesto = to_string(ops.calcoloDeviazioneStandard(lista_val));
+                else if (operazioneSelezionata == 12) risultatoTesto = to_string(ops.calcoloVarianza(lista_val));
+                else if (operazioneSelezionata == 13) risultatoTesto = to_string(ops.calcoloMediana(lista_val));
+                else if (operazioneSelezionata == 14) risultatoTesto = to_string(ops.calcoloModa(lista_val));
             } catch (...) {
                 risultatoTesto = "Errore durante il calcolo.";
             }

@@ -118,7 +118,7 @@ void Homepage(bool& upload_file_dati, bool& visualizza_funzioni_statistiche, boo
     ImGui::Dummy(ImVec2(0.0f, distanza_pulsanti_standard));
 
 	// Pulsante 3 (celeste): "Utilizza singolarmente le funzioni base e statistiche"
-	ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.0f, 0.5f, 0.8f, 1.0f)); // Celeste scuro (colore normale)
+	ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.0f, 0.5f, 0.8f, 1.0f)); // Celeste (colore normale)
 	ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.2f, 0.7f, 1.0f, 1.0f)); // Celeste chiaro (colore hovered)
     ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.0f, 0.4f, 0.6f, 1.0f)); // Celeste scuro (colore active)
 	ImGui::SetCursorPosX(posizione_X_pulsante_standard); // Posizione X centrata del pulsante

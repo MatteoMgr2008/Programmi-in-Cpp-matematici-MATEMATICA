@@ -32,6 +32,7 @@ class OperazioniBase
 		float calcoloLogaritmo(float valore_base, float valore_argomento);
 		float calcoloSommatoria(vector<float> valori_sommatoria);
 		float calcoloProduttoria(vector<float> valori_produttoria);
+		float calcoloValoreAssoluto(float valore_non_assoluto);
 
 		// Dichiarazione dei metodi per la gestione dello storico dei calcoli
 		void aggiungiCalcoloStoricoOperazioniBase();
