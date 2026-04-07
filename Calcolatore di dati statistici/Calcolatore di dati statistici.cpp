@@ -1,7 +1,7 @@
 // Definizione di alcune macro per includere le funzionalità di ImGui e GLFW
 #define GLFW_EXPOSE_NATIVE_WIN32
 
-// Librerie necessarie per il progetto
+// Librerie necessarie per il programma
 #include <Windows.h>
 #include "imgui.h"
 #include "imgui_impl_glfw.h"
@@ -55,7 +55,7 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
     ImGui::CreateContext();
     ImGuiIO& io = ImGui::GetIO(); (void)io; // Ottiene l'oggetto IO (può essere usato per input, configurazioni, ecc.)
 
-    // Variabile da mettere sopra, tra le altre globali o prima del ciclo
+	// Variabile da mettere sopra, tra le altre globali o prima del ciclo principale, per tenere traccia del tema scuro o chiaro
     bool darkMode = true; // Tema scuro di default
 
     // Caricamento dei font di tutto il programma
@@ -69,11 +69,11 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
     ImGui_ImplOpenGL3_Init("#version 130"); // Specifica la versione di GLSL da usare
 
 	bool upload_file_dati = false; // Variabile per mostrare la schermata di upload dei file di dati
-	bool visualizza_funzioni_statistiche = false; // Variabile per mostrare la schermata di visualizzazione delle funzioni statistiche e di base
+	bool visualizza_funzioni_statistiche = false; // Variabile per mostrare la schermata di visualizzazione delle funzioni base e statistiche
 	bool uscita_software = false; // Variabile per mostrare la schermata di uscita dal software
-	bool test_funzioni = false; // Variabile per mostrare la schermata di test delle funzioni
+	bool test_funzioni_statistiche = false; // Variabile per mostrare la schermata di test delle funzioni base e statistiche
 
-    // Ciclo principale dell'applicazione (finché la finestra non viene chiusa dall'utente)
+    // Ciclo principale del programma (valido finché la finestra non viene chiusa dall'utente)
     while (!glfwWindowShouldClose(window)) {
         glfwPollEvents(); // Gestisce gli eventi in input (mouse, tastiera, ecc...)
 
@@ -91,17 +91,17 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
             // Mostra la schermata per visualizzare le funzioni statistiche
 			SchermataVisualizzaFunzioni(visualizza_funzioni_statistiche);
         }
-        else if (test_funzioni == true) {
+        else if (test_funzioni_statistiche == true) {
             // Mostra la schermata per testare le funzioni base e statistiche
-			SchermataTestFunzioni(test_funzioni);
+			SchermataTestFunzioni(test_funzioni_statistiche);
 		}
         else if (uscita_software == true) {
             // Mostra la schermata per l'uscita dal software
-
+			// TODO: implementare la schermata di uscita dal software (con conferma di uscita SI/NO)
 		}
         else {
 			// Mostra la schermata principale (homepage)
-			Homepage(upload_file_dati, visualizza_funzioni_statistiche, uscita_software, test_funzioni);
+			Homepage(upload_file_dati, visualizza_funzioni_statistiche, uscita_software, test_funzioni_statistiche);
         }
 
         // Rendering ImGui

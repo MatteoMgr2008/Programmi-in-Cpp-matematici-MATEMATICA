@@ -45,6 +45,15 @@
     <ClInclude Include="Homepage.h">
       <Filter>File di intestazione</Filter>
     </ClInclude>
+    <ClInclude Include="SchermataTestFunzioni.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
+    <ClInclude Include="SchermataUploadDati.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
+    <ClInclude Include="SchermataVisualizzaFunzioni.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Calcolatore di dati statistici.cpp">
@@ -84,6 +93,15 @@
       <Filter>File di origine</Filter>
     </ClCompile>
     <ClCompile Include="Homepage.cpp">
+      <Filter>File di origine</Filter>
+    </ClCompile>
+    <ClCompile Include="SchermataTestFunzioni.cpp">
+      <Filter>File di origine</Filter>
+    </ClCompile>
+    <ClCompile Include="SchermataUploadDati.cpp">
+      <Filter>File di origine</Filter>
+    </ClCompile>
+    <ClCompile Include="SchermataVisualizzaFunzioni.cpp">
       <Filter>File di origine</Filter>
     </ClCompile>
   </ItemGroup>

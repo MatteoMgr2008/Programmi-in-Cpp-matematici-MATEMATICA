@@ -23,13 +23,13 @@ vector<float> ParseFloatList(const string& input) {
     return result;
 }
 
-void SchermataTestFunzioni(bool& test_funzioni) {
+void SchermataTestFunzioni(bool& test_funzioni_statistiche) {
     ImGui::SetNextWindowPos(ImVec2(0, 0), ImGuiCond_Always);
     ImGui::SetNextWindowSize(ImGui::GetIO().DisplaySize, ImGuiCond_Always);
     ImGui::Begin("Test Funzioni", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse);
 
     if (ImGui::Button("Torna alla Homepage")) {
-        test_funzioni = false;
+        test_funzioni_statistiche = false;
     }
     
     ImGui::Spacing();

@@ -140,6 +140,9 @@
     <ClInclude Include="OperazioniBase.h" />
     <ClInclude Include="OperazioniStatistiche.h" />
     <ClInclude Include="Resource.h" />
+    <ClInclude Include="SchermataTestFunzioni.h" />
+    <ClInclude Include="SchermataUploadDati.h" />
+    <ClInclude Include="SchermataVisualizzaFunzioni.h" />
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
@@ -156,6 +159,9 @@
     <ClCompile Include="imgui\imgui_widgets.cpp" />
     <ClCompile Include="OperazioniBase.cpp" />
     <ClCompile Include="OperazioniStatistiche.cpp" />
+    <ClCompile Include="SchermataTestFunzioni.cpp" />
+    <ClCompile Include="SchermataUploadDati.cpp" />
+    <ClCompile Include="SchermataVisualizzaFunzioni.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Calcolatore di dati statistici.rc" />
