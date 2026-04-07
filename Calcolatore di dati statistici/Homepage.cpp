@@ -3,7 +3,7 @@
 
 using namespace std;
 
-void Homepage(bool& upload_file_dati, bool& visualizza_funzioni_statistiche, bool& uscita_software) {
+void Homepage(bool& upload_file_dati, bool& visualizza_funzioni_statistiche, bool& uscita_software, bool& test_funzioni) {
     ImGui::SetNextWindowPos(ImVec2(0, 0), ImGuiCond_Always);
     ImGui::SetNextWindowSize(ImGui::GetIO().DisplaySize, ImGuiCond_Always);
 
@@ -54,11 +54,13 @@ void Homepage(bool& upload_file_dati, bool& visualizza_funzioni_statistiche, boo
     float larghezza_testo_pulsante_1 = ImGui::CalcTextSize(testo_pulsante_1.c_str()).x + 20.0f; // Calcola la larghezza del testo del pulsante 1
     string testo_pulsante_2 = "Visualizza la lista di funzioni base e statistiche esistenti"; // Testo del pulsante 2 (indica la funzione del pulsante)
     float larghezza_testo_pulsante_2 = ImGui::CalcTextSize(testo_pulsante_2.c_str()).x + 20.0f; // Calcola la larghezza del testo del pulsante 2
+    string testo_pulsante_4 = "Testa singolarmente le funzioni base e statistiche"; // Testo del pulsante 4 (nuovo pulsante di test)
+    float larghezza_testo_pulsante_4 = ImGui::CalcTextSize(testo_pulsante_4.c_str()).x + 20.0f;
     string testo_pulsante_3 = "Esci dal software"; // Testo del pulsante 3 (indica la funzione del pulsante)
     float larghezza_testo_pulsante_3 = ImGui::CalcTextSize(testo_pulsante_3.c_str()).x + 20.0f; // Calcola la larghezza del testo del pulsante 3
 
 	// Variabili per la posizione e dimensione dei pulsanti
-	float larghezza_pulsante_standard = max({ larghezza_testo_pulsante_1, larghezza_testo_pulsante_2, larghezza_testo_pulsante_3 }); // Larghezza del pulsante standard basata sulla larghezza del testo più lungo tra i tre pulsanti
+	float larghezza_pulsante_standard = max({ larghezza_testo_pulsante_1, larghezza_testo_pulsante_2, larghezza_testo_pulsante_3, larghezza_testo_pulsante_4 }); // Larghezza del pulsante standard basata sulla larghezza del testo più lungo tra i tre pulsanti
 	float altezza_pulsante_standard = 50.0f; // Altezza del pulsante standard
 	float distanza_pulsanti_standard = 10.0f; // Spazio verticale standard tra i pulsanti
 	float posizione_X_pulsante_standard = (ImGui::GetWindowSize().x - larghezza_pulsante_standard) * 0.5f; // Posizione X centrata del pulsante standard
@@ -98,6 +100,22 @@ void Homepage(bool& upload_file_dati, bool& visualizza_funzioni_statistiche, boo
     if (ImGui::IsItemHovered()) {
         ImGui::SetTooltip("Visualizza la lista delle funzioni di base e statistiche esistenti. Seleziona una funzione in particolare per visualizzarne i dettagli.");
     }
+    ImGui::PopStyleColor(3); // Ripristina i colori originali
+
+    // Spaziatura tra i pulsanti
+    ImGui::Dummy(ImVec2(0.0f, distanza_pulsanti_standard));
+
+	// Pulsante test (Celeste): "Testa singolarmente le funzioni"
+    ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.0f, 0.5f, 0.8f, 1.0f)); // Celeste scuro
+    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.2f, 0.7f, 1.0f, 1.0f)); // Celeste chiaro
+    ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.0f, 0.4f, 0.6f, 1.0f)); // Celeste
+	ImGui::SetCursorPosX(posizione_X_pulsante_standard); // Posizione X centrata del pulsante
+    if (ImGui::Button(testo_pulsante_4.c_str(), ImVec2(larghezza_pulsante_standard, altezza_pulsante_standard))) {
+        test_funzioni = true; 
+	}
+    if (ImGui::IsItemHovered()) {
+        ImGui::SetTooltip("Testa le funzionalità di calcolo inserendo dei valori a piacimento.");
+	}
     ImGui::PopStyleColor(3); // Ripristina i colori originali
 
     // Spaziatura tra i pulsanti
