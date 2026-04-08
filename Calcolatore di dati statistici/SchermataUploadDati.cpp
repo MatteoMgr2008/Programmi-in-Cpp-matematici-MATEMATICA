@@ -158,69 +158,71 @@ void SchermataUploadDati(bool& upload_file_dati) {
 
         vector<float>& datiScelti = datasetCaricato.columns[colonnaSelezionata];
 
-        ImGui::Text("Valori pronti all'uso per '%s' (N=%zu). Seleziona l'operazione:", datasetCaricato.headers[colonnaSelezionata].c_str(), datiScelti.size());
+        ImGui::Text("Valori pronti all'uso per '%s' (N=%zu).", datasetCaricato.headers[colonnaSelezionata].c_str(), datiScelti.size());
 
-        const char* nomiOperazioni[] = {
-            "Scelta operazione...",
-            "01) Sommatoria",
-            "02) Produttoria",
-            "03) Media Aritmetica",
-            "04) Media Geometrica",
-            "05) Media Armonica",
-            "06) Media Quadratica",
-            "07) Deviazione Standard",
-            "08) Varianza",
-            "09) Mediana",
-            "10) Moda",
-            "11) Frequenza Assoluta",
-            "12) Frequenza Relativa"
-        };
-
-        ImGui::Combo("Scegli un'operazione", &operazioneSelezionata, nomiOperazioni, IM_ARRAYSIZE(nomiOperazioni));
-
-        if (operazioneSelezionata != 0 && !datiScelti.empty()) {
+        if (!datiScelti.empty()) {
             ImGui::Spacing();
-            if (ImGui::Button("Calcola Risultato sui Dati Caricati")) {
-                try {
-                    if (operazioneSelezionata == 1) risultatoTesto = to_string(ops.calcoloSommatoria(datiScelti));
-                    else if (operazioneSelezionata == 2) risultatoTesto = to_string(ops.calcoloProduttoria(datiScelti));
-                    else if (operazioneSelezionata == 3) risultatoTesto = to_string(ops.calcoloMediaAritmetica(datiScelti));
-                    else if (operazioneSelezionata == 4) risultatoTesto = to_string(ops.calcoloMediaGeometrica(datiScelti));
-                    else if (operazioneSelezionata == 5) risultatoTesto = to_string(ops.calcoloMediaArmonica(datiScelti));
-                    else if (operazioneSelezionata == 6) risultatoTesto = to_string(ops.calcoloMediaQuadratica(datiScelti));
-                    else if (operazioneSelezionata == 7) risultatoTesto = to_string(ops.calcoloDeviazioneStandard(datiScelti));
-                    else if (operazioneSelezionata == 8) risultatoTesto = to_string(ops.calcoloVarianza(datiScelti));
-                    else if (operazioneSelezionata == 9) risultatoTesto = to_string(ops.calcoloMediana(datiScelti));
-                    else if (operazioneSelezionata == 10) risultatoTesto = to_string(ops.calcoloModa(datiScelti));
-                    else if (operazioneSelezionata == 11) {
-                        auto freq = ops.calcoloFrequenzaAssoluta(datiScelti);
-                        stringstream ss;
-                        ss << "\n";
-                        for (auto const& val_count : freq) {
-                            ss << "   Dato " << val_count.first << " -> " << val_count.second << " volte\n";
-                        }
-                        risultatoTesto = ss.str();
+            ImGui::Text("Elenco delle operazioni statistiche:");
+            ImGui::Spacing();
+
+            if (ImGui::BeginTable("TabellaRisultati", 2, ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg | ImGuiTableFlags_SizingFixedFit)) {
+                ImGui::TableSetupColumn("Operazione", ImGuiTableColumnFlags_WidthFixed, 200.0f);
+                ImGui::TableSetupColumn("Risultato", ImGuiTableColumnFlags_WidthStretch);
+                ImGui::TableHeadersRow();
+
+                auto AddRow = [](const char* operazione, const string& risultato) {
+                    ImGui::TableNextRow();
+                    ImGui::TableSetColumnIndex(0);
+                    ImGui::Text("%s", operazione);
+                    ImGui::TableSetColumnIndex(1);
+                    ImGui::Text("%s", risultato.c_str());
+                };
+
+                auto SafeCalc = [&](const char* opName, auto calcFunc) {
+                    try {
+                        AddRow(opName, calcFunc());
+                    } catch (...) {
+                        AddRow(opName, "N/A (errore intercettato)");
                     }
-                    else if (operazioneSelezionata == 12) {
-                        auto freqAss = ops.calcoloFrequenzaAssoluta(datiScelti);
-                        auto freqRel = ops.calcoloFrequenzaRelativa(freqAss);
-                        stringstream ss;
-                        ss << "\n";
-                        for (auto const& val_rel : freqRel) {
-                            // freqRel in OperazioniStatistiche.h ritorna un map<float, int> 
-                            // che probabilmente rappresenta la percentuale intera
-                            ss << "   Dato " << val_rel.first << " -> " << val_rel.second << "%\n";
-                        }
-                        risultatoTesto = ss.str();
+                };
+
+                SafeCalc("01) Sommatoria", [&](){ return to_string(ops.calcoloSommatoria(datiScelti)); });
+                SafeCalc("02) Produttoria", [&](){ return to_string(ops.calcoloProduttoria(datiScelti)); });
+                SafeCalc("03) Media Aritmetica", [&](){ return to_string(ops.calcoloMediaAritmetica(datiScelti)); });
+                SafeCalc("04) Media Geometrica", [&](){ return to_string(ops.calcoloMediaGeometrica(datiScelti)); });
+                SafeCalc("05) Media Armonica", [&](){ return to_string(ops.calcoloMediaArmonica(datiScelti)); });
+                SafeCalc("06) Media Quadratica", [&](){ return to_string(ops.calcoloMediaQuadratica(datiScelti)); });
+                SafeCalc("07) Deviazione Standard", [&](){ return to_string(ops.calcoloDeviazioneStandard(datiScelti)); });
+                SafeCalc("08) Varianza", [&](){ return to_string(ops.calcoloVarianza(datiScelti)); });
+                SafeCalc("09) Mediana", [&](){ return to_string(ops.calcoloMediana(datiScelti)); });
+                SafeCalc("10) Moda", [&](){ return to_string(ops.calcoloModa(datiScelti)); });
+                
+                SafeCalc("11) Frequenza Assoluta", [&]() {
+                    auto freq = ops.calcoloFrequenzaAssoluta(datiScelti);
+                    stringstream ss;
+                    for (auto const& val_count : freq) {
+                        ss << "Dato " << val_count.first << " -> " << val_count.second << " volte\n";
                     }
-                } catch (...) {
-                    risultatoTesto = "Errore matematico durante il calcolo.";
-                }
+                    string result = ss.str();
+                    if (!result.empty()) result.pop_back(); // rimuove l'ultimo \n
+                    return result.empty() ? string("N/A") : result;
+                });
+
+                SafeCalc("12) Frequenza Relativa", [&]() {
+                    auto freqAss = ops.calcoloFrequenzaAssoluta(datiScelti);
+                    auto freqRel = ops.calcoloFrequenzaRelativa(freqAss);
+                    stringstream ss;
+                    for (auto const& val_rel : freqRel) {
+                        ss << "Dato " << val_rel.first << " -> " << val_rel.second << "%\n";
+                    }
+                    string result = ss.str();
+                    if (!result.empty()) result.pop_back(); // rimuove l'ultimo \n
+                    return result.empty() ? string("N/A") : result;
+                });
+
+                ImGui::EndTable();
             }
         }
-        
-        ImGui::Spacing();
-        ImGui::TextColored(ImVec4(0.2f, 1.0f, 0.2f, 1.0f), "Risultato Elaborazione: %s", risultatoTesto.c_str());
         
         ImGui::Spacing();
         ImGui::Separator();
@@ -255,7 +257,11 @@ void SchermataUploadDati(bool& upload_file_dati) {
                 if (min_x == max_x) { min_x -= 1; max_x += 1; }
                 if (min_y == max_y) { min_y -= 1; max_y += 1; }
 
-                ImVec2 graph_size(400, 300);
+                ImVec2 screen_size = ImGui::GetIO().DisplaySize;
+                ImVec2 graph_size(screen_size.x * 0.6f, screen_size.y * 0.5f);
+                if (graph_size.x < 400.0f) graph_size.x = 400.0f;
+                if (graph_size.y < 300.0f) graph_size.y = 300.0f;
+
                 ImDrawList* draw_list = ImGui::GetWindowDrawList();
                 ImVec2 p = ImGui::GetCursorScreenPos();
                 
@@ -323,78 +329,144 @@ void SchermataUploadDati(bool& upload_file_dati) {
             ImGui::Combo("Asse X (Categoria)", &featureX_Histo, nomiColonne.data(), nomiColonne.size());
             ImGui::Combo("Asse Y (Valore Bar)", &featureY_Histo, nomiColonne.data(), nomiColonne.size());
             
-            ImGui::Spacing();
+            if (ImGui::Button("Mostra Istogramma Avanzato")) {
+                ImGui::OpenPopup("BarChartPopup");
+            }
 
-            // Raggruppamento per X e somma/media su Y (Per default calcoliamo la Media per ciascun valore unico di X o raggruppamento)
-            vector<float>& colX = datasetCaricato.columns[featureX_Histo];
-            vector<float>& colY = datasetCaricato.columns[featureY_Histo];
+            if (ImGui::BeginPopupModal("BarChartPopup", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
+                ImGui::Text("Istogramma: Asse X ('%s'), Asse Y ('%s' Media/Somma)", datasetCaricato.headers[featureX_Histo].c_str(), datasetCaricato.headers[featureY_Histo].c_str());
+                
+                vector<float>& colX = datasetCaricato.columns[featureX_Histo];
+                vector<float>& colY = datasetCaricato.columns[featureY_Histo];
 
-            if (colX.size() > 0 && colX.size() == colY.size()) {
-                vector<float> histogram_bars;
-                float min_y_bar = FLT_MAX;
-                float max_y_bar = -FLT_MAX;
-                size_t n_bars = 0;
+                if (colX.size() > 0 && colX.size() == colY.size()) {
+                    vector<float> bar_values;
+                    vector<string> bar_labels;
+                    float max_y_bar = 0.0001f;
 
-                if (modalitaGrafici == 1) { // Raggruppa in intervalli
-                    float mn_x = *min_element(colX.begin(), colX.end());
-                    float mx_x = *max_element(colX.begin(), colX.end());
-                    float rng = mx_x - mn_x;
-                    if (rng <= 0.0f) rng = 1.0f;
+                    if (modalitaGrafici == 1) { // Raggruppa in intervalli
+                        float mn_x = *min_element(colX.begin(), colX.end());
+                        float mx_x = *max_element(colX.begin(), colX.end());
+                        float rng = mx_x - mn_x;
+                        if (rng <= 0.0f) rng = 1.0f;
+                        
+                        vector<float> sum_y(numCustomBins, 0.0f);
+                        vector<int> count_y(numCustomBins, 0);
+
+                        for (size_t k = 0; k < colX.size(); k++) {
+                            int bin_idx = (int)(((colX[k] - mn_x) / rng) * numCustomBins);
+                            if (bin_idx >= numCustomBins) bin_idx = numCustomBins - 1;
+                            if (bin_idx < 0) bin_idx = 0;
+                            sum_y[bin_idx] += colY[k];
+                            count_y[bin_idx]++;
+                        }
+                        
+                        for (int k = 0; k < numCustomBins; k++) {
+                            float media = count_y[k] > 0 ? (sum_y[k] / count_y[k]) : 0.0f;
+                            bar_values.push_back(media);
+                            
+                            float val_min = mn_x + (k * rng / numCustomBins);
+                            float val_max = mn_x + ((k + 1) * rng / numCustomBins);
+                            
+                            char buf[64];
+                            snprintf(buf, sizeof(buf), "%.1f-%.1f", val_min, val_max);
+                            bar_labels.push_back(buf);
+
+                            if (media > max_y_bar) max_y_bar = media;
+                        }
+                    } else { // Singoli valori (valore unico su X crescente)
+                        map<float, vector<float>> groupedY;
+                        for (size_t k = 0; k < colX.size(); k++) {
+                            groupedY[colX[k]].push_back(colY[k]);
+                        }
+                        
+                        for (auto const& pair : groupedY) {
+                            float sum = 0;
+                            for (float v : pair.second) sum += v;
+                            float avg = sum / pair.second.size();
+                            bar_values.push_back(avg);
+                            
+                            char buf[32];
+                            snprintf(buf, sizeof(buf), "%.1f", pair.first);
+                            bar_labels.push_back(buf);
+
+                            if (avg > max_y_bar) max_y_bar = avg;
+                        }
+                    }
+
+                    // Aggiungiamo un piccolo margine per l'asse Y
+                    max_y_bar *= 1.15f;
+
+                    ImVec2 screen_size = ImGui::GetIO().DisplaySize;
+                    ImVec2 graph_size(screen_size.x * 0.7f, screen_size.y * 0.55f);
+                    if (graph_size.x < 600.0f) graph_size.x = 600.0f;
+                    if (graph_size.y < 300.0f) graph_size.y = 300.0f;
+
+                    ImDrawList* draw_list = ImGui::GetWindowDrawList();
+                    ImVec2 p = ImGui::GetCursorScreenPos();
                     
-                    vector<float> sum_y(numCustomBins, 0.0f);
-                    vector<int> count_y(numCustomBins, 0);
+                    // Disegna sfondo grafico
+                    draw_list->AddRectFilled(p, ImVec2(p.x + graph_size.x, p.y + graph_size.y), IM_COL32(30, 30, 30, 255));
+                    
+                    // Assi
+                    float margin_bottom = 40.0f;
+                    float margin_left = 60.0f;
+                    ImVec2 origin(p.x + margin_left, p.y + graph_size.y - margin_bottom);
+                    
+                    draw_list->AddLine(ImVec2(origin.x, p.y), origin, IM_COL32(200, 200, 200, 255), 2.0f); // Y Asse
+                    draw_list->AddLine(origin, ImVec2(p.x + graph_size.x, origin.y), IM_COL32(200, 200, 200, 255), 2.0f); // X Asse
+                    
+                    // Label Y Max
+                    char maxLabelY[32];
+                    snprintf(maxLabelY, sizeof(maxLabelY), "%.2f", max_y_bar);
+                    draw_list->AddText(ImVec2(p.x + 5.0f, p.y + 5.0f), IM_COL32(255, 255, 255, 255), maxLabelY);
+                    draw_list->AddText(ImVec2(p.x + 5.0f, origin.y - 15.0f), IM_COL32(255, 255, 255, 255), "0.00");
 
-                    for (size_t k = 0; k < colX.size(); k++) {
-                        int bin_idx = (int)(((colX[k] - mn_x) / rng) * numCustomBins);
-                        if (bin_idx >= numCustomBins) bin_idx = numCustomBins - 1;
-                        if (bin_idx < 0) bin_idx = 0;
-                        sum_y[bin_idx] += colY[k];
-                        count_y[bin_idx]++;
+                    // Barre
+                    int n_bars = bar_values.size();
+                    if (n_bars > 0) {
+                        float drawing_width = graph_size.x - margin_left - 20.0f;
+                        float drawing_height = graph_size.y - margin_bottom - 20.0f;
+                        float bar_width = drawing_width / n_bars;
+                        float bar_padding = bar_width * 0.2f;
+
+                        for (int i = 0; i < n_bars; i++) {
+                            float bar_h = (bar_values[i] / max_y_bar) * drawing_height;
+                            ImVec2 p_min(origin.x + (i * bar_width) + bar_padding, origin.y - bar_h);
+                            ImVec2 p_max(origin.x + ((i + 1) * bar_width) - bar_padding, origin.y - 1.0f); // -1.0f base offset per non coprire asse
+                            
+                            ImU32 color = IM_COL32(50, 150, 255, 255);
+                            draw_list->AddRectFilled(p_min, p_max, color, 2.0f);
+                            draw_list->AddRect(p_min, p_max, IM_COL32(200, 200, 200, 100), 2.0f);
+                            
+                            // Values text just above the bar
+                            if (bar_h > 15.0f) {
+                                char valBuf[32];
+                                snprintf(valBuf, sizeof(valBuf), "%.1f", bar_values[i]);
+                                float text_width = ImGui::CalcTextSize(valBuf).x;
+                                float center_x = p_min.x + ((p_max.x - p_min.x) * 0.5f);
+                                draw_list->AddText(ImVec2(center_x - (text_width * 0.5f), p_min.y - 15.0f), IM_COL32(255, 255, 100, 255), valBuf);
+                            }
+
+                            // Disegniamo alcune etichette X in base a quante ce ne sono
+                            if (n_bars <= 15 || (i % (n_bars / 10 + 1) == 0)) {
+                                float text_width = ImGui::CalcTextSize(bar_labels[i].c_str()).x;
+                                float center_x = p_min.x + ((p_max.x - p_min.x) * 0.5f);
+                                draw_list->AddText(ImVec2(center_x - (text_width * 0.5f), origin.y + 5.0f), IM_COL32(200, 200, 200, 255), bar_labels[i].c_str());
+                            }
+                        }
                     }
-                    
-                    for (int k = 0; k < numCustomBins; k++) {
-                        float media = count_y[k] > 0 ? (sum_y[k] / count_y[k]) : 0.0f;
-                        histogram_bars.push_back(media);
-                        if (media < min_y_bar) min_y_bar = media;
-                        if (media > max_y_bar) max_y_bar = media;
-                    }
-                    n_bars = numCustomBins;
-                } else { // Singoli valori per ogni riga
-                    // Raggruppa la feature Y facendo la media dei valori duplicati su X,
-                    // oppure mostra un valore per riga. Optiamo per mostrare direttamente Y ordinato rispetto a X
-                    struct PairXY { float x, y; };
-                    vector<PairXY> coppie;
-                    for (size_t k = 0; k < colX.size(); k++) {
-                        coppie.push_back({colX[k], colY[k]});
-                    }
-                    // Ordina per Asse X
-                    sort(coppie.begin(), coppie.end(), [](const PairXY& a, const PairXY& b) {
-                        return a.x < b.x;
-                    });
-                    
-                    for (size_t k = 0; k < coppie.size(); k++) {
-                        float v = coppie[k].y;
-                        histogram_bars.push_back(v);
-                        if (v < min_y_bar) min_y_bar = v;
-                        if (v > max_y_bar) max_y_bar = v;
-                    }
-                    n_bars = coppie.size();
+
+                    ImGui::Dummy(graph_size);
+
+                } else {
+                    ImGui::TextColored(ImVec4(1, 0, 0, 1), "Errore: Dimensioni colonne incompatibili o vuote.");
                 }
 
-                if (min_y_bar > 0.0f) min_y_bar = 0.0f; // Di base gli istogrammi partono da 0
-                if (max_y_bar < min_y_bar + 1.0f) max_y_bar = min_y_bar + 1.0f;
-
-                ImGui::AlignTextToFramePadding();
-                ImGui::Text("Max Y: %.2f", max_y_bar);
-                
-                string label_istogramma = "Istogramma(" + datasetCaricato.headers[featureY_Histo] + " rispetto a " + datasetCaricato.headers[featureX_Histo] + ")";
-                
-                // Disegna Istogramma
-                ImGui::PlotHistogram("##IstogrammaDoppio", histogram_bars.data(), (int)n_bars, 0, label_istogramma.c_str(), min_y_bar, max_y_bar, ImVec2(0, 150));
-                
-                ImGui::Text("Min Y: %.2f", min_y_bar);
-                ImGui::SameLine(ImGui::GetContentRegionAvail().x - 100);
-                ImGui::Text("Barre/Righe: %zu", n_bars);
+                if (ImGui::Button("Chiudi Grafico", ImVec2(120, 0))) {
+                    ImGui::CloseCurrentPopup();
+                }
+                ImGui::EndPopup();
             }
 
             ImGui::Spacing();
@@ -451,7 +523,7 @@ void SchermataUploadDati(bool& upload_file_dati) {
                 ImGui::SameLine();
                 float offset_y = p.y + (radiusPieChart * 2.0f - (num_bins * ImGui::GetTextLineHeightWithSpacing())) * 0.5f;
                 if (offset_y < p.y) offset_y = p.y;
-                ImGui::SetCursorPosY(offset_y);
+                ImGui::SetCursorScreenPos(ImVec2(ImGui::GetCursorScreenPos().x, offset_y));
 
                 ImGui::BeginGroup();
                 for (int i = 0; i < num_bins; i++) {
@@ -508,7 +580,7 @@ void SchermataUploadDati(bool& upload_file_dati) {
                 float panel_height = radiusPieChart * 2.0f;
                 if (panel_height > 600.0f) panel_height = 600.0f;
 
-                ImGui::SetCursorPosY(p.y);
+                ImGui::SetCursorScreenPos(ImVec2(ImGui::GetCursorScreenPos().x, p.y));
                 ImGui::BeginChild("PieLegend", ImVec2(0, panel_height), true);
                 i = 0;
                 for (auto const& val_count : frequenze) {
