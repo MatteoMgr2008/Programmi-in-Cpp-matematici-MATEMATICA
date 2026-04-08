@@ -165,15 +165,19 @@ float OperazioniStatistiche::calcoloPercentile(map<float,int> risultato_frequenz
 
 float OperazioniStatistiche::calcoloScartoSempliceMedio(vector<float> valori)
 {
-	// TODO: IMPLEMENTARE/RIVEDERE meglio il calcolo dello scarto semplice medio (inserire formula da wikipedia)
-	float risultato_scarto_semplice_medio = 0.0f;
+	float risultato_media_aritmetica = calcoloMediaAritmetica(valori);
+	vector<float> valori_scarti_assoluti;
+	for (int i = 0; i < (int)valori.size(); i++)
+	{
+		valori_scarti_assoluti.push_back(calcoloValoreAssoluto(valori[i] - risultato_media_aritmetica));
+	}
+	float risultato_scarto_semplice_medio = calcoloSommatoria(valori_scarti_assoluti) / (float)valori.size();
 	this->risultato_corrente = { valori, "scarto semplice medio", risultato_scarto_semplice_medio };
 	return risultato_scarto_semplice_medio;
 }
 
 float OperazioniStatistiche::calcoloScartoQuadraticoMedio(vector<float> valori)
 {
-	// //TODO: IMPLEMENTARE/RIVEDERE meglio il calcolo dello scarto quadratico medio (inserire formula da wikipedia)
 	float risultato_scarto_quadratico_medio = calcoloDeviazioneStandard(valori);
 	this->risultato_corrente = { valori, "scarto quadratico medio", risultato_scarto_quadratico_medio };
 	return risultato_scarto_quadratico_medio;
