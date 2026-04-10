@@ -191,6 +191,79 @@ float OperazioniStatistiche::calcoloGaussiana(float valore_media, float valore_v
 	return risultato_gaussiana;
 }
 
+float OperazioniStatistiche::calcoloCovarianza(vector<float> valori_x, vector<float>valori_y)
+{
+	float media_valori_x = this->calcoloMediaAritmetica(valori_x);
+	float media_valori_y = this->calcoloMediaAritmetica(valori_y);
+	float risultato_covarianza = 0.0f;
+	for (int i = 0; i < valori_x.size(); i++)
+	{
+		risultato_covarianza += (valori_x[i] - media_valori_x) * (valori_y[i] - media_valori_y);
+	}
+	risultato_covarianza /= valori_x.size();
+	this->risultato_corrente = { pair<vector<float>, vector<float>>{valori_x, valori_y}, "covarianza", risultato_covarianza };
+	return risultato_covarianza;
+}
+
+float OperazioniStatistiche::calcoloCoefficienteDiCorrelazioneDiBravaisPearson(vector<float> valori_x, vector<float> valori_y)	
+{
+	float covarianza = this->calcoloCovarianza(valori_x, valori_y);
+	float deviazione_standard_x = this->calcoloDeviazioneStandard(valori_x);
+	float deviazione_standard_y = this->calcoloDeviazioneStandard(valori_y);
+	float risultato_coefficiente_Bravais_Pearson = covarianza / (deviazione_standard_x * deviazione_standard_y);
+	this->risultato_corrente = { pair<vector<float>, vector<float>>{valori_x, valori_y}, "coefficiente di correlazione di Bravais-Pearson", risultato_coefficiente_Bravais_Pearson };
+	return risultato_coefficiente_Bravais_Pearson;
+}
+
+float OperazioniStatistiche::calcoloDistribuzioneChiQuadrato(vector<vector<float>> valori_osservati)	
+{
+	float risultato_chi_quadrato = 0.0f;
+	vector<vector<float>> tabella_valori_attesi = calcoloTabellaValoriAttesi(valori_osservati);
+	for (int i = 0; i < valori_osservati.size(); i++)
+	{
+		for (int j = 0; j < valori_osservati[i].size(); j++)
+		{
+			risultato_chi_quadrato += calcoloPotenza(valori_osservati[i][j] - tabella_valori_attesi[i][j], 2) / tabella_valori_attesi[i][j];
+		}
+	}
+	this->risultato_corrente = { vector<vector<float>>{valori_osservati}, "Distribuzione chi quadrato", risultato_chi_quadrato };
+	return risultato_chi_quadrato;
+}
+
+vector<vector<float>> OperazioniStatistiche::calcoloTabellaValoriAttesi(vector<vector<float>> valori_osservati)
+{
+	vector<float> totale_riga;
+	vector<float> totale_colonna;
+	for (int i = 0; i < valori_osservati.size(); i++)
+	{
+		float totale_riga_i = 0.0f;
+		for (int j = 0; j < valori_osservati[i].size(); j++)
+		{
+			totale_riga_i += valori_osservati[i][j];
+			if (totale_colonna.size() <= j)
+			{
+				totale_colonna.push_back(valori_osservati[i][j]);
+			}
+			else
+			{
+				totale_colonna[j] += valori_osservati[i][j];
+			}
+		}
+		totale_riga.push_back(totale_riga_i);
+	}
+	float totale_valori_osservati = calcoloSommatoria(totale_riga);
+	vector<vector<float>> tabella_valori_attesi;
+	for (int i = 0; i < valori_osservati.size(); i++)
+	{
+		for (int j = 0; j < valori_osservati[i].size(); j++)
+		{
+			tabella_valori_attesi[i][j] = totale_riga[i] * totale_colonna[j] / totale_valori_osservati;
+		}
+	}
+	this->risultato_corrente = { vector<vector<float>>{valori_osservati}, "tabella valori attesi", tabella_valori_attesi };
+	return tabella_valori_attesi;
+}
+
 void OperazioniStatistiche::aggiungiCalcoloStoricoOperazioniStatistiche()
 {
 	this->storico_risultati_calcoli_statistici.push_back(this->risultato_corrente);

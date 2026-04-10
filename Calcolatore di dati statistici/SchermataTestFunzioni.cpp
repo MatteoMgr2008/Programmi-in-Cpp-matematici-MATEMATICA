@@ -107,6 +107,15 @@ void SchermataTestFunzioni(bool& test_funzioni_statistiche) {
                 else if (operazioneSelezionata == 12) risultatoTesto = to_string(ops.calcoloVarianza(lista_val));
                 else if (operazioneSelezionata == 13) risultatoTesto = to_string(ops.calcoloMediana(lista_val));
                 else if (operazioneSelezionata == 14) risultatoTesto = to_string(ops.calcoloModa(lista_val));
+				//else if (operazioneSelezionata == 15) risultatoTesto = to_string(ops.calcoloFrequenzaRelativa(ops.calcoloFrequenzaAssoluta(lista_val)));
+				else if (operazioneSelezionata == 16) risultatoTesto = to_string(ops.calcoloPercentile(ops.calcoloFrequenzaRelativa(ops.calcoloFrequenzaAssoluta(lista_val)), floatParam1));
+                else if (operazioneSelezionata == 17) risultatoTesto = to_string(ops.calcoloScartoSempliceMedio(lista_val));
+                else if (operazioneSelezionata == 18) risultatoTesto = to_string(ops.calcoloScartoQuadraticoMedio(lista_val));
+                //else if (operazioneSelezionata == 19) risultatoTesto = to_string(ops.calcoloGaussiana(floatParam1, floatParam2, floatParam3));
+                //else if (operazioneSelezionata == 20) risultatoTesto = to_string(ops.calcoloCovarianza(lista_val_x, lista_val_y));
+                //else if (operazioneSelezionata == 21) risultatoTesto = to_string(ops.calcoloCoefficienteDiCorrelazioneDiBravaisPearson(lista_val_x, lista_val_y));
+                //else if (operazioneSelezionata == 22) risultatoTesto = to_string(ops.calcoloDistribuzioneChiQuadrato(valori_osservati));
+                else if (operazioneSelezionata == 23) risultatoTesto = "Tabella valori attesi calcolata. Controlla il log per i dettagli.";
             } catch (...) {
                 risultatoTesto = "Errore durante il calcolo.";
             }

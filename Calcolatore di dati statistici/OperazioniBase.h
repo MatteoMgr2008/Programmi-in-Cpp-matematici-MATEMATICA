@@ -11,9 +11,20 @@ using namespace std;
 
 struct RisultatoOperazione
 {
-	variant<pair<vector<float>, vector<float>>, pair<map<float, int>, float>, vector<float>, map<float, int>> valori_operazione;
+	variant<
+		pair<vector<float>, vector<float>>,
+		pair<map<float, int>, float>,
+		vector<float>,
+		map<float, int>,
+		vector<vector<float>>
+	> valori_operazione;
+
 	string tipo_operazione;
-	variant<float, map<float, int>> risultato_operazione;
+	variant<
+		float, 
+		map<float, int>,
+		vector<vector<float>>
+	> risultato_operazione;
 };
 
 class OperazioniBase

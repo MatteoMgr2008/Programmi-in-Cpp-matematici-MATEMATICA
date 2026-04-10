@@ -54,7 +54,7 @@ CsvData LeggiFileCSVTabellare(const string& percorso_file) {
         string cella;
         int col_idx = 0;
         
-        while (getline(ss, cella, ',')) {
+        while (getline(ss, cella, ';')) {
             // Rimuovo spazi in eccesso ai lati
             cella.erase(0, cella.find_first_not_of(" \t\r\n"));
             cella.erase(cella.find_last_not_of(" \t\r\n") + 1);

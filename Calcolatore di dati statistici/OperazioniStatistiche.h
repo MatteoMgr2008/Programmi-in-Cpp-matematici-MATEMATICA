@@ -33,6 +33,10 @@ class OperazioniStatistiche : public OperazioniBase
 		float calcoloScartoQuadraticoMedio(vector<float> valori);
 		float calcoloScartoSempliceMedio(vector<float> valori);
 		float calcoloGaussiana(float valore_media, float valore_varianza, float valore_x);
+		float calcoloCovarianza(vector<float> valori_x, vector<float> valori_y);
+		float calcoloCoefficienteDiCorrelazioneDiBravaisPearson(vector<float> valori_x, vector<float> valori_y);
+		float calcoloDistribuzioneChiQuadrato(vector<vector<float>> valori_osservati);
+		vector<vector<float>> calcoloTabellaValoriAttesi(vector<vector<float>> valori_osservati);
 
 		// Dichiarazione dei metodi per la gestione dello storico dei calcoli
 		void aggiungiCalcoloStoricoOperazioniStatistiche();
