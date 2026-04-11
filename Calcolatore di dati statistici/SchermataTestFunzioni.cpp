@@ -55,7 +55,7 @@ void SchermataTestFunzioni(bool& test_funzioni_statistiche) {
     ImGui::Text("In questa sezione è possibile testare le operazioni base e statistiche esistenti nel software.");
     ImGui::Spacing();
 
-    static OperazioniStatistiche ops;
+    static OperazioniStatistiche operazioni_statistiche;
     
 	// Lista delle operazioni disponibili (operazione 0 è un placeholder per il testo iniziale)
     static int operazioneSelezionata = 0;
@@ -83,7 +83,10 @@ void SchermataTestFunzioni(bool& test_funzioni_statistiche) {
         "20) Covarianza",
         "21) Correlazione di Bravais-Pearson",
         "22) Distribuzione Chi Quadrato",
-        "23) Tabella valori attesi"
+        "23) Tabella valori attesi",
+		"24) Tabella probabilità",
+		"25) Distribuzione marginale",
+		"26) Probabilità marginale"
     };
 
     ImGui::Combo("Scegli un'operazione dall'elenco", &operazioneSelezionata, nomiOperazioni, IM_ARRAYSIZE(nomiOperazioni));
@@ -150,6 +153,10 @@ void SchermataTestFunzioni(bool& test_funzioni_statistiche) {
         ImGui::InputText("Matrice osservati", inputMatrice, sizeof(inputMatrice));
     }
 
+    else if (operazioneSelezionata == 24 || operazioneSelezionata == 25 || operazioneSelezionata == 26) {
+        ImGui::TextWrapped("Inserire il formato matrice: righe separate da ';', valori separati da ','. Ad esempio: 10,20,30;40,50,60");
+        ImGui::InputText("Tabella osservati", inputMatrice, sizeof(inputMatrice));
+	}
     ImGui::Spacing();
 
 	// Pulsante per calcolare il risultato in base all'operazione selezionata dal menù a tendina
@@ -162,54 +169,54 @@ void SchermataTestFunzioni(bool& test_funzioni_statistiche) {
                 vector<vector<float>> matrice = ConvertitoreMatriceDaFloat(string(inputMatrice));
 
                 if (operazioneSelezionata == 1) {
-                    risultatoTesto = to_string(ops.calcoloPotenza(base, esponente));
+                    risultatoTesto = to_string(operazioni_statistiche.calcoloPotenza(base, esponente));
                 }
                 else if (operazioneSelezionata == 2) {
-                    risultatoTesto = to_string(ops.calcoloRadice(base, esponente));
+                    risultatoTesto = to_string(operazioni_statistiche.calcoloRadice(base, esponente));
                 }
                 else if (operazioneSelezionata == 3) {
-                    risultatoTesto = to_string(ops.calcoloLogaritmo(base, argomento));
+                    risultatoTesto = to_string(operazioni_statistiche.calcoloLogaritmo(base, argomento));
                 }
                 else if (operazioneSelezionata == 4) {
-                    risultatoTesto = to_string(ops.calcoloValoreAssoluto(valore));
+                    risultatoTesto = to_string(operazioni_statistiche.calcoloValoreAssoluto(valore));
                 }
                 else if (lista_val.empty() &&
                     operazioneSelezionata >= 5 && operazioneSelezionata <= 18) {
                     risultatoTesto = "Errore: lista di valori vuota o non valida.";
                 }
                 else if (operazioneSelezionata == 5) {
-                    risultatoTesto = to_string(ops.calcoloSommatoria(lista_val));
+                    risultatoTesto = to_string(operazioni_statistiche.calcoloSommatoria(lista_val));
                 }
                 else if (operazioneSelezionata == 6) {
-                    risultatoTesto = to_string(ops.calcoloProduttoria(lista_val));
+                    risultatoTesto = to_string(operazioni_statistiche.calcoloProduttoria(lista_val));
                 }
                 else if (operazioneSelezionata == 7) {
-                    risultatoTesto = to_string(ops.calcoloMediaAritmetica(lista_val));
+                    risultatoTesto = to_string(operazioni_statistiche.calcoloMediaAritmetica(lista_val));
                 }
                 else if (operazioneSelezionata == 8) {
-                    risultatoTesto = to_string(ops.calcoloMediaGeometrica(lista_val));
+                    risultatoTesto = to_string(operazioni_statistiche.calcoloMediaGeometrica(lista_val));
                 }
                 else if (operazioneSelezionata == 9) {
-                    risultatoTesto = to_string(ops.calcoloMediaArmonica(lista_val));
+                    risultatoTesto = to_string(operazioni_statistiche.calcoloMediaArmonica(lista_val));
                 }
                 else if (operazioneSelezionata == 10) {
-                    risultatoTesto = to_string(ops.calcoloMediaQuadratica(lista_val));
+                    risultatoTesto = to_string(operazioni_statistiche.calcoloMediaQuadratica(lista_val));
                 }
                 else if (operazioneSelezionata == 11) {
-                    risultatoTesto = to_string(ops.calcoloDeviazioneStandard(lista_val));
+                    risultatoTesto = to_string(operazioni_statistiche.calcoloDeviazioneStandard(lista_val));
                 }
                 else if (operazioneSelezionata == 12) {
-                    risultatoTesto = to_string(ops.calcoloVarianza(lista_val));
+                    risultatoTesto = to_string(operazioni_statistiche.calcoloVarianza(lista_val));
                 }
                 else if (operazioneSelezionata == 13) {
-                    risultatoTesto = to_string(ops.calcoloMediana(lista_val));
+                    risultatoTesto = to_string(operazioni_statistiche.calcoloMediana(lista_val));
                 }
                 else if (operazioneSelezionata == 14) {
-                    risultatoTesto = to_string(ops.calcoloModa(lista_val));
+                    risultatoTesto = to_string(operazioni_statistiche.calcoloModa(lista_val));
                 }
                 else if (operazioneSelezionata == 15) {
-                    map<float, int> freq_ass = ops.calcoloFrequenzaAssoluta(lista_val);
-                    map<float, int> freq_rel = ops.calcoloFrequenzaRelativa(freq_ass);
+                    map<float, int> freq_ass = operazioni_statistiche.calcoloFrequenzaAssoluta(lista_val);
+                    map<float, int> freq_rel = operazioni_statistiche.calcoloFrequenzaRelativa(freq_ass);
                     string out = "Freq.Ass.: ";
                     for (auto& c : freq_ass)
                         out += to_string(c.first) + ":" + to_string(c.second) + "  ";
@@ -219,18 +226,18 @@ void SchermataTestFunzioni(bool& test_funzioni_statistiche) {
                     risultatoTesto = out;
                 }
                 else if (operazioneSelezionata == 16) {
-                    map<float, int> freq_ass = ops.calcoloFrequenzaAssoluta(lista_val);
-                    map<float, int> freq_rel = ops.calcoloFrequenzaRelativa(freq_ass);
-                    risultatoTesto = to_string(ops.calcoloPercentile(freq_rel, valore_percentile));
+                    map<float, int> freq_ass = operazioni_statistiche.calcoloFrequenzaAssoluta(lista_val);
+                    map<float, int> freq_rel = operazioni_statistiche.calcoloFrequenzaRelativa(freq_ass);
+                    risultatoTesto = to_string(operazioni_statistiche.calcoloPercentile(freq_rel, valore_percentile));
                 }
                 else if (operazioneSelezionata == 17) {
-                    risultatoTesto = to_string(ops.calcoloScartoSempliceMedio(lista_val));
+                    risultatoTesto = to_string(operazioni_statistiche.calcoloScartoSempliceMedio(lista_val));
                 }
                 else if (operazioneSelezionata == 18) {
-                    risultatoTesto = to_string(ops.calcoloScartoQuadraticoMedio(lista_val));
+                    risultatoTesto = to_string(operazioni_statistiche.calcoloScartoQuadraticoMedio(lista_val));
                 }
                 else if (operazioneSelezionata == 19) {
-                    risultatoTesto = to_string(ops.calcoloGaussiana(media_gaussiana, varianza_gaussiana, x_gaussiana));
+                    risultatoTesto = to_string(operazioni_statistiche.calcoloGaussiana(media_gaussiana, varianza_gaussiana, x_gaussiana));
                 }
                 else if (operazioneSelezionata == 20) {
                     if (lista_val_x.empty() || lista_val_y.empty())
@@ -238,7 +245,7 @@ void SchermataTestFunzioni(bool& test_funzioni_statistiche) {
                     else if (lista_val_x.size() != lista_val_y.size())
                         risultatoTesto = "Errore: lista X e Y devono avere la stessa lunghezza.";
                     else
-                        risultatoTesto = to_string(ops.calcoloCovarianza(lista_val_x, lista_val_y));
+                        risultatoTesto = to_string(operazioni_statistiche.calcoloCovarianza(lista_val_x, lista_val_y));
                 }
                 else if (operazioneSelezionata == 21) {
                     if (lista_val_x.empty() || lista_val_y.empty())
@@ -246,26 +253,80 @@ void SchermataTestFunzioni(bool& test_funzioni_statistiche) {
                     else if (lista_val_x.size() != lista_val_y.size())
                         risultatoTesto = "Errore: lista X e Y devono avere la stessa lunghezza.";
                     else
-                        risultatoTesto = to_string(ops.calcoloCoefficienteDiCorrelazioneDiBravaisPearson(lista_val_x, lista_val_y));
+                        risultatoTesto = to_string(operazioni_statistiche.calcoloCoefficienteDiCorrelazioneDiBravaisPearson(lista_val_x, lista_val_y));
                 }
                 else if (operazioneSelezionata == 22) {
                     if (matrice.empty())
                         risultatoTesto = "Errore: matrice vuota o non valida.";
                     else
-                        risultatoTesto = to_string(ops.calcoloDistribuzioneChiQuadrato(matrice));
+                        risultatoTesto = to_string(operazioni_statistiche.calcoloDistribuzioneChiQuadrato(matrice));
                 }
                 else if (operazioneSelezionata == 23) {
                     if (matrice.empty()) {
                         risultatoTesto = "Errore: matrice vuota o non valida.";
                     }
                     else {
-                        vector<vector<float>> tabella = ops.calcoloTabellaValoriAttesi(matrice);
+                        vector<vector<float>> tabella = operazioni_statistiche.calcoloTabellaValoriAttesi(matrice);
                         string out = "Tabella valori attesi: ";
                         for (int i = 0; i < (int)tabella.size(); i++) {
                             out += "[";
                             for (int j = 0; j < (int)tabella[i].size(); j++) {
                                 out += to_string(tabella[i][j]);
                                 if (j < (int)tabella[i].size() - 1) out += ", ";
+                            }
+                            out += "] ";
+                        }
+                        risultatoTesto = out;
+                    }
+                }
+				else if (operazioneSelezionata == 24) {
+                    if (matrice.empty()) {
+                        risultatoTesto = "Errore: matrice vuota o non valida.";
+                    }
+                    else {
+                        vector<vector<float>> tabella_prob = operazioni_statistiche.calcoloTabellaProbabilita(matrice);
+                        string out = "Tabella probabilità: ";
+                        for (int i = 0; i < (int)tabella_prob.size(); i++) {
+                            out += "[";
+                            for (int j = 0; j < (int)tabella_prob[i].size(); j++) {
+                                out += to_string(tabella_prob[i][j]);
+                                if (j < (int)tabella_prob[i].size() - 1) out += ", ";
+                            }
+                            out += "] ";
+                        }
+                        risultatoTesto = out;
+                    }
+                }
+                else if (operazioneSelezionata == 25) {
+                    if (matrice.empty()) {
+                        risultatoTesto = "Errore: matrice vuota o non valida.";
+                    }
+                    else {
+                        vector<vector<float>> distribuzione_marginale = operazioni_statistiche.calcoloDistribuzioneMarginale(matrice);
+                        string out = "Distribuzione marginale: ";
+                        for (int i = 0; i < (int)distribuzione_marginale.size(); i++) {
+                            out += "[";
+                            for (int j = 0; j < (int)distribuzione_marginale[i].size(); j++) {
+                                out += to_string(distribuzione_marginale[i][j]);
+                                if (j < (int)distribuzione_marginale[i].size() - 1) out += ", ";
+                            }
+                            out += "] ";
+                        }
+                        risultatoTesto = out;
+                    }
+                }
+                else if (operazioneSelezionata == 26) {
+                    if (matrice.empty()) {
+                        risultatoTesto = "Errore: matrice vuota o non valida.";
+                    }
+                    else {
+                        vector<vector<float>> probabilita_marginale = operazioni_statistiche.calcoloProbabilitaMarginale(matrice);
+                        string out = "Probabilità marginale: ";
+                        for (int i = 0; i < (int)probabilita_marginale.size(); i++) {
+                            out += "[";
+                            for (int j = 0; j < (int)probabilita_marginale[i].size(); j++) {
+                                out += to_string(probabilita_marginale[i][j]);
+                                if (j < (int)probabilita_marginale[i].size() - 1) out += ", ";
                             }
                             out += "] ";
                         }

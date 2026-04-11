@@ -16,7 +16,7 @@ struct CsvData {
 };
 
 // Funzione di utilità per aprire Esplora File
-string ApriEsploraFile() {
+inline string ApriEsploraFile() {
     OPENFILENAMEA ofn;
     CHAR szFile[260] = { 0 };
 
@@ -39,7 +39,7 @@ string ApriEsploraFile() {
 }
 
 // Funzione di utilità per leggere il file CSV tabellare
-CsvData LeggiFileCSVTabellare(const string& percorso_file) {
+inline CsvData LeggiFileCSVTabellare(const string& percorso_file) {
     CsvData dataset;
     ifstream file(percorso_file);
     if (!file.is_open()) {

@@ -16,6 +16,7 @@
 #include "SchermataTestFunzioni.h"
 #include "SchermataVisualizzaFunzioni.h"
 #include "SchermataUploadDati.h"
+#include "SchermataUploadProbabilita.h"
 
 // Fonts del programma
 #include "HeptaSlabFont.h"
@@ -80,6 +81,7 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 	bool visualizza_funzioni_statistiche = false; // Variabile per mostrare la schermata di visualizzazione delle funzioni base e statistiche
 	bool uscita_software = false; // Variabile per mostrare la schermata di uscita dal software
 	bool test_funzioni_statistiche = false; // Variabile per mostrare la schermata di test delle funzioni base e statistiche
+	bool upload_file_probabilita = false; // Variabile per mostrare la schermata di upload dei file di probabilità
 
     // Ciclo principale del programma (valido finché la finestra non viene chiusa dall'utente)
     while (!glfwWindowShouldClose(window)) {
@@ -103,13 +105,17 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
             // Mostra la schermata per testare le funzioni base e statistiche
 			SchermataTestFunzioni(test_funzioni_statistiche);
 		}
+		else if (upload_file_probabilita == true) {
+            // Mostra la schermata per l'upload dei file di probabilità
+			SchermataUploadProbabilita(upload_file_probabilita);
+        }
         else if (uscita_software == true) {
             // Mostra la schermata per l'uscita dal software
 			// TODO: implementare la schermata di uscita dal software (con conferma di uscita SI/NO)
 		}
         else {
 			// Mostra la schermata principale (homepage)
-			Homepage(upload_file_dati, visualizza_funzioni_statistiche, uscita_software, test_funzioni_statistiche);
+			Homepage(upload_file_dati, visualizza_funzioni_statistiche, uscita_software, test_funzioni_statistiche, upload_file_probabilita);
         }
 
         // Rendering ImGui

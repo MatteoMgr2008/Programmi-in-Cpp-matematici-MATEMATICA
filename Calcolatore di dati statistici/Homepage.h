@@ -5,4 +5,4 @@
 
 #include <imgui.h>
 
-void Homepage(bool& upload_file_dati, bool& visualizza_funzioni_statistiche, bool& uscita_software, bool& test_funzioni_statistiche);
+void Homepage(bool& upload_file_dati, bool& visualizza_funzioni_statistiche, bool& uscita_software, bool& test_funzioni_statistiche, bool& upload_file_probabilita);

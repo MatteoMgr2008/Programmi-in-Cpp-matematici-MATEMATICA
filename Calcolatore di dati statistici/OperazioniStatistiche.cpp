@@ -234,6 +234,7 @@ vector<vector<float>> OperazioniStatistiche::calcoloTabellaValoriAttesi(vector<v
 {
 	vector<float> totale_riga;
 	vector<float> totale_colonna;
+
 	for (int i = 0; i < valori_osservati.size(); i++)
 	{
 		float totale_riga_i = 0.0f;
@@ -241,27 +242,94 @@ vector<vector<float>> OperazioniStatistiche::calcoloTabellaValoriAttesi(vector<v
 		{
 			totale_riga_i += valori_osservati[i][j];
 			if (totale_colonna.size() <= j)
-			{
 				totale_colonna.push_back(valori_osservati[i][j]);
-			}
 			else
-			{
 				totale_colonna[j] += valori_osservati[i][j];
-			}
 		}
 		totale_riga.push_back(totale_riga_i);
 	}
+
 	float totale_valori_osservati = calcoloSommatoria(totale_riga);
-	vector<vector<float>> tabella_valori_attesi;
+
+	vector<vector<float>> tabella_valori_attesi(
+		valori_osservati.size(),
+		vector<float>(totale_colonna.size(), 0.0f)
+	);
+
 	for (int i = 0; i < valori_osservati.size(); i++)
 	{
 		for (int j = 0; j < valori_osservati[i].size(); j++)
 		{
-			tabella_valori_attesi[i][j] = totale_riga[i] * totale_colonna[j] / totale_valori_osservati;
+			tabella_valori_attesi[i][j] =
+				totale_riga[i] * totale_colonna[j] / totale_valori_osservati;
 		}
 	}
+
 	this->risultato_corrente = { vector<vector<float>>{valori_osservati}, "tabella valori attesi", tabella_valori_attesi };
 	return tabella_valori_attesi;
+}
+
+vector<vector<float>> OperazioniStatistiche::calcoloTabellaProbabilita(vector<vector<float>> tabella)
+{
+	float totale = 0.0f;
+	for (int i = 0; i < tabella.size(); i++)
+		for (int j = 0; j < tabella[i].size(); j++)
+			totale += tabella[i][j];
+
+	vector<vector<float>> tabella_probabilita(
+		tabella.size(),
+		vector<float>(tabella[0].size(), 0.0f)
+	);
+
+	if (totale == 0.0f)
+		return tabella_probabilita;
+
+	for (int i = 0; i < tabella.size(); i++)
+		for (int j = 0; j < tabella[i].size(); j++)
+			tabella_probabilita[i][j] = tabella[i][j] / totale;
+
+	this->risultato_corrente = { vector<vector<float>>{tabella}, "tabella probabilità", tabella_probabilita };
+	return tabella_probabilita;
+}
+
+vector<vector<float>> OperazioniStatistiche::calcoloDistribuzioneMarginale(vector<vector<float>> tabella)
+{
+	vector<float> marginale_riga(tabella.size(), 0.0f);
+	vector<float> marginale_colonna(tabella[0].size(), 0.0f);
+	for (int i = 0; i < tabella.size(); i++)
+		for (int j = 0; j < tabella[i].size(); j++)
+		{
+			marginale_riga[i] += tabella[i][j];
+			marginale_colonna[j] += tabella[i][j];
+		}
+	vector<vector<float>> tabella_distribuzione_marginale = { marginale_riga, marginale_colonna };
+	this->risultato_corrente = { vector<vector<float>>{tabella}, "distribuzione marginale", tabella_distribuzione_marginale };
+	return tabella_distribuzione_marginale;
+}
+
+vector<vector<float>> OperazioniStatistiche::calcoloProbabilitaMarginale(vector<vector<float>> tabella)
+{
+	float totale = 0.0f;
+	for (int i = 0; i < tabella.size(); i++)
+		for (int j = 0; j < tabella[i].size(); j++)
+			totale += tabella[i][j];
+
+	if (totale == 0.0f)
+		return {};
+
+	vector<vector<float>> distribuzioneMarginale = calcoloDistribuzioneMarginale(tabella);
+
+	vector<vector<float>> probabilitaMarginale;
+	for (int i = 0; i < distribuzioneMarginale.size(); i++)
+	{
+		vector<float> riga;
+		for (int j = 0; j < distribuzioneMarginale[i].size(); j++)
+			riga.push_back(distribuzioneMarginale[i][j] / totale);
+		probabilitaMarginale.push_back(riga);
+	}
+
+	this->risultato_corrente = { vector<vector<float>>{tabella}, "probabilità marginale", probabilitaMarginale };
+	return probabilitaMarginale;
 }
 
 void OperazioniStatistiche::aggiungiCalcoloStoricoOperazioniStatistiche()

@@ -37,6 +37,9 @@ class OperazioniStatistiche : public OperazioniBase
 		float calcoloCoefficienteDiCorrelazioneDiBravaisPearson(vector<float> valori_x, vector<float> valori_y);
 		float calcoloDistribuzioneChiQuadrato(vector<vector<float>> valori_osservati);
 		vector<vector<float>> calcoloTabellaValoriAttesi(vector<vector<float>> valori_osservati);
+		vector<vector<float>> calcoloTabellaProbabilita(vector<vector<float>> tabella);
+		vector<vector<float>> calcoloDistribuzioneMarginale(vector<vector<float>> tabella);
+		vector<vector<float>> calcoloProbabilitaMarginale(vector<vector<float>> tabella);
 
 		// Dichiarazione dei metodi per la gestione dello storico dei calcoli
 		void aggiungiCalcoloStoricoOperazioniStatistiche();

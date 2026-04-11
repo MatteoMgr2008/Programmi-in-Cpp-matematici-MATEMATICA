@@ -3,7 +3,7 @@
 
 using namespace std;
 
-void Homepage(bool& upload_file_dati, bool& visualizza_funzioni_statistiche, bool& uscita_software, bool& test_funzioni_statistiche) {
+void Homepage(bool& upload_file_dati, bool& visualizza_funzioni_statistiche, bool& uscita_software, bool& test_funzioni_statistiche, bool& upload_file_probabilita) {
     ImGui::SetNextWindowPos(ImVec2(0, 0), ImGuiCond_Always);
     ImGui::SetNextWindowSize(ImGui::GetIO().DisplaySize, ImGuiCond_Always);
 
@@ -50,17 +50,19 @@ void Homepage(bool& upload_file_dati, bool& visualizza_funzioni_statistiche, boo
     ImGui::Spacing();
 
 	// Variabili per il testo dei pulsanti e calcolo della loro larghezza
-    string testo_pulsante_1 = "Carica un file CSV/XLSX per l'acquisizione di dati da analizzare"; // Testo del pulsante 1 (indica la funzione del pulsante)
+    string testo_pulsante_1 = "Carica un file CSV per l'acquisizione di dati da analizzare"; // Testo del pulsante 1 (indica la funzione del pulsante)
     float larghezza_testo_pulsante_1 = ImGui::CalcTextSize(testo_pulsante_1.c_str()).x + 20.0f; // Calcola la larghezza del testo del pulsante 1
-    string testo_pulsante_2 = "Visualizza la lista di funzioni base e statistiche esistenti"; // Testo del pulsante 2 (indica la funzione del pulsante)
-    float larghezza_testo_pulsante_2 = ImGui::CalcTextSize(testo_pulsante_2.c_str()).x + 20.0f; // Calcola la larghezza del testo del pulsante 2
-    string testo_pulsante_3 = "Utilizza singolarmente le funzioni base e statistiche esistenti"; // Testo del pulsante 3 (indica la funzione del pulsante)
-	float larghezza_testo_pulsante_3 = ImGui::CalcTextSize(testo_pulsante_3.c_str()).x + 20.0f; // Calcola la larghezza del testo del pulsante 3
-    string testo_pulsante_4 = "Esci dal software"; // Testo del pulsante 4 (indica la funzione del pulsante)
-    float larghezza_testo_pulsante_4 = ImGui::CalcTextSize(testo_pulsante_4.c_str()).x + 20.0f; // Calcola la larghezza del testo del pulsante 4
+	string testo_pulsante_2 = "Carica un file CSV per calcolo delle probabilità"; // Testo del pulsante 2 (indica la funzione del pulsante)
+	float larghezza_testo_pulsante_2 = ImGui::CalcTextSize(testo_pulsante_2.c_str()).x + 20.0f; // Calcola la larghezza del testo del pulsante 2
+    string testo_pulsante_3 = "Visualizza la lista di funzioni base e statistiche esistenti"; // Testo del pulsante 3 (indica la funzione del pulsante)
+    float larghezza_testo_pulsante_3 = ImGui::CalcTextSize(testo_pulsante_3.c_str()).x + 20.0f; // Calcola la larghezza del testo del pulsante 3
+    string testo_pulsante_4 = "Utilizza singolarmente le funzioni base e statistiche esistenti"; // Testo del pulsante 4 (indica la funzione del pulsante)
+	float larghezza_testo_pulsante_4 = ImGui::CalcTextSize(testo_pulsante_4.c_str()).x + 20.0f; // Calcola la larghezza del testo del pulsante 4
+    string testo_pulsante_5 = "Esci dal software"; // Testo del pulsante 5 (indica la funzione del pulsante)
+    float larghezza_testo_pulsante_5 = ImGui::CalcTextSize(testo_pulsante_5.c_str()).x + 20.0f; // Calcola la larghezza del testo del pulsante 5
 
 	// Variabili per la posizione e dimensione dei pulsanti
-	float larghezza_pulsante_standard = max({ larghezza_testo_pulsante_1, larghezza_testo_pulsante_2, larghezza_testo_pulsante_3, larghezza_testo_pulsante_4 }); // Larghezza del pulsante standard basata sulla larghezza del testo più lungo tra i tre pulsanti
+	float larghezza_pulsante_standard = max({ larghezza_testo_pulsante_1, larghezza_testo_pulsante_2, larghezza_testo_pulsante_3, larghezza_testo_pulsante_4, larghezza_testo_pulsante_5 }); // Larghezza del pulsante standard basata sulla larghezza del testo più lungo tra i tre pulsanti
 	float altezza_pulsante_standard = 50.0f; // Altezza del pulsante standard
 	float distanza_pulsanti_standard = 10.0f; // Spazio verticale standard tra i pulsanti
 	float posizione_X_pulsante_standard = (ImGui::GetWindowSize().x - larghezza_pulsante_standard) * 0.5f; // Posizione X centrata del pulsante standard
@@ -73,7 +75,7 @@ void Homepage(bool& upload_file_dati, bool& visualizza_funzioni_statistiche, boo
     ImGui::SetCursorPosX(posizione_X_pulsante_standard); // Posizione X centrata del pulsante
     ImGui::PopStyleColor(3); // Ripristina i colori originali
 
-	// Pulsante 1 (verde): "Caricamento di un file CSV/XLSX per l'acquisizione di dati"
+	// Pulsante 1 (verde): "Caricamento di un file CSV per l'acquisizione di dati"
     ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.0f, 0.6f, 0.2f, 1.0f)); // Verde (colore normale)
     ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.0f, 0.8f, 0.3f, 1.0f)); // Verde acceso (colore hovered)
     ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.0f, 0.4f, 0.1f, 1.0f)); // Verde scuro (colore active)
@@ -95,66 +97,86 @@ void Homepage(bool& upload_file_dati, bool& visualizza_funzioni_statistiche, boo
 	// Spaziatura tra i pulsanti
     ImGui::Dummy(ImVec2(0.0f, distanza_pulsanti_standard));
 
-	// Pulsante 2 (Arancione): "Visualizzazione della lista di funzioni base e statistiche esistenti"
-    ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1.0f, 0.6f, 0.0f, 1.0f)); // Arancione (colore normale)
-	ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(1.0f, 0.7f, 0.2f, 1.0f)); // Arancione acceso (colore hovered)
-	ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.8f, 0.5f, 0.0f, 1.0f)); // Arancione scuro (colore active)
+	// Pulsante 2 (blu): "Caricamento di un file CSV per il calcolo delle probabilità"
+	ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.0f, 0.5f, 0.8f, 1.0f)); // Blu (colore normale)
+    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.0f, 0.6f, 0.9f, 1.0f)); // Blu acceso (colore hovered)
+	ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.0f, 0.4f, 0.6f, 1.0f)); // Blu scuro (colore active)
 	ImGui::SetCursorPosX(posizione_X_pulsante_standard); // Posizione X centrata del pulsante
     if (ImGui::Button(testo_pulsante_2.c_str(), ImVec2(larghezza_pulsante_standard, altezza_pulsante_standard))) {
-        visualizza_funzioni_statistiche = true; // Imposta la variabile true per la visualizzazione delle funzioni statistiche
+        upload_file_probabilita = true; // Imposta la variabile true per il caricamento del file probabilità CSV
     }
     if (ImGui::IsItemHovered()) {
-        string testo_tooltip_pulsante_2 = "Visualizza la lista delle funzioni di base e statistiche esistenti. Seleziona una funzione in particolare per visualizzarne i dettagli."; // Testo del tooltip per il pulsante 2 (fornisce ulteriori dettagli sulla funzione del pulsante)
-		float larghezza_tooltip_pulsante_2 = ImGui::CalcTextSize(testo_tooltip_pulsante_2.c_str()).x + 20.0f; // Calcola la larghezza del tooltip per il pulsante 2 in base al testo
+        string testo_tooltip_pulsante_2 = "Carica un file CSV contenente dei dati per il calcolo delle probabilità. Il file deve essere formattato correttamente per essere accettato dal software."; // Testo del tooltip per il pulsante 2 (fornisce ulteriori dettagli sulla funzione del pulsante)
+        float larghezza_tooltip_pulsante_2 = ImGui::CalcTextSize(testo_tooltip_pulsante_2.c_str()).x + 20.0f; // Calcola la larghezza del tooltip per il pulsante 2 in base al testo
         ImGui::SetNextWindowSize(ImVec2(larghezza_tooltip_pulsante_2, 0), ImGuiCond_Always); // Imposta la larghezza del tooltip per il pulsante 2
         ImGui::BeginTooltip(); // Inizia la finestra del tooltip per il pulsante 2
         ImGui::SetCursorPosX((larghezza_tooltip_pulsante_2 - ImGui::CalcTextSize(testo_tooltip_pulsante_2.c_str()).x) * 0.5f); // Posizione X centrata del tooltip rispetto al pulsante 2
         ImGui::Text("%s", testo_tooltip_pulsante_2.c_str()); // Visualizza il testo del tooltip per il pulsante 2
         ImGui::EndTooltip(); // Termina la finestra del tooltip per il pulsante 2
+    }   
+	ImGui::PopStyleColor(3); // Ripristina i colori originali
+	ImGui::Dummy(ImVec2(0.0f, distanza_pulsanti_standard)); // Spaziatura tra i pulsanti
+
+	// Pulsante 3 (Arancione): "Visualizzazione della lista di funzioni base e statistiche esistenti"
+    ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1.0f, 0.6f, 0.0f, 1.0f)); // Arancione (colore normale)
+	ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(1.0f, 0.7f, 0.2f, 1.0f)); // Arancione acceso (colore hovered)
+	ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.8f, 0.5f, 0.0f, 1.0f)); // Arancione scuro (colore active)
+	ImGui::SetCursorPosX(posizione_X_pulsante_standard); // Posizione X centrata del pulsante
+    if (ImGui::Button(testo_pulsante_3.c_str(), ImVec2(larghezza_pulsante_standard, altezza_pulsante_standard))) {
+        visualizza_funzioni_statistiche = true; // Imposta la variabile true per la visualizzazione delle funzioni statistiche
+    }
+    if (ImGui::IsItemHovered()) {
+        string testo_tooltip_pulsante_3 = "Visualizza la lista delle funzioni di base e statistiche esistenti. Seleziona una funzione in particolare per visualizzarne i dettagli."; // Testo del tooltip per il pulsante 3 (fornisce ulteriori dettagli sulla funzione del pulsante)
+		float larghezza_tooltip_pulsante_3 = ImGui::CalcTextSize(testo_tooltip_pulsante_3.c_str()).x + 20.0f; // Calcola la larghezza del tooltip per il pulsante 3 in base al testo
+        ImGui::SetNextWindowSize(ImVec2(larghezza_tooltip_pulsante_3, 0), ImGuiCond_Always); // Imposta la larghezza del tooltip per il pulsante 3
+        ImGui::BeginTooltip(); // Inizia la finestra del tooltip per il pulsante 3
+        ImGui::SetCursorPosX((larghezza_tooltip_pulsante_3 - ImGui::CalcTextSize(testo_tooltip_pulsante_3.c_str()).x) * 0.5f); // Posizione X centrata del tooltip rispetto al pulsante 3
+        ImGui::Text("%s", testo_tooltip_pulsante_3.c_str()); // Visualizza il testo del tooltip per il pulsante 3
+        ImGui::EndTooltip(); // Termina la finestra del tooltip per il pulsante 3
     }
     ImGui::PopStyleColor(3); // Ripristina i colori originali
 
     // Spaziatura tra i pulsanti
     ImGui::Dummy(ImVec2(0.0f, distanza_pulsanti_standard));
 
-	// Pulsante 3 (celeste): "Utilizza singolarmente le funzioni base e statistiche"
+	// Pulsante 4 (celeste): "Utilizza singolarmente le funzioni base e statistiche"
 	ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.0f, 0.5f, 0.8f, 1.0f)); // Celeste (colore normale)
 	ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.2f, 0.7f, 1.0f, 1.0f)); // Celeste chiaro (colore hovered)
     ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.0f, 0.4f, 0.6f, 1.0f)); // Celeste scuro (colore active)
 	ImGui::SetCursorPosX(posizione_X_pulsante_standard); // Posizione X centrata del pulsante
-    if (ImGui::Button(testo_pulsante_3.c_str(), ImVec2(larghezza_pulsante_standard, altezza_pulsante_standard))) {
+    if (ImGui::Button(testo_pulsante_4.c_str(), ImVec2(larghezza_pulsante_standard, altezza_pulsante_standard))) {
         test_funzioni_statistiche = true;
 	}
     if (ImGui::IsItemHovered()) {
-        string testo_tooltip_pulsante_3 = "Testa le funzionalità di calcolo inserendo dei valori a piacimento."; // Testo del tooltip per il pulsante 3 (fornisce ulteriori dettagli sulla funzione del pulsante)
-		float larghezza_tooltip_pulsante_3 = ImGui::CalcTextSize(testo_tooltip_pulsante_3.c_str()).x + 20.0f; // Calcola la larghezza del tooltip per il pulsante 3 in base al testo
-	    ImGui::SetNextWindowSize(ImVec2(larghezza_tooltip_pulsante_3, 0), ImGuiCond_Always); // Imposta la larghezza del tooltip per il pulsante 3
-        ImGui::BeginTooltip(); // Inizia la finestra del tooltip per il pulsante 3
-        ImGui::SetCursorPosX((larghezza_tooltip_pulsante_3 - ImGui::CalcTextSize(testo_tooltip_pulsante_3.c_str()).x) * 0.5f); // Posizione X centrata del tooltip rispetto al pulsante 3
-        ImGui::Text("%s", testo_tooltip_pulsante_3.c_str()); // Visualizza il testo del tooltip per il pulsante 3
-		ImGui::EndTooltip(); // Termina la finestra del tooltip per il pulsante 3
+        string testo_tooltip_pulsante_4 = "Testa le funzionalità di calcolo inserendo dei valori a piacimento."; // Testo del tooltip per il pulsante 4 (fornisce ulteriori dettagli sulla funzione del pulsante)
+		float larghezza_tooltip_pulsante_4 = ImGui::CalcTextSize(testo_tooltip_pulsante_4.c_str()).x + 20.0f; // Calcola la larghezza del tooltip per il pulsante 4 in base al testo
+	    ImGui::SetNextWindowSize(ImVec2(larghezza_tooltip_pulsante_4, 0), ImGuiCond_Always); // Imposta la larghezza del tooltip per il pulsante 4
+        ImGui::BeginTooltip(); // Inizia la finestra del tooltip per il pulsante 4
+        ImGui::SetCursorPosX((larghezza_tooltip_pulsante_4 - ImGui::CalcTextSize(testo_tooltip_pulsante_4.c_str()).x) * 0.5f); // Posizione X centrata del tooltip rispetto al pulsante 4
+        ImGui::Text("%s", testo_tooltip_pulsante_4.c_str()); // Visualizza il testo del tooltip per il pulsante 4
+		ImGui::EndTooltip(); // Termina la finestra del tooltip per il pulsante 4
     }
     ImGui::PopStyleColor(3); // Ripristina i colori originali
 
     // Spaziatura tra i pulsanti
     ImGui::Dummy(ImVec2(0.0f, distanza_pulsanti_standard));
 
-	// Pulsante 4 (fucsia): "Uscita dal software"
+	// Pulsante 5 (fucsia): "Uscita dal software"
     ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1.0f, 0.0f, 0.5f, 1.0f)); // Fucsia (colore normale)
     ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(1.0f, 0.2f, 0.7f, 1.0f)); // Fucsia acceso (colore hovered)
     ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.8f, 0.0f, 0.4f, 1.0f)); // Fucsia scuro (colore active)
 	ImGui::SetCursorPosX(posizione_X_pulsante_standard); // Posizione X centrata del pulsante
-    if (ImGui::Button(testo_pulsante_4.c_str(), ImVec2(larghezza_pulsante_standard, altezza_pulsante_standard))) {
+    if (ImGui::Button(testo_pulsante_5.c_str(), ImVec2(larghezza_pulsante_standard, altezza_pulsante_standard))) {
         uscita_software = true; // Imposta la variabile true per permettere l'uscita dal software
 	}
     if (ImGui::IsItemHovered()) {
-        string testo_tooltip_pulsante_4 = "Esci dal software. Verrà chiuso il software e tutte le operazioni in corso verranno subito interrotte."; // Testo del tooltip per il pulsante 4 (fornisce ulteriori dettagli sulla funzione del pulsante)
-		float larghezza_tooltip_pulsante_4 = ImGui::CalcTextSize(testo_tooltip_pulsante_4.c_str()).x + 20.0f; // Calcola la larghezza del tooltip per il pulsante 4 in base al testo
-        ImGui::SetNextWindowSize(ImVec2(larghezza_tooltip_pulsante_4, 0), ImGuiCond_Always); // Imposta la larghezza del tooltip per il pulsante 4
-        ImGui::BeginTooltip(); // Inizia la finestra del tooltip per il pulsante 4
-        ImGui::SetCursorPosX((larghezza_tooltip_pulsante_4 - ImGui::CalcTextSize(testo_tooltip_pulsante_4.c_str()).x) * 0.5f); // Posizione X centrata del tooltip rispetto al pulsante 4
-        ImGui::Text("%s", testo_tooltip_pulsante_4.c_str()); // Visualizza il testo del tooltip per il pulsante 4
-        ImGui::EndTooltip(); // Termina la finestra del tooltip per il pulsante 4
+        string testo_tooltip_pulsante_5 = "Esci dal software. Verrà chiuso il software e tutte le operazioni in corso verranno subito interrotte."; // Testo del tooltip per il pulsante 5 (fornisce ulteriori dettagli sulla funzione del pulsante)
+		float larghezza_tooltip_pulsante_5 = ImGui::CalcTextSize(testo_tooltip_pulsante_5.c_str()).x + 20.0f; // Calcola la larghezza del tooltip per il pulsante 5          in base al testo
+        ImGui::SetNextWindowSize(ImVec2(larghezza_tooltip_pulsante_5, 0), ImGuiCond_Always); // Imposta la larghezza del tooltip per il pulsante 5
+        ImGui::BeginTooltip(); // Inizia la finestra del tooltip per il pulsante 5
+        ImGui::SetCursorPosX((larghezza_tooltip_pulsante_5 - ImGui::CalcTextSize(testo_tooltip_pulsante_5.c_str()).x) * 0.5f); // Posizione X centrata del tooltip rispetto al pulsante 5
+        ImGui::Text("%s", testo_tooltip_pulsante_5.c_str()); // Visualizza il testo del tooltip per il pulsante 5
+        ImGui::EndTooltip(); // Termina la finestra del tooltip per il pulsante 5
 	}
     ImGui::PopStyleColor(3); // Ripristina i colori originali
 
