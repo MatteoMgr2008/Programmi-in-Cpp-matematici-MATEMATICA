@@ -160,10 +160,15 @@ void SchermataUploadProbabilita(bool& uploadFileProbabilita)
     static vector<float>         prob_marg_riga;
     static vector<float>         prob_marg_col;
     static vector<float>         valori_osservati_flat;
+    static vector<vector<float>> valori_attesi;
     static float                 media = 0.0f;
+    static float                 media_quadratica = 0.0f;
     static float                 chi2 = 0.0f;
     static float                 mediana = 0.0f;
     static float                 moda = 0.0f;
+    static float                 varianza = 0.0f;
+    static float                 deviazione_standard = 0.0f;
+    static float                 scarto_semplice_medio = 0.0f;
     static float                 totale = 0.0f;
     static bool                  calcolato = false;
 
@@ -193,6 +198,7 @@ void SchermataUploadProbabilita(bool& uploadFileProbabilita)
 
             // ── probabilità per cella ────────────────────────────────────────
             prob_cella = operazioni_statistiche.calcoloTabellaProbabilita(tb.valori);
+            valori_attesi = operazioni_statistiche.calcoloTabellaValoriAttesi(tb.valori);
 
             // ── probabilità marginali ────────────────────────────────────────
             distribuzione_marginale = operazioni_statistiche.calcoloDistribuzioneMarginale(tb.valori);
@@ -209,12 +215,24 @@ void SchermataUploadProbabilita(bool& uploadFileProbabilita)
             media = valori_osservati_flat.empty()
                 ? 0.0f
                 : operazioni_statistiche.calcoloMediaAritmetica(valori_osservati_flat);
+            media_quadratica = valori_osservati_flat.empty()
+                ? 0.0f
+                : operazioni_statistiche.calcoloMediaQuadratica(valori_osservati_flat);
             mediana = valori_osservati_flat.empty()
                 ? 0.0f
                 : operazioni_statistiche.calcoloMediana(valori_osservati_flat);
             moda = valori_osservati_flat.empty()
                 ? 0.0f
                 : operazioni_statistiche.calcoloModa(valori_osservati_flat);
+            varianza = valori_osservati_flat.empty()
+                ? 0.0f
+                : operazioni_statistiche.calcoloVarianza(valori_osservati_flat);
+            deviazione_standard = valori_osservati_flat.empty()
+                ? 0.0f
+                : operazioni_statistiche.calcoloDeviazioneStandard(valori_osservati_flat);
+            scarto_semplice_medio = valori_osservati_flat.empty()
+                ? 0.0f
+                : operazioni_statistiche.calcoloScartoSempliceMedio(valori_osservati_flat);
 
             statoCaricamento = "Elaborazione completata. Totale osservazioni: " + to_string((int)totale);
             calcolato = true;
@@ -287,6 +305,11 @@ void SchermataUploadProbabilita(bool& uploadFileProbabilita)
     ImGui::Spacing(); ImGui::Separator(); ImGui::Spacing();
 
     // ── chi quadro ───────────────────────────────────────────────────────────
+    MostraTabellaImGui("TabellaAttesi", "Valori attesi",
+        tb.intestazioni_colonne, tb.intestazioni_righe, valori_attesi);
+
+    ImGui::Spacing(); ImGui::Separator(); ImGui::Spacing();
+
     int gdl = (R - 1) * (C - 1);
     ImGui::Text("Chi quadro (χ²)");
     ImGui::Spacing();
@@ -314,12 +337,28 @@ void SchermataUploadProbabilita(bool& uploadFileProbabilita)
         ImGui::TableSetColumnIndex(1); ImGui::Text("%.4f", media);
 
         ImGui::TableNextRow();
+        ImGui::TableSetColumnIndex(0); ImGui::Text("Media quadratica frequenze");
+        ImGui::TableSetColumnIndex(1); ImGui::Text("%.4f", media_quadratica);
+
+        ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0); ImGui::Text("Mediana frequenze osservate");
         ImGui::TableSetColumnIndex(1); ImGui::Text("%.4f", mediana);
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0); ImGui::Text("Moda frequenze osservate");
         ImGui::TableSetColumnIndex(1); ImGui::Text("%.4f", moda);
+
+        ImGui::TableNextRow();
+        ImGui::TableSetColumnIndex(0); ImGui::Text("Varianza frequenze osservate");
+        ImGui::TableSetColumnIndex(1); ImGui::Text("%.4f", varianza);
+
+        ImGui::TableNextRow();
+        ImGui::TableSetColumnIndex(0); ImGui::Text("Deviazione standard frequenze");
+        ImGui::TableSetColumnIndex(1); ImGui::Text("%.4f", deviazione_standard);
+
+        ImGui::TableNextRow();
+        ImGui::TableSetColumnIndex(0); ImGui::Text("Scarto semplice medio");
+        ImGui::TableSetColumnIndex(1); ImGui::Text("%.4f", scarto_semplice_medio);
 
         ImGui::EndTable();
     }
