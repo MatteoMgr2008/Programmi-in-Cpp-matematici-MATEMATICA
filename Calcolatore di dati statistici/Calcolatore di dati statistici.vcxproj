@@ -135,6 +135,7 @@
     <ClInclude Include="framework.h" />
     <ClInclude Include="HeptaSlabFont.h" />
     <ClInclude Include="Homepage.h" />
+    <ClInclude Include="IconsFontAwesome7.h" />
     <ClInclude Include="imgui\imgui_impl_glfw.h" />
     <ClInclude Include="imgui\imgui_impl_opengl3.h" />
     <ClInclude Include="OperazioniBase.h" />

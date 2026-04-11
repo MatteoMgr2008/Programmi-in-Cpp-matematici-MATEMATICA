@@ -19,6 +19,7 @@
 
 // Fonts del programma
 #include "HeptaSlabFont.h"
+#include "IconsFontAwesome7.h"
 
 // Icone del programma
 #include "resource.h" // Per includere le icone dal file "Calcolatore di dati statistici.rc"
@@ -57,12 +58,19 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 
 	// Variabile da mettere sopra, tra le altre globali o prima del ciclo principale, per tenere traccia del tema scuro o chiaro
     bool darkMode = true; // Tema scuro di default
-
+    
     // Caricamento dei font di tutto il programma
     ImFontConfig font_default_config;
     font_default_config.FontDataOwnedByAtlas = false;
     ImFont* font_default = io.Fonts->AddFontFromMemoryTTF(font_hepta_slab, grandezza_font_hepta_slab, 25.0f, &font_default_config);
     io.FontDefault = font_default;
+
+	// Caricamento delle icone di tutto il programma (da font awesome)
+    static const ImWchar range_caratteri_icone[] = { ICON_MIN_FA, ICON_MAX_16_FA, 0 };
+    ImFontConfig font_icone_config;
+    font_icone_config.MergeMode = true;
+    font_icone_config.PixelSnapH = true;
+    io.Fonts->AddFontFromFileTTF("Resources\\Fonts\\Font Awesome 7 Free-Solid-900.otf", 25.0f, &font_icone_config, range_caratteri_icone);
 
     // Inizializza i backend per GLFW e OpenGL
     ImGui_ImplGlfw_InitForOpenGL(window, true);

@@ -8,8 +8,8 @@
 
 using namespace std;
 
-// Converti la stringa contenente numeri separati da virgole o spazi in vector<float>
-vector<float> ParseFloatList(const string& input) {
+// Funzione per convertire una stringa di numeri separati da virgola in un vettore di float
+vector<float> ConvertitoreListaDaFloat(const string& input) {
     vector<float> result;
     stringstream ss(input);
     string token;
@@ -23,100 +23,257 @@ vector<float> ParseFloatList(const string& input) {
     return result;
 }
 
+// Funzione per convertire una stringa di righe di numeri separati da virgola (separati da punto e virgola) in una matrice di float
+vector<vector<float>> ConvertitoreMatriceDaFloat(const string& input) {
+    vector<vector<float>> result;
+    stringstream ss(input);
+    string row;
+    while (getline(ss, row, ';')) {
+        vector<float> rowVec = ConvertitoreListaDaFloat(row);
+        if (!rowVec.empty()) {
+            result.push_back(rowVec);
+        }
+    }
+    return result;
+}
+
+// Funzione per visualizzare la schermata di test delle funzioni statistiche
 void SchermataTestFunzioni(bool& test_funzioni_statistiche) {
     ImGui::SetNextWindowPos(ImVec2(0, 0), ImGuiCond_Always);
     ImGui::SetNextWindowSize(ImGui::GetIO().DisplaySize, ImGuiCond_Always);
     ImGui::Begin("Test Funzioni", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse);
 
-    if (ImGui::Button("Torna alla Homepage")) {
+    if (ImGui::Button(ICON_FA_ARROW_LEFT "  Torna alla Homepage")) {
         test_funzioni_statistiche = false;
     }
-    
+
+    ImGui::Spacing();
     ImGui::Spacing();
     ImGui::Separator();
     ImGui::Spacing();
 
-    ImGui::Text("Area di Test delle Operazioni Base e Statistiche");
+    ImGui::Text("In questa sezione è possibile testare le operazioni base e statistiche esistenti nel software.");
+    ImGui::Spacing();
 
-    static OperazioniStatistiche ops; // L'oggetto per effettuare i calcoli statistici
-
+    static OperazioniStatistiche ops;
+    
+	// Lista delle operazioni disponibili (operazione 0 è un placeholder per il testo iniziale)
     static int operazioneSelezionata = 0;
     const char* nomiOperazioni[] = {
-        "Scelta operazione...",
+        "Clicca o premi qui per selezionare un'operazione dal menù a tendina",
         "01) Potenza",
         "02) Radice",
         "03) Logaritmo",
-		"04) Valore assoluto",
+        "04) Valore assoluto",
         "05) Sommatoria",
         "06) Produttoria",
-        "07) Media Aritmetica",
-        "08) Media Geometrica",
-        "09) Media Armonica",
-        "10) Media Quadratica",
-        "11) Deviazione Standard",
+        "07) Media aritmetica",
+        "08) Media geometrica",
+        "09) Media armonica",
+        "10) Media quadratica",
+        "11) Deviazione standard",
         "12) Varianza",
         "13) Mediana",
-        "14) Moda"
+        "14) Moda",
+        "15) Frequenza assoluta e relativa",
+        "16) Percentile",
+        "17) Scarto semplice medio",
+        "18) Scarto quadratico medio",
+        "19) Gaussiana",
+        "20) Covarianza",
+        "21) Correlazione di Bravais-Pearson",
+        "22) Distribuzione Chi Quadrato",
+        "23) Tabella valori attesi"
     };
 
-    ImGui::Combo("Scegli un'operazione", &operazioneSelezionata, nomiOperazioni, IM_ARRAYSIZE(nomiOperazioni));
+    ImGui::Combo("Scegli un'operazione dall'elenco", &operazioneSelezionata, nomiOperazioni, IM_ARRAYSIZE(nomiOperazioni));
 
     ImGui::Spacing();
 
-    static char inputValori[256] = ""; // per liste (es. 1.5, 2.0, 3.1)
-    static float floatParam1 = 0.0f; // per ex. base
-    static float floatParam2 = 0.0f; // per ex. esponente
-    static float risultatoFormattatoText = 0.0f;
+    // Input per operazioni con due float (operazione 1-3)
+    static float base = 0.0f;
+    static float esponente = 0.0f;
+    static float argomento = 0.0f;
+    // Input per operazione valore assoluto (operazione 4)
+    static float valore = 0.0f;
+    // Input per operazione gaussiana (operazione 19)
+    static float media_gaussiana = 0.0f;
+    static float varianza_gaussiana = 0.0f;
+    static float x_gaussiana = 0.0f;
+    // Input per operazione percentile (operazione 16)
+    static float valore_percentile = 0.0f;
+    // Input liste
+    static char inputValori[256] = "";
+    static char inputValoriX[256] = "";
+    static char inputValoriY[256] = "";
+    static char inputMatrice[512] = "";
+
     static string risultatoTesto = "";
 
-    // Input form context depending on selected operazione
-    if (operazioneSelezionata >= 1 && operazioneSelezionata <= 3) {
-        // Operazioni che richiedono 2 parametri (Base + Argomento/Esponente)
-        ImGui::InputFloat("Parametro 1 (es. Base)", &floatParam1);
-        ImGui::InputFloat("Parametro 2 (es. Esponente/Argomento)", &floatParam2);
-    } 
-    else if (operazioneSelezionata >= 4) {
-        // Operazioni che richiedono una lista di valori float
-        ImGui::InputText("Lista (separati da virgola: 1, 2.5, 3)", inputValori, sizeof(inputValori));
+	// Mostra i campi di input in base all'operazione selezionata
+    if (operazioneSelezionata == 1) {
+        ImGui::InputFloat("Base", &base);
+        ImGui::InputFloat("Esponente", &esponente);
+    }
+    else if (operazioneSelezionata == 2) {
+        ImGui::InputFloat("Base (radicando)", &base);
+        ImGui::InputFloat("Indice della radice", &esponente);
+    }
+    else if (operazioneSelezionata == 3) {
+        ImGui::InputFloat("Base del logaritmo", &base);
+        ImGui::InputFloat("Argomento", &argomento);
+    }
+    else if (operazioneSelezionata == 4) {
+        ImGui::InputFloat("Valore", &valore);
+    }
+    else if (operazioneSelezionata >= 5 && operazioneSelezionata <= 15) {
+        ImGui::InputText("Lista dei valori (separati da virgola)", inputValori, sizeof(inputValori));
+    }
+    else if (operazioneSelezionata == 16) {
+        ImGui::InputText("Lista dei valori (separati da virgola)", inputValori, sizeof(inputValori));
+        ImGui::InputFloat("Valore percentile (Ad esempio: 0.25, 0.5, 0.75)", &valore_percentile);
+    }
+    else if (operazioneSelezionata == 17 || operazioneSelezionata == 18) {
+        ImGui::InputText("Lista dei valori (separati da virgola)", inputValori, sizeof(inputValori));
+    }
+    else if (operazioneSelezionata == 19) {
+        ImGui::InputFloat("Media (µ)", &media_gaussiana);
+        ImGui::InputFloat("Varianza (o)", &varianza_gaussiana);
+        ImGui::InputFloat("Valore x", &x_gaussiana);
+    }
+    else if (operazioneSelezionata == 20 || operazioneSelezionata == 21) {
+        ImGui::InputText("Lista dei valori di X (separati da virgola)", inputValoriX, sizeof(inputValoriX));
+        ImGui::InputText("Lista dei valori di Y (separati da virgola)", inputValoriY, sizeof(inputValoriY));
+    }
+    else if (operazioneSelezionata == 22 || operazioneSelezionata == 23) {
+        ImGui::TextWrapped("Inserire il formato matrice: righe separate da ';', valori separati da ','. Ad esempio: 10,20,30;40,50,60");
+        ImGui::InputText("Matrice osservati", inputMatrice, sizeof(inputMatrice));
     }
 
     ImGui::Spacing();
 
+	// Pulsante per calcolare il risultato in base all'operazione selezionata dal menù a tendina
     if (operazioneSelezionata != 0) {
         if (ImGui::Button("Calcola Risultato")) {
-            vector<float> lista_val;
-            if (operazioneSelezionata >= 4) {
-                lista_val = ParseFloatList(string(inputValori));
-            }
-
             try {
-                if (operazioneSelezionata == 1) risultatoTesto = to_string(ops.calcoloPotenza(floatParam1, floatParam2));
-                else if (operazioneSelezionata == 2) risultatoTesto = to_string(ops.calcoloRadice(floatParam1, floatParam2));
-                else if (operazioneSelezionata == 3) risultatoTesto = to_string(ops.calcoloLogaritmo(floatParam1, floatParam2));
-                else if (operazioneSelezionata == 4) risultatoTesto = to_string(ops.calcoloValoreAssoluto(floatParam1));
-                else if (lista_val.empty() && operazioneSelezionata >= 5) {
+                vector<float> lista_val = ConvertitoreListaDaFloat(string(inputValori));
+                vector<float> lista_val_x = ConvertitoreListaDaFloat(string(inputValoriX));
+                vector<float> lista_val_y = ConvertitoreListaDaFloat(string(inputValoriY));
+                vector<vector<float>> matrice = ConvertitoreMatriceDaFloat(string(inputMatrice));
+
+                if (operazioneSelezionata == 1) {
+                    risultatoTesto = to_string(ops.calcoloPotenza(base, esponente));
+                }
+                else if (operazioneSelezionata == 2) {
+                    risultatoTesto = to_string(ops.calcoloRadice(base, esponente));
+                }
+                else if (operazioneSelezionata == 3) {
+                    risultatoTesto = to_string(ops.calcoloLogaritmo(base, argomento));
+                }
+                else if (operazioneSelezionata == 4) {
+                    risultatoTesto = to_string(ops.calcoloValoreAssoluto(valore));
+                }
+                else if (lista_val.empty() &&
+                    operazioneSelezionata >= 5 && operazioneSelezionata <= 18) {
                     risultatoTesto = "Errore: lista di valori vuota o non valida.";
                 }
-                else if (operazioneSelezionata == 5) risultatoTesto = to_string(ops.calcoloSommatoria(lista_val));
-                else if (operazioneSelezionata == 6) risultatoTesto = to_string(ops.calcoloProduttoria(lista_val));
-                else if (operazioneSelezionata == 7) risultatoTesto = to_string(ops.calcoloMediaAritmetica(lista_val));
-                else if (operazioneSelezionata == 8) risultatoTesto = to_string(ops.calcoloMediaGeometrica(lista_val));
-                else if (operazioneSelezionata == 9) risultatoTesto = to_string(ops.calcoloMediaArmonica(lista_val));
-                else if (operazioneSelezionata == 10) risultatoTesto = to_string(ops.calcoloMediaQuadratica(lista_val));
-                else if (operazioneSelezionata == 11) risultatoTesto = to_string(ops.calcoloDeviazioneStandard(lista_val));
-                else if (operazioneSelezionata == 12) risultatoTesto = to_string(ops.calcoloVarianza(lista_val));
-                else if (operazioneSelezionata == 13) risultatoTesto = to_string(ops.calcoloMediana(lista_val));
-                else if (operazioneSelezionata == 14) risultatoTesto = to_string(ops.calcoloModa(lista_val));
-				//else if (operazioneSelezionata == 15) risultatoTesto = to_string(ops.calcoloFrequenzaRelativa(ops.calcoloFrequenzaAssoluta(lista_val)));
-				else if (operazioneSelezionata == 16) risultatoTesto = to_string(ops.calcoloPercentile(ops.calcoloFrequenzaRelativa(ops.calcoloFrequenzaAssoluta(lista_val)), floatParam1));
-                else if (operazioneSelezionata == 17) risultatoTesto = to_string(ops.calcoloScartoSempliceMedio(lista_val));
-                else if (operazioneSelezionata == 18) risultatoTesto = to_string(ops.calcoloScartoQuadraticoMedio(lista_val));
-                //else if (operazioneSelezionata == 19) risultatoTesto = to_string(ops.calcoloGaussiana(floatParam1, floatParam2, floatParam3));
-                //else if (operazioneSelezionata == 20) risultatoTesto = to_string(ops.calcoloCovarianza(lista_val_x, lista_val_y));
-                //else if (operazioneSelezionata == 21) risultatoTesto = to_string(ops.calcoloCoefficienteDiCorrelazioneDiBravaisPearson(lista_val_x, lista_val_y));
-                //else if (operazioneSelezionata == 22) risultatoTesto = to_string(ops.calcoloDistribuzioneChiQuadrato(valori_osservati));
-                else if (operazioneSelezionata == 23) risultatoTesto = "Tabella valori attesi calcolata. Controlla il log per i dettagli.";
-            } catch (...) {
+                else if (operazioneSelezionata == 5) {
+                    risultatoTesto = to_string(ops.calcoloSommatoria(lista_val));
+                }
+                else if (operazioneSelezionata == 6) {
+                    risultatoTesto = to_string(ops.calcoloProduttoria(lista_val));
+                }
+                else if (operazioneSelezionata == 7) {
+                    risultatoTesto = to_string(ops.calcoloMediaAritmetica(lista_val));
+                }
+                else if (operazioneSelezionata == 8) {
+                    risultatoTesto = to_string(ops.calcoloMediaGeometrica(lista_val));
+                }
+                else if (operazioneSelezionata == 9) {
+                    risultatoTesto = to_string(ops.calcoloMediaArmonica(lista_val));
+                }
+                else if (operazioneSelezionata == 10) {
+                    risultatoTesto = to_string(ops.calcoloMediaQuadratica(lista_val));
+                }
+                else if (operazioneSelezionata == 11) {
+                    risultatoTesto = to_string(ops.calcoloDeviazioneStandard(lista_val));
+                }
+                else if (operazioneSelezionata == 12) {
+                    risultatoTesto = to_string(ops.calcoloVarianza(lista_val));
+                }
+                else if (operazioneSelezionata == 13) {
+                    risultatoTesto = to_string(ops.calcoloMediana(lista_val));
+                }
+                else if (operazioneSelezionata == 14) {
+                    risultatoTesto = to_string(ops.calcoloModa(lista_val));
+                }
+                else if (operazioneSelezionata == 15) {
+                    map<float, int> freq_ass = ops.calcoloFrequenzaAssoluta(lista_val);
+                    map<float, int> freq_rel = ops.calcoloFrequenzaRelativa(freq_ass);
+                    string out = "Freq.Ass.: ";
+                    for (auto& c : freq_ass)
+                        out += to_string(c.first) + ":" + to_string(c.second) + "  ";
+                    out += " | Freq.Rel.: ";
+                    for (auto& c : freq_rel)
+                        out += to_string(c.first) + ":" + to_string(c.second) + "  ";
+                    risultatoTesto = out;
+                }
+                else if (operazioneSelezionata == 16) {
+                    map<float, int> freq_ass = ops.calcoloFrequenzaAssoluta(lista_val);
+                    map<float, int> freq_rel = ops.calcoloFrequenzaRelativa(freq_ass);
+                    risultatoTesto = to_string(ops.calcoloPercentile(freq_rel, valore_percentile));
+                }
+                else if (operazioneSelezionata == 17) {
+                    risultatoTesto = to_string(ops.calcoloScartoSempliceMedio(lista_val));
+                }
+                else if (operazioneSelezionata == 18) {
+                    risultatoTesto = to_string(ops.calcoloScartoQuadraticoMedio(lista_val));
+                }
+                else if (operazioneSelezionata == 19) {
+                    risultatoTesto = to_string(ops.calcoloGaussiana(media_gaussiana, varianza_gaussiana, x_gaussiana));
+                }
+                else if (operazioneSelezionata == 20) {
+                    if (lista_val_x.empty() || lista_val_y.empty())
+                        risultatoTesto = "Errore: lista X o Y vuota.";
+                    else if (lista_val_x.size() != lista_val_y.size())
+                        risultatoTesto = "Errore: lista X e Y devono avere la stessa lunghezza.";
+                    else
+                        risultatoTesto = to_string(ops.calcoloCovarianza(lista_val_x, lista_val_y));
+                }
+                else if (operazioneSelezionata == 21) {
+                    if (lista_val_x.empty() || lista_val_y.empty())
+                        risultatoTesto = "Errore: lista X o Y vuota.";
+                    else if (lista_val_x.size() != lista_val_y.size())
+                        risultatoTesto = "Errore: lista X e Y devono avere la stessa lunghezza.";
+                    else
+                        risultatoTesto = to_string(ops.calcoloCoefficienteDiCorrelazioneDiBravaisPearson(lista_val_x, lista_val_y));
+                }
+                else if (operazioneSelezionata == 22) {
+                    if (matrice.empty())
+                        risultatoTesto = "Errore: matrice vuota o non valida.";
+                    else
+                        risultatoTesto = to_string(ops.calcoloDistribuzioneChiQuadrato(matrice));
+                }
+                else if (operazioneSelezionata == 23) {
+                    if (matrice.empty()) {
+                        risultatoTesto = "Errore: matrice vuota o non valida.";
+                    }
+                    else {
+                        vector<vector<float>> tabella = ops.calcoloTabellaValoriAttesi(matrice);
+                        string out = "Tabella valori attesi: ";
+                        for (int i = 0; i < (int)tabella.size(); i++) {
+                            out += "[";
+                            for (int j = 0; j < (int)tabella[i].size(); j++) {
+                                out += to_string(tabella[i][j]);
+                                if (j < (int)tabella[i].size() - 1) out += ", ";
+                            }
+                            out += "] ";
+                        }
+                        risultatoTesto = out;
+                    }
+                }
+            }
+            catch (...) {
                 risultatoTesto = "Errore durante il calcolo.";
             }
         }

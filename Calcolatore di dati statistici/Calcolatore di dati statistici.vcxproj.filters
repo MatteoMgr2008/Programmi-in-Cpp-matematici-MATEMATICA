@@ -54,6 +54,9 @@
     <ClInclude Include="SchermataVisualizzaFunzioni.h">
       <Filter>File di intestazione</Filter>
     </ClInclude>
+    <ClInclude Include="IconsFontAwesome7.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Calcolatore di dati statistici.cpp">
