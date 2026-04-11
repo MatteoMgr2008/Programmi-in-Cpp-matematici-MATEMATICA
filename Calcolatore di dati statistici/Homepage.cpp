@@ -97,10 +97,10 @@ void Homepage(bool& upload_file_dati, bool& visualizza_funzioni_statistiche, boo
 	// Spaziatura tra i pulsanti
     ImGui::Dummy(ImVec2(0.0f, distanza_pulsanti_standard));
 
-	// Pulsante 2 (blu): "Caricamento di un file CSV per il calcolo delle probabilità"
-	ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.0f, 0.5f, 0.8f, 1.0f)); // Blu (colore normale)
-    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.0f, 0.6f, 0.9f, 1.0f)); // Blu acceso (colore hovered)
-	ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.0f, 0.4f, 0.6f, 1.0f)); // Blu scuro (colore active)
+	// Pulsante 2 (Arancione): "Caricamento di un file CSV per il calcolo delle probabilità"
+    ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.85f, 0.40f, 0.00f, 1.0f)); // Arancione (colore normale)
+    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.95f, 0.50f, 0.05f, 1.0f)); // Arancione acceso (colore hovered)
+    ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.65f, 0.28f, 0.00f, 1.0f)); // Arancione scuro (colore active)
 	ImGui::SetCursorPosX(posizione_X_pulsante_standard); // Posizione X centrata del pulsante
     if (ImGui::Button(testo_pulsante_2.c_str(), ImVec2(larghezza_pulsante_standard, altezza_pulsante_standard))) {
         upload_file_probabilita = true; // Imposta la variabile true per il caricamento del file probabilità CSV
@@ -115,12 +115,14 @@ void Homepage(bool& upload_file_dati, bool& visualizza_funzioni_statistiche, boo
         ImGui::EndTooltip(); // Termina la finestra del tooltip per il pulsante 2
     }   
 	ImGui::PopStyleColor(3); // Ripristina i colori originali
-	ImGui::Dummy(ImVec2(0.0f, distanza_pulsanti_standard)); // Spaziatura tra i pulsanti
+	
+    // Spaziatura tra i pulsanti
+    ImGui::Dummy(ImVec2(0.0f, distanza_pulsanti_standard));
 
-	// Pulsante 3 (Arancione): "Visualizzazione della lista di funzioni base e statistiche esistenti"
-    ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1.0f, 0.6f, 0.0f, 1.0f)); // Arancione (colore normale)
-	ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(1.0f, 0.7f, 0.2f, 1.0f)); // Arancione acceso (colore hovered)
-	ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.8f, 0.5f, 0.0f, 1.0f)); // Arancione scuro (colore active)
+	// Pulsante 3 (Giallo): "Visualizzazione della lista di funzioni base e statistiche esistenti"
+    ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1.0f, 0.6f, 0.0f, 1.0f)); // Giallo (colore normale)
+	ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(1.0f, 0.7f, 0.2f, 1.0f)); // Giallo acceso (colore hovered)
+	ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.8f, 0.5f, 0.0f, 1.0f)); // Giallo scuro (colore active)
 	ImGui::SetCursorPosX(posizione_X_pulsante_standard); // Posizione X centrata del pulsante
     if (ImGui::Button(testo_pulsante_3.c_str(), ImVec2(larghezza_pulsante_standard, altezza_pulsante_standard))) {
         visualizza_funzioni_statistiche = true; // Imposta la variabile true per la visualizzazione delle funzioni statistiche
@@ -139,7 +141,7 @@ void Homepage(bool& upload_file_dati, bool& visualizza_funzioni_statistiche, boo
     // Spaziatura tra i pulsanti
     ImGui::Dummy(ImVec2(0.0f, distanza_pulsanti_standard));
 
-	// Pulsante 4 (celeste): "Utilizza singolarmente le funzioni base e statistiche"
+	// Pulsante 4 (Celeste): "Utilizza singolarmente le funzioni base e statistiche"
 	ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.0f, 0.5f, 0.8f, 1.0f)); // Celeste (colore normale)
 	ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.2f, 0.7f, 1.0f, 1.0f)); // Celeste chiaro (colore hovered)
     ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.0f, 0.4f, 0.6f, 1.0f)); // Celeste scuro (colore active)
@@ -161,7 +163,7 @@ void Homepage(bool& upload_file_dati, bool& visualizza_funzioni_statistiche, boo
     // Spaziatura tra i pulsanti
     ImGui::Dummy(ImVec2(0.0f, distanza_pulsanti_standard));
 
-	// Pulsante 5 (fucsia): "Uscita dal software"
+	// Pulsante 5 (Fucsia): "Uscita dal software"
     ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1.0f, 0.0f, 0.5f, 1.0f)); // Fucsia (colore normale)
     ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(1.0f, 0.2f, 0.7f, 1.0f)); // Fucsia acceso (colore hovered)
     ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.8f, 0.0f, 0.4f, 1.0f)); // Fucsia scuro (colore active)
