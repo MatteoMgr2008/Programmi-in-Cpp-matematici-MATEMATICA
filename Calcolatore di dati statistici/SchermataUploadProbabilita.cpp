@@ -160,6 +160,7 @@ void SchermataUploadProbabilita(bool& uploadFileProbabilita)
     static vector<float>         prob_marg_riga;
     static vector<float>         prob_marg_col;
     static vector<float>         valori_osservati_flat;
+    static float                 media = 0.0f;
     static float                 chi2 = 0.0f;
     static float                 mediana = 0.0f;
     static float                 moda = 0.0f;
@@ -180,49 +181,34 @@ void SchermataUploadProbabilita(bool& uploadFileProbabilita)
             int R = (int)tb.valori.size();
             int C = (int)tb.intestazioni_colonne.size();
             OperazioniStatistiche operazioni_statistiche;
+            vector<vector<float>> distribuzione_marginale;
+            vector<vector<float>> probabilita_marginale;
 
             // ── totale generale ──────────────────────────────────────────────
-            totale = 0.0f;
-            marg_riga.assign(R, 0.0f);
-            marg_col.assign(C, 0.0f);
             valori_osservati_flat.clear();
 
             for (int i = 0; i < R; i++)
                 for (int j = 0; j < C; j++)
-                {
-                    float v = tb.valori[i][j];
-                    totale += v;
-                    marg_riga[i] += v;
-                    marg_col[j] += v;
-                    valori_osservati_flat.push_back(v);
-                }
+                    valori_osservati_flat.push_back(tb.valori[i][j]);
 
             // ── probabilità per cella ────────────────────────────────────────
-            prob_cella.assign(R, vector<float>(C, 0.0f));
-            if (totale > 0.0f)
-                for (int i = 0; i < R; i++)
-                    for (int j = 0; j < C; j++)
-                        prob_cella[i][j] = tb.valori[i][j] / totale;
+            prob_cella = operazioni_statistiche.calcoloTabellaProbabilita(tb.valori);
 
             // ── probabilità marginali ────────────────────────────────────────
-            prob_marg_riga.resize(R);
-            prob_marg_col.resize(C);
-            for (int i = 0; i < R; i++) prob_marg_riga[i] = totale > 0.0f ? marg_riga[i] / totale : 0.0f;
-            for (int j = 0; j < C; j++) prob_marg_col[j] = totale > 0.0f ? marg_col[j] / totale : 0.0f;
+            distribuzione_marginale = operazioni_statistiche.calcoloDistribuzioneMarginale(tb.valori);
+            probabilita_marginale = operazioni_statistiche.calcoloProbabilitaMarginale(tb.valori);
+            marg_riga = distribuzione_marginale.empty() ? vector<float>{} : distribuzione_marginale[0];
+            marg_col = distribuzione_marginale.size() > 1 ? distribuzione_marginale[1] : vector<float>{};
+            prob_marg_riga = probabilita_marginale.empty() ? vector<float>{} : probabilita_marginale[0];
+            prob_marg_col = probabilita_marginale.size() > 1 ? probabilita_marginale[1] : vector<float>{};
+            totale = marg_riga.empty() ? 0.0f : operazioni_statistiche.calcoloSommatoria(marg_riga);
 
             // ── chi quadro ───────────────────────────────────────────────────
-            chi2 = 0.0f;
-            for (int i = 0; i < R; i++)
-                for (int j = 0; j < C; j++)
-                {
-                    float atteso = (marg_riga[i] * marg_col[j]) / totale;
-                    if (atteso > 0.0f)
-                    {
-                        float diff = tb.valori[i][j] - atteso;
-                        chi2 += (diff * diff) / atteso;
-                    }
-                }
+            chi2 = operazioni_statistiche.calcoloDistribuzioneChiQuadrato(tb.valori);
 
+            media = valori_osservati_flat.empty()
+                ? 0.0f
+                : operazioni_statistiche.calcoloMediaAritmetica(valori_osservati_flat);
             mediana = valori_osservati_flat.empty()
                 ? 0.0f
                 : operazioni_statistiche.calcoloMediana(valori_osservati_flat);
@@ -324,6 +310,10 @@ void SchermataUploadProbabilita(bool& uploadFileProbabilita)
         ImGui::TableSetColumnIndex(1); ImGui::Text("%.0f", totale);
 
         ImGui::TableNextRow();
+        ImGui::TableSetColumnIndex(0); ImGui::Text("Media frequenze osservate");
+        ImGui::TableSetColumnIndex(1); ImGui::Text("%.4f", media);
+
+        ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0); ImGui::Text("Mediana frequenze osservate");
         ImGui::TableSetColumnIndex(1); ImGui::Text("%.4f", mediana);
 
@@ -333,6 +323,11 @@ void SchermataUploadProbabilita(bool& uploadFileProbabilita)
 
         ImGui::EndTable();
     }
+
+	// Calcolo moda e mediana per frequenze osservate (non per probabilità) 
+
+
+
 
     ImGui::End();
 }
