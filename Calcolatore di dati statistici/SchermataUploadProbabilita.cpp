@@ -27,6 +27,12 @@ struct StatisticheDescrittive {
     float scarto_semplice_medio = 0.0f;
 };
 
+struct StatisticheMarginali {
+    float media = 0.0f;
+    float varianza = 0.0f;
+    float deviazione_standard = 0.0f;
+};
+
 // ── lettura CSV bivariato ────────────────────────────────────────────────────
 inline TabellaBivariata LeggiCSVBivariato(const string& percorso)
 {
@@ -182,6 +188,78 @@ static void MostraTabellaStatistichePerCaratteristica(
     }
 }
 
+static float EstraiValoreNumericoEtichetta(const string& etichetta, int fallback)
+{
+    try { return stof(etichetta); }
+    catch (...) {}
+
+    string numero;
+    for (char c : etichetta)
+    {
+        if ((c >= '0' && c <= '9') || c == '-' || c == '+' || c == '.' || c == ',')
+            numero.push_back(c == ',' ? '.' : c);
+    }
+
+    if (!numero.empty())
+    {
+        try { return stof(numero); }
+        catch (...) {}
+    }
+
+    return (float)fallback;
+}
+
+static vector<float> CostruisciSupportoNumerico(const vector<string>& etichette)
+{
+    vector<float> supporto;
+    for (int i = 0; i < (int)etichette.size(); i++)
+        supporto.push_back(EstraiValoreNumericoEtichetta(etichette[i], i + 1));
+    return supporto;
+}
+
+static StatisticheMarginali CalcolaStatisticheMarginali(
+    OperazioniStatistiche& operazioni_statistiche,
+    const vector<float>& supporto,
+    const vector<float>& frequenze)
+{
+    StatisticheMarginali statistiche;
+    if (supporto.empty() || frequenze.empty() || supporto.size() != frequenze.size())
+        return statistiche;
+
+    statistiche.media = operazioni_statistiche.calcoloMediaPonderata(supporto, frequenze);
+    statistiche.varianza = operazioni_statistiche.calcoloVarianzaPonderata(supporto, frequenze);
+    statistiche.deviazione_standard = operazioni_statistiche.calcoloDeviazioneStandardPonderata(supporto, frequenze);
+    return statistiche;
+}
+
+static void MostraTabellaStatisticheMarginali(
+    const char* id,
+    const string& titolo,
+    const vector<string>& etichette_variabili,
+    const vector<StatisticheMarginali>& statistiche)
+{
+    ImGui::Text("%s", titolo.c_str());
+    if (ImGui::BeginTable(id, 4,
+        ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg | ImGuiTableFlags_SizingFixedFit))
+    {
+        ImGui::TableSetupColumn("Variabile", ImGuiTableColumnFlags_WidthFixed, 110.0f);
+        ImGui::TableSetupColumn("Media", ImGuiTableColumnFlags_WidthFixed, 90.0f);
+        ImGui::TableSetupColumn("Varianza", ImGuiTableColumnFlags_WidthFixed, 90.0f);
+        ImGui::TableSetupColumn("Dev. Std.", ImGuiTableColumnFlags_WidthFixed, 90.0f);
+        ImGui::TableHeadersRow();
+
+        for (int i = 0; i < (int)etichette_variabili.size() && i < (int)statistiche.size(); i++)
+        {
+            ImGui::TableNextRow();
+            ImGui::TableSetColumnIndex(0); ImGui::Text("%s", etichette_variabili[i].c_str());
+            ImGui::TableSetColumnIndex(1); ImGui::Text("%.4f", statistiche[i].media);
+            ImGui::TableSetColumnIndex(2); ImGui::Text("%.4f", statistiche[i].varianza);
+            ImGui::TableSetColumnIndex(3); ImGui::Text("%.4f", statistiche[i].deviazione_standard);
+        }
+        ImGui::EndTable();
+    }
+}
+
 // ════════════════════════════════════════════════════════════════════════════
 void SchermataUploadProbabilita(bool& uploadFileProbabilita)
 {
@@ -219,8 +297,9 @@ void SchermataUploadProbabilita(bool& uploadFileProbabilita)
     static vector<float>         prob_marg_riga;
     static vector<float>         prob_marg_col;
     static vector<vector<float>> valori_attesi;
-    static vector<StatisticheDescrittive> statistiche_righe;
-    static vector<StatisticheDescrittive> statistiche_colonne;
+    static vector<StatisticheMarginali> statistiche_variabili;
+    static string coppia_moda = "";
+    static string coppia_mediana = "";
     static float                 chi2 = 0.0f;
     static float                 totale = 0.0f;
     static bool                  calcolato = false;
@@ -261,21 +340,39 @@ void SchermataUploadProbabilita(bool& uploadFileProbabilita)
             // ── chi quadro ───────────────────────────────────────────────────
             chi2 = operazioni_statistiche.calcoloDistribuzioneChiQuadrato(tb.valori);
 
-            statistiche_righe.clear();
-            for (const auto& riga : tb.valori)
-                statistiche_righe.push_back(CalcolaStatisticheDescrittive(operazioni_statistiche, riga));
+            vector<float> supporto_righe = CostruisciSupportoNumerico(tb.intestazioni_righe);
+            vector<float> supporto_colonne = CostruisciSupportoNumerico(tb.intestazioni_colonne);
 
-            statistiche_colonne.clear();
-            for (int j = 0; j < C; j++)
+            statistiche_variabili.clear();
+            statistiche_variabili.push_back(CalcolaStatisticheMarginali(
+                operazioni_statistiche,
+                supporto_righe,
+                marg_riga));
+            statistiche_variabili.push_back(CalcolaStatisticheMarginali(
+                operazioni_statistiche,
+                supporto_colonne,
+                marg_col));
+
+            int indice_moda_riga = 0;
+            int indice_moda_colonna = 0;
+            float frequenza_massima = tb.valori[0][0];
+            for (int i = 0; i < R; i++)
             {
-                vector<float> colonna;
-                for (int i = 0; i < R; i++)
+                for (int j = 0; j < C; j++)
                 {
-                    if (j < (int)tb.valori[i].size())
-                        colonna.push_back(tb.valori[i][j]);
+                    if (tb.valori[i][j] > frequenza_massima)
+                    {
+                        frequenza_massima = tb.valori[i][j];
+                        indice_moda_riga = i;
+                        indice_moda_colonna = j;
+                    }
                 }
-                statistiche_colonne.push_back(CalcolaStatisticheDescrittive(operazioni_statistiche, colonna));
             }
+            coppia_moda = "(" + tb.intestazioni_righe[indice_moda_riga] + ", " + tb.intestazioni_colonne[indice_moda_colonna] + ")";
+
+            float mediana_x = operazioni_statistiche.calcoloMedianaPonderata(supporto_righe, marg_riga);
+            float mediana_y = operazioni_statistiche.calcoloMedianaPonderata(supporto_colonne, marg_col);
+            coppia_mediana = "(" + to_string(mediana_x) + ", " + to_string(mediana_y) + ")";
 
             statoCaricamento = "Elaborazione completata. Totale osservazioni: " + to_string((int)totale);
             calcolato = true;
@@ -385,19 +482,31 @@ void SchermataUploadProbabilita(bool& uploadFileProbabilita)
 
     ImGui::Spacing(); ImGui::Separator(); ImGui::Spacing();
 
-    MostraTabellaStatistichePerCaratteristica(
-        "StatisticheRighe",
-        "Statistiche descrittive per ogni riga",
-        tb.intestazioni_righe,
-        statistiche_righe);
+    if (ImGui::BeginTable("TabellaCoppie", 2,
+        ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg | ImGuiTableFlags_SizingFixedFit))
+    {
+        ImGui::TableSetupColumn("Statistica bivariata", ImGuiTableColumnFlags_WidthFixed, 180.0f);
+        ImGui::TableSetupColumn("Valore", ImGuiTableColumnFlags_WidthFixed, 180.0f);
+        ImGui::TableHeadersRow();
+
+        ImGui::TableNextRow();
+        ImGui::TableSetColumnIndex(0); ImGui::Text("Coppia modale");
+        ImGui::TableSetColumnIndex(1); ImGui::Text("%s", coppia_moda.c_str());
+
+        ImGui::TableNextRow();
+        ImGui::TableSetColumnIndex(0); ImGui::Text("Coppia mediana");
+        ImGui::TableSetColumnIndex(1); ImGui::Text("%s", coppia_mediana.c_str());
+
+        ImGui::EndTable();
+    }
 
     ImGui::Spacing(); ImGui::Separator(); ImGui::Spacing();
 
-    MostraTabellaStatistichePerCaratteristica(
-        "StatisticheColonne",
-        "Statistiche descrittive per ogni colonna",
-        tb.intestazioni_colonne,
-        statistiche_colonne);
+    MostraTabellaStatisticheMarginali(
+        "StatisticheMarginali",
+        "Statistiche marginali delle variabili",
+        vector<string>{ "X", "Y" },
+        statistiche_variabili);
 
     ImGui::End();
 }

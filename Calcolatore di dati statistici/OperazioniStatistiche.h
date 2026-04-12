@@ -23,6 +23,9 @@ class OperazioniStatistiche : public OperazioniBase
 		float calcoloMediaArmonica(vector<float> valori);
 		float calcoloMediaQuadratica(vector<float> valori);
 		float calcoloMediaPonderata(vector<float> valori, vector<float> pesi);
+		float calcoloVarianzaPonderata(vector<float> valori, vector<float> pesi);
+		float calcoloDeviazioneStandardPonderata(vector<float> valori, vector<float> pesi);
+		float calcoloMedianaPonderata(vector<float> valori, vector<float> frequenze);
 		float calcoloDeviazioneStandard(vector<float> valori);
 		float calcoloVarianza(vector<float> valori);
 		float calcoloMediana(vector<float> valori);

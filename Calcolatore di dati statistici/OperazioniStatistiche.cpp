@@ -57,6 +57,79 @@ float OperazioniStatistiche::calcoloMediaPonderata(vector<float> valori, vector<
 	return risultato_media_ponderata;
 }
 
+float OperazioniStatistiche::calcoloVarianzaPonderata(vector<float> valori, vector<float> pesi)
+{
+	if (valori.empty() || pesi.empty() || valori.size() != pesi.size())
+	{
+		this->risultato_corrente = { pair<vector<float>, vector<float>>{valori, pesi}, "varianza ponderata", 0.0f };
+		return 0.0f;
+	}
+
+	float media_ponderata = calcoloMediaPonderata(valori, pesi);
+	float somma_pesata = 0.0f;
+	vector<float> scarti_quadratici_pesati;
+	for (int i = 0; i < valori.size(); i++)
+	{
+		float scarto_quadratico_pesato = calcoloPotenza(valori[i] - media_ponderata, 2.0f) * pesi[i];
+		scarti_quadratici_pesati.push_back(scarto_quadratico_pesato);
+		somma_pesata += pesi[i];
+	}
+
+	float risultato_varianza_ponderata = somma_pesata != 0.0f
+		? calcoloSommatoria(scarti_quadratici_pesati) / somma_pesata
+		: 0.0f;
+	this->risultato_corrente = { pair<vector<float>, vector<float>>{valori, pesi}, "varianza ponderata", risultato_varianza_ponderata };
+	return risultato_varianza_ponderata;
+}
+
+float OperazioniStatistiche::calcoloDeviazioneStandardPonderata(vector<float> valori, vector<float> pesi)
+{
+	float risultato_deviazione_standard_ponderata = calcoloRadice(calcoloVarianzaPonderata(valori, pesi), 2.0f);
+	this->risultato_corrente = { pair<vector<float>, vector<float>>{valori, pesi}, "deviazione standard ponderata", risultato_deviazione_standard_ponderata };
+	return risultato_deviazione_standard_ponderata;
+}
+
+float OperazioniStatistiche::calcoloMedianaPonderata(vector<float> valori, vector<float> frequenze)
+{
+	if (valori.empty() || frequenze.empty() || valori.size() != frequenze.size())
+	{
+		this->risultato_corrente = { pair<vector<float>, vector<float>>{valori, frequenze}, "mediana ponderata", 0.0f };
+		return 0.0f;
+	}
+
+	vector<pair<float, float>> valori_frequenze;
+	for (int i = 0; i < valori.size(); i++)
+	{
+		valori_frequenze.push_back({ valori[i], frequenze[i] });
+	}
+
+	sort(valori_frequenze.begin(), valori_frequenze.end(), [](const auto& a, const auto& b) {
+		return a.first < b.first;
+	});
+
+	float totale_frequenze = 0.0f;
+	for (const auto& coppia : valori_frequenze)
+	{
+		totale_frequenze += coppia.second;
+	}
+
+	float soglia = totale_frequenze / 2.0f;
+	float cumulata = 0.0f;
+	float risultato_mediana_ponderata = valori_frequenze.back().first;
+	for (const auto& coppia : valori_frequenze)
+	{
+		cumulata += coppia.second;
+		if (cumulata >= soglia)
+		{
+			risultato_mediana_ponderata = coppia.first;
+			break;
+		}
+	}
+
+	this->risultato_corrente = { pair<vector<float>, vector<float>>{valori, frequenze}, "mediana ponderata", risultato_mediana_ponderata };
+	return risultato_mediana_ponderata;
+}
+
 float OperazioniStatistiche::calcoloDeviazioneStandard(vector<float> valori)
 {
 	vector<float> valori_originali = valori;
