@@ -18,6 +18,15 @@ struct TabellaBivariata {
     vector<vector<float>>   valori;               // frequenze osservate
 };
 
+struct StatisticheDescrittive {
+    float media = 0.0f;
+    float mediana = 0.0f;
+    float moda = 0.0f;
+    float varianza = 0.0f;
+    float deviazione_standard = 0.0f;
+    float scarto_semplice_medio = 0.0f;
+};
+
 // ── lettura CSV bivariato ────────────────────────────────────────────────────
 inline TabellaBivariata LeggiCSVBivariato(const string& percorso)
 {
@@ -123,6 +132,56 @@ static void MostraTabellaImGui(
     }
 }
 
+static StatisticheDescrittive CalcolaStatisticheDescrittive(
+    OperazioniStatistiche& operazioni_statistiche,
+    const vector<float>& valori)
+{
+    StatisticheDescrittive statistiche;
+    if (valori.empty()) return statistiche;
+
+    statistiche.media = operazioni_statistiche.calcoloMediaAritmetica(valori);
+    statistiche.mediana = operazioni_statistiche.calcoloMediana(valori);
+    statistiche.moda = operazioni_statistiche.calcoloModa(valori);
+    statistiche.varianza = operazioni_statistiche.calcoloVarianza(valori);
+    statistiche.deviazione_standard = operazioni_statistiche.calcoloDeviazioneStandard(valori);
+    statistiche.scarto_semplice_medio = operazioni_statistiche.calcoloScartoSempliceMedio(valori);
+    return statistiche;
+}
+
+static void MostraTabellaStatistichePerCaratteristica(
+    const char* id,
+    const string& titolo,
+    const vector<string>& etichette,
+    const vector<StatisticheDescrittive>& statistiche)
+{
+    ImGui::Text("%s", titolo.c_str());
+    if (ImGui::BeginTable(id, 7,
+        ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg | ImGuiTableFlags_SizingFixedFit))
+    {
+        ImGui::TableSetupColumn("Caratteristica", ImGuiTableColumnFlags_WidthFixed, 120.0f);
+        ImGui::TableSetupColumn("Media", ImGuiTableColumnFlags_WidthFixed, 90.0f);
+        ImGui::TableSetupColumn("Mediana", ImGuiTableColumnFlags_WidthFixed, 90.0f);
+        ImGui::TableSetupColumn("Moda", ImGuiTableColumnFlags_WidthFixed, 90.0f);
+        ImGui::TableSetupColumn("Varianza", ImGuiTableColumnFlags_WidthFixed, 100.0f);
+        ImGui::TableSetupColumn("Dev. Std.", ImGuiTableColumnFlags_WidthFixed, 100.0f);
+        ImGui::TableSetupColumn("Scarto Semplice Medio", ImGuiTableColumnFlags_WidthFixed, 150.0f);
+        ImGui::TableHeadersRow();
+
+        for (int i = 0; i < (int)etichette.size() && i < (int)statistiche.size(); i++)
+        {
+            ImGui::TableNextRow();
+            ImGui::TableSetColumnIndex(0); ImGui::Text("%s", etichette[i].c_str());
+            ImGui::TableSetColumnIndex(1); ImGui::Text("%.4f", statistiche[i].media);
+            ImGui::TableSetColumnIndex(2); ImGui::Text("%.4f", statistiche[i].mediana);
+            ImGui::TableSetColumnIndex(3); ImGui::Text("%.4f", statistiche[i].moda);
+            ImGui::TableSetColumnIndex(4); ImGui::Text("%.4f", statistiche[i].varianza);
+            ImGui::TableSetColumnIndex(5); ImGui::Text("%.4f", statistiche[i].deviazione_standard);
+            ImGui::TableSetColumnIndex(6); ImGui::Text("%.4f", statistiche[i].scarto_semplice_medio);
+        }
+        ImGui::EndTable();
+    }
+}
+
 // ════════════════════════════════════════════════════════════════════════════
 void SchermataUploadProbabilita(bool& uploadFileProbabilita)
 {
@@ -159,16 +218,10 @@ void SchermataUploadProbabilita(bool& uploadFileProbabilita)
     static vector<float>         marg_col;
     static vector<float>         prob_marg_riga;
     static vector<float>         prob_marg_col;
-    static vector<float>         valori_osservati_flat;
     static vector<vector<float>> valori_attesi;
-    static float                 media = 0.0f;
-    static float                 media_quadratica = 0.0f;
+    static vector<StatisticheDescrittive> statistiche_righe;
+    static vector<StatisticheDescrittive> statistiche_colonne;
     static float                 chi2 = 0.0f;
-    static float                 mediana = 0.0f;
-    static float                 moda = 0.0f;
-    static float                 varianza = 0.0f;
-    static float                 deviazione_standard = 0.0f;
-    static float                 scarto_semplice_medio = 0.0f;
     static float                 totale = 0.0f;
     static bool                  calcolato = false;
 
@@ -190,11 +243,7 @@ void SchermataUploadProbabilita(bool& uploadFileProbabilita)
             vector<vector<float>> probabilita_marginale;
 
             // ── totale generale ──────────────────────────────────────────────
-            valori_osservati_flat.clear();
 
-            for (int i = 0; i < R; i++)
-                for (int j = 0; j < C; j++)
-                    valori_osservati_flat.push_back(tb.valori[i][j]);
 
             // ── probabilità per cella ────────────────────────────────────────
             prob_cella = operazioni_statistiche.calcoloTabellaProbabilita(tb.valori);
@@ -212,27 +261,21 @@ void SchermataUploadProbabilita(bool& uploadFileProbabilita)
             // ── chi quadro ───────────────────────────────────────────────────
             chi2 = operazioni_statistiche.calcoloDistribuzioneChiQuadrato(tb.valori);
 
-            media = valori_osservati_flat.empty()
-                ? 0.0f
-                : operazioni_statistiche.calcoloMediaAritmetica(valori_osservati_flat);
-            media_quadratica = valori_osservati_flat.empty()
-                ? 0.0f
-                : operazioni_statistiche.calcoloMediaQuadratica(valori_osservati_flat);
-            mediana = valori_osservati_flat.empty()
-                ? 0.0f
-                : operazioni_statistiche.calcoloMediana(valori_osservati_flat);
-            moda = valori_osservati_flat.empty()
-                ? 0.0f
-                : operazioni_statistiche.calcoloModa(valori_osservati_flat);
-            varianza = valori_osservati_flat.empty()
-                ? 0.0f
-                : operazioni_statistiche.calcoloVarianza(valori_osservati_flat);
-            deviazione_standard = valori_osservati_flat.empty()
-                ? 0.0f
-                : operazioni_statistiche.calcoloDeviazioneStandard(valori_osservati_flat);
-            scarto_semplice_medio = valori_osservati_flat.empty()
-                ? 0.0f
-                : operazioni_statistiche.calcoloScartoSempliceMedio(valori_osservati_flat);
+            statistiche_righe.clear();
+            for (const auto& riga : tb.valori)
+                statistiche_righe.push_back(CalcolaStatisticheDescrittive(operazioni_statistiche, riga));
+
+            statistiche_colonne.clear();
+            for (int j = 0; j < C; j++)
+            {
+                vector<float> colonna;
+                for (int i = 0; i < R; i++)
+                {
+                    if (j < (int)tb.valori[i].size())
+                        colonna.push_back(tb.valori[i][j]);
+                }
+                statistiche_colonne.push_back(CalcolaStatisticheDescrittive(operazioni_statistiche, colonna));
+            }
 
             statoCaricamento = "Elaborazione completata. Totale osservazioni: " + to_string((int)totale);
             calcolato = true;
@@ -332,34 +375,6 @@ void SchermataUploadProbabilita(bool& uploadFileProbabilita)
         ImGui::TableSetColumnIndex(0); ImGui::Text("Totale osservazioni (N)");
         ImGui::TableSetColumnIndex(1); ImGui::Text("%.0f", totale);
 
-        ImGui::TableNextRow();
-        ImGui::TableSetColumnIndex(0); ImGui::Text("Media frequenze osservate");
-        ImGui::TableSetColumnIndex(1); ImGui::Text("%.4f", media);
-
-        ImGui::TableNextRow();
-        ImGui::TableSetColumnIndex(0); ImGui::Text("Media quadratica frequenze");
-        ImGui::TableSetColumnIndex(1); ImGui::Text("%.4f", media_quadratica);
-
-        ImGui::TableNextRow();
-        ImGui::TableSetColumnIndex(0); ImGui::Text("Mediana frequenze osservate");
-        ImGui::TableSetColumnIndex(1); ImGui::Text("%.4f", mediana);
-
-        ImGui::TableNextRow();
-        ImGui::TableSetColumnIndex(0); ImGui::Text("Moda frequenze osservate");
-        ImGui::TableSetColumnIndex(1); ImGui::Text("%.4f", moda);
-
-        ImGui::TableNextRow();
-        ImGui::TableSetColumnIndex(0); ImGui::Text("Varianza frequenze osservate");
-        ImGui::TableSetColumnIndex(1); ImGui::Text("%.4f", varianza);
-
-        ImGui::TableNextRow();
-        ImGui::TableSetColumnIndex(0); ImGui::Text("Deviazione standard frequenze");
-        ImGui::TableSetColumnIndex(1); ImGui::Text("%.4f", deviazione_standard);
-
-        ImGui::TableNextRow();
-        ImGui::TableSetColumnIndex(0); ImGui::Text("Scarto semplice medio");
-        ImGui::TableSetColumnIndex(1); ImGui::Text("%.4f", scarto_semplice_medio);
-
         ImGui::EndTable();
     }
 
@@ -367,6 +382,22 @@ void SchermataUploadProbabilita(bool& uploadFileProbabilita)
 
 
 
+
+    ImGui::Spacing(); ImGui::Separator(); ImGui::Spacing();
+
+    MostraTabellaStatistichePerCaratteristica(
+        "StatisticheRighe",
+        "Statistiche descrittive per ogni riga",
+        tb.intestazioni_righe,
+        statistiche_righe);
+
+    ImGui::Spacing(); ImGui::Separator(); ImGui::Spacing();
+
+    MostraTabellaStatistichePerCaratteristica(
+        "StatisticheColonne",
+        "Statistiche descrittive per ogni colonna",
+        tb.intestazioni_colonne,
+        statistiche_colonne);
 
     ImGui::End();
 }

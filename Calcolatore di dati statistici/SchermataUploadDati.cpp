@@ -1,11 +1,12 @@
 #include "SchermataUploadDati.h"
 #include <string>
 #include <vector>
+#include <map>
 #include <fstream>
 #include <sstream>
 #include <iostream>
-#include <windows.h>
 #include <algorithm>
+#include <windows.h>
 #include "OperazioniStatistiche.h"
 
 using namespace std;
@@ -15,7 +16,9 @@ struct CsvData {
     vector<vector<float>> columns;
 };
 
-// Funzione di utilità per aprire Esplora File
+// ---------------------------------------------------------------------------
+// Utility: apre Esplora File e restituisce il percorso scelto
+// ---------------------------------------------------------------------------
 inline string ApriEsploraFile() {
     OPENFILENAMEA ofn;
     CHAR szFile[260] = { 0 };
@@ -27,24 +30,21 @@ inline string ApriEsploraFile() {
     ofn.nMaxFile = sizeof(szFile);
     ofn.lpstrFilter = "File CSV\0*.csv\0Tutti i file\0*.*\0";
     ofn.nFilterIndex = 1;
-    ofn.lpstrFileTitle = NULL;
-    ofn.nMaxFileTitle = 0;
-    ofn.lpstrInitialDir = NULL;
     ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;
 
-    if (GetOpenFileNameA(&ofn) == TRUE) {
+    if (GetOpenFileNameA(&ofn) == TRUE)
         return ofn.lpstrFile;
-    }
     return "";
 }
 
-// Funzione di utilità per leggere il file CSV tabellare
+// ---------------------------------------------------------------------------
+// Utility: legge un CSV tabellare con separatore ';'
+// ---------------------------------------------------------------------------
 inline CsvData LeggiFileCSVTabellare(const string& percorso_file) {
     CsvData dataset;
     ifstream file(percorso_file);
-    if (!file.is_open()) {
+    if (!file.is_open())
         return dataset;
-    }
 
     string linea;
     bool is_first_line = true;
@@ -53,25 +53,21 @@ inline CsvData LeggiFileCSVTabellare(const string& percorso_file) {
         stringstream ss(linea);
         string cella;
         int col_idx = 0;
-        
+
         while (getline(ss, cella, ';')) {
-            // Rimuovo spazi in eccesso ai lati
             cella.erase(0, cella.find_first_not_of(" \t\r\n"));
             cella.erase(cella.find_last_not_of(" \t\r\n") + 1);
 
             if (is_first_line) {
-                // Leggiamo gli header
                 dataset.headers.push_back(cella.empty() ? "Feature " + to_string(col_idx + 1) : cella);
                 dataset.columns.push_back(vector<float>());
-            } else {
-                // Leggiamo i dati se ci sono colonne a sufficienza
-                if (col_idx < dataset.columns.size()) {
+            }
+            else {
+                if (col_idx < (int)dataset.columns.size()) {
                     try {
-                        float numero = stof(cella);
-                        dataset.columns[col_idx].push_back(numero);
-                    } catch (...) {
-                        // Dato non valido, saltiamo o mettiamo 0. Per ora lo ignoriamo.
+                        dataset.columns[col_idx].push_back(stof(cella));
                     }
+                    catch (...) {}
                 }
             }
             col_idx++;
@@ -81,264 +77,554 @@ inline CsvData LeggiFileCSVTabellare(const string& percorso_file) {
     return dataset;
 }
 
+// ---------------------------------------------------------------------------
+// Helper interno: disegna sfondo + bordo del grafico e restituisce la lambda
+// di conversione coordinate dati -> coordinate schermo.
+// ---------------------------------------------------------------------------
+static void DisegnaSfondoGrafico(ImDrawList* dl, ImVec2 p, ImVec2 sz) {
+    dl->AddRectFilled(p, ImVec2(p.x + sz.x, p.y + sz.y), IM_COL32(40, 40, 40, 255));
+    dl->AddRect(p, ImVec2(p.x + sz.x, p.y + sz.y), IM_COL32(180, 180, 180, 255));
+}
+
+// ---------------------------------------------------------------------------
+// Schermata principale
+// ---------------------------------------------------------------------------
 void SchermataUploadDati(bool& upload_file_dati) {
+
     ImGui::SetNextWindowPos(ImVec2(0, 0), ImGuiCond_Always);
     ImGui::SetNextWindowSize(ImGui::GetIO().DisplaySize, ImGuiCond_Always);
-    ImGui::Begin("Caricamento File CSV", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse);
+    ImGui::Begin("Caricamento File CSV", nullptr,
+        ImGuiWindowFlags_NoTitleBar |
+        ImGuiWindowFlags_NoResize |
+        ImGuiWindowFlags_NoMove |
+        ImGuiWindowFlags_NoCollapse);
 
-    if (ImGui::Button("Torna alla Homepage")) {
+    if (ImGui::Button("Torna alla Homepage"))
         upload_file_dati = false;
-    }
 
     ImGui::Spacing();
     ImGui::Separator();
     ImGui::Spacing();
 
     ImGui::Text("Inserisci il percorso assoluto del file CSV da cui acquisire i dati.");
-    ImGui::Text("I valori numerici (float) devono essere separati da virgole o punti e virgola.");
-    
+    ImGui::Text("I valori numerici (float) devono essere separati da punti e virgola.");
     ImGui::Spacing();
 
+    // ------------------------------------------------------------------
+    // Sezione: caricamento file
+    // ------------------------------------------------------------------
     static char percorsoFile[512] = "";
     ImGui::InputText("Percorso File CSV", percorsoFile, sizeof(percorsoFile));
-
     ImGui::SameLine();
     if (ImGui::Button("Sfoglia...")) {
-        string percorso = ApriEsploraFile();
-        if (!percorso.empty()) {
-            strcpy_s(percorsoFile, sizeof(percorsoFile), percorso.c_str());
-        }
+        string p = ApriEsploraFile();
+        if (!p.empty())
+            strcpy_s(percorsoFile, sizeof(percorsoFile), p.c_str());
     }
 
-    static CsvData datasetCaricato;
-    static int colonnaSelezionata = 0;
-    static string statoCaricamento = "";
-    static OperazioniStatistiche ops; // L'oggetto per effettuare i calcoli statistici
-    static int operazioneSelezionata = 0;
-    static string risultatoTesto = "";
+    static CsvData              datasetCaricato;
+    static int                  colonnaSelezionata = 0;
+    static string               statoCaricamento = "";
+    static OperazioniStatistiche ops;
 
     if (ImGui::Button("Carica ed Estrai Dati")) {
         datasetCaricato = LeggiFileCSVTabellare(string(percorsoFile));
+        colonnaSelezionata = 0;
         if (datasetCaricato.headers.empty()) {
-            statoCaricamento = "Errore: Impossibile leggere il file, percorso errato o file vuoto/non valido.";
-            risultatoTesto = "";
-            operazioneSelezionata = 0;
-            colonnaSelezionata = 0;
-        } else {
-            statoCaricamento = "File letto con successo! " + to_string(datasetCaricato.headers.size()) + " feature(s) caricate in memoria.";
-            risultatoTesto = "";
-            operazioneSelezionata = 0;
-            colonnaSelezionata = 0;
+            statoCaricamento = "Errore: impossibile leggere il file (percorso errato o file vuoto/non valido).";
+        }
+        else {
+            statoCaricamento = "File letto con successo! " +
+                to_string(datasetCaricato.headers.size()) + " feature(s) caricate in memoria.";
         }
     }
 
     ImGui::Spacing();
     ImGui::TextColored(ImVec4(1.0f, 1.0f, 0.0f, 1.0f), "%s", statoCaricamento.c_str());
+    ImGui::Spacing();
+    ImGui::Separator();
+    ImGui::Spacing();
+
+    if (datasetCaricato.headers.empty()) {
+        ImGui::End();
+        return;
+    }
+
+    // ------------------------------------------------------------------
+    // Costruiamo l'array di puntatori ai nomi colonne (usato dai Combo)
+    // ------------------------------------------------------------------
+    vector<const char*> nomiColonne;
+    for (const auto& h : datasetCaricato.headers)
+        nomiColonne.push_back(h.c_str());
+
+    // Combo selezione feature per le statistiche
+    ImGui::Text("Seleziona la caratteristica (colonna) su cui effettuare i calcoli:");
+    ImGui::Combo("Feature", &colonnaSelezionata, nomiColonne.data(), (int)nomiColonne.size());
+    ImGui::Spacing();
+
+    if (colonnaSelezionata < 0 || colonnaSelezionata >= (int)datasetCaricato.columns.size())
+        colonnaSelezionata = 0;
+
+    vector<float>& datiScelti = datasetCaricato.columns[colonnaSelezionata];
+    ImGui::Text("Valori pronti per '%s' (N=%zu).",
+        datasetCaricato.headers[colonnaSelezionata].c_str(), datiScelti.size());
+
+    // ------------------------------------------------------------------
+    // Tabella statistiche
+    // ------------------------------------------------------------------
+    if (!datiScelti.empty()) {
+        ImGui::Spacing();
+        ImGui::Text("Elenco delle operazioni statistiche:");
+        ImGui::Spacing();
+
+        if (ImGui::BeginTable("TabellaRisultati", 2,
+            ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg | ImGuiTableFlags_SizingFixedFit)) {
+
+            ImGui::TableSetupColumn("Operazione", ImGuiTableColumnFlags_WidthFixed, 200.0f);
+            ImGui::TableSetupColumn("Risultato", ImGuiTableColumnFlags_WidthStretch);
+            ImGui::TableHeadersRow();
+
+            auto AddRow = [](const char* op, const string& res) {
+                ImGui::TableNextRow();
+                ImGui::TableSetColumnIndex(0); ImGui::Text("%s", op);
+                ImGui::TableSetColumnIndex(1); ImGui::Text("%s", res.c_str());
+                };
+
+            auto SafeCalc = [&](const char* opName, auto calcFunc) {
+                try { AddRow(opName, calcFunc()); }
+                catch (...) { AddRow(opName, "N/A (errore intercettato)"); }
+                };
+
+            SafeCalc("01) Sommatoria", [&] { return to_string(ops.calcoloSommatoria(datiScelti)); });
+            SafeCalc("02) Produttoria", [&] { return to_string(ops.calcoloProduttoria(datiScelti)); });
+            SafeCalc("03) Media Aritmetica", [&] { return to_string(ops.calcoloMediaAritmetica(datiScelti)); });
+            SafeCalc("04) Media Geometrica", [&] { return to_string(ops.calcoloMediaGeometrica(datiScelti)); });
+            SafeCalc("05) Media Armonica", [&] { return to_string(ops.calcoloMediaArmonica(datiScelti)); });
+            SafeCalc("06) Media Quadratica", [&] { return to_string(ops.calcoloMediaQuadratica(datiScelti)); });
+            SafeCalc("07) Dev. Standard", [&] { return to_string(ops.calcoloDeviazioneStandard(datiScelti)); });
+            SafeCalc("08) Varianza", [&] { return to_string(ops.calcoloVarianza(datiScelti)); });
+            SafeCalc("09) Mediana", [&] { return to_string(ops.calcoloMediana(datiScelti)); });
+            SafeCalc("10) Moda", [&] { return to_string(ops.calcoloModa(datiScelti)); });
+
+            SafeCalc("11) Frequenza Assoluta", [&]() -> string {
+                auto freq = ops.calcoloFrequenzaAssoluta(datiScelti);
+                stringstream ss;
+                for (auto const& vc : freq)
+                    ss << "Dato " << vc.first << " -> " << vc.second << " volte\n";
+                string r = ss.str();
+                if (!r.empty()) r.pop_back();
+                return r.empty() ? "N/A" : r;
+                });
+
+            SafeCalc("12) Frequenza Relativa", [&]() -> string {
+                auto fa = ops.calcoloFrequenzaAssoluta(datiScelti);
+                auto fr = ops.calcoloFrequenzaRelativa(fa);
+                stringstream ss;
+                for (auto const& vr : fr)
+                    ss << "Dato " << vr.first << " -> " << vr.second << "%\n";
+                string r = ss.str();
+                if (!r.empty()) r.pop_back();
+                return r.empty() ? "N/A" : r;
+                });
+
+            ImGui::EndTable();
+        }
+    }
 
     ImGui::Spacing();
     ImGui::Separator();
     ImGui::Spacing();
 
-    if (!datasetCaricato.headers.empty()) {
-        ImGui::Text("Seleziona la caratteristica (colonna) su cui effettuare i calcoli:");
-        
-        // Creiamo dinamicamente l'array dei nomi delle colonne per ImGui::Combo
-        vector<const char*> nomiColonne;
-        for (const auto& header : datasetCaricato.headers) {
-            nomiColonne.push_back(header.c_str());
-        }
-        
-        ImGui::Combo("Feature", &colonnaSelezionata, nomiColonne.data(), nomiColonne.size());
-        ImGui::Spacing();
+    // ------------------------------------------------------------------
+    // Sezione: grafici relazionali (scatter + regressione)
+    // ------------------------------------------------------------------
+    static int colonnaX = 0;
+    static int colonnaY = 0;
+    if (colonnaX >= (int)datasetCaricato.columns.size()) colonnaX = 0;
+    if (colonnaY >= (int)datasetCaricato.columns.size()) colonnaY = 0;
 
-        // Controllo di sicurezza sull'indice della colonna
-        if (colonnaSelezionata < 0 || colonnaSelezionata >= datasetCaricato.columns.size()) {
-            colonnaSelezionata = 0;
-        }
+    ImGui::Text("Grafico Relazionale (Confronto tra 2 Feature)");
+    ImGui::Combo("Asse X##rel", &colonnaX, nomiColonne.data(), (int)nomiColonne.size());
+    ImGui::Combo("Asse Y##rel", &colonnaY, nomiColonne.data(), (int)nomiColonne.size());
+    ImGui::Spacing();
 
-        vector<float>& datiScelti = datasetCaricato.columns[colonnaSelezionata];
+    // --- Bottone 1: solo punti ---
+    if (ImGui::Button("Disegna Grafico di Dispersione"))
+        ImGui::OpenPopup("ScatterPlotPopup");
 
-        ImGui::Text("Valori pronti all'uso per '%s' (N=%zu).", datasetCaricato.headers[colonnaSelezionata].c_str(), datiScelti.size());
+    ImGui::SameLine();
 
-        if (!datiScelti.empty()) {
-            ImGui::Spacing();
-            ImGui::Text("Elenco delle operazioni statistiche:");
-            ImGui::Spacing();
+    // --- Bottone 2: rette di regressione ---
+    if (ImGui::Button("Mostra Rette di Regressione"))
+        ImGui::OpenPopup("RegressionLinesPopup");
 
-            if (ImGui::BeginTable("TabellaRisultati", 2, ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg | ImGuiTableFlags_SizingFixedFit)) {
-                ImGui::TableSetupColumn("Operazione", ImGuiTableColumnFlags_WidthFixed, 200.0f);
-                ImGui::TableSetupColumn("Risultato", ImGuiTableColumnFlags_WidthStretch);
-                ImGui::TableHeadersRow();
+    // ======================================================================
+    // POPUP 1 — Scatter Plot (solo punti + punto delle medie)
+    // ======================================================================
+    if (ImGui::BeginPopupModal("ScatterPlotPopup", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
 
-                auto AddRow = [](const char* operazione, const string& risultato) {
-                    ImGui::TableNextRow();
-                    ImGui::TableSetColumnIndex(0);
-                    ImGui::Text("%s", operazione);
-                    ImGui::TableSetColumnIndex(1);
-                    ImGui::Text("%s", risultato.c_str());
+        ImGui::Text("Dispersione: '%s' (X)  vs  '%s' (Y)",
+            datasetCaricato.headers[colonnaX].c_str(),
+            datasetCaricato.headers[colonnaY].c_str());
+
+        vector<float>& vecX = datasetCaricato.columns[colonnaX];
+        vector<float>& vecY = datasetCaricato.columns[colonnaY];
+
+        if (vecX.size() > 0 && vecX.size() == vecY.size()) {
+
+            float media_x = ops.calcoloMediaAritmetica(vecX);
+            float media_y = ops.calcoloMediaAritmetica(vecY);
+            float min_x = *min_element(vecX.begin(), vecX.end());
+            float max_x = *max_element(vecX.begin(), vecX.end());
+            float min_y = *min_element(vecY.begin(), vecY.end());
+            float max_y = *max_element(vecY.begin(), vecY.end());
+
+            if (min_x == max_x) { min_x -= 1.0f; max_x += 1.0f; }
+            if (min_y == max_y) { min_y -= 1.0f; max_y += 1.0f; }
+
+            ImVec2 screen_size = ImGui::GetIO().DisplaySize;
+            ImVec2 graph_size(
+                max(screen_size.x * 0.6f, 400.0f),
+                max(screen_size.y * 0.5f, 300.0f));
+
+            ImDrawList* draw_list = ImGui::GetWindowDrawList();
+            ImVec2 p = ImGui::GetCursorScreenPos();
+
+            auto Converti = [&](float x, float y) -> ImVec2 {
+                return {
+                    p.x + ((x - min_x) / (max_x - min_x)) * graph_size.x,
+                    p.y + ((y - min_y) / (max_y - min_y)) * graph_size.y
                 };
-
-                auto SafeCalc = [&](const char* opName, auto calcFunc) {
-                    try {
-                        AddRow(opName, calcFunc());
-                    } catch (...) {
-                        AddRow(opName, "N/A (errore intercettato)");
-                    }
                 };
+            DisegnaSfondoGrafico(draw_list, p, graph_size);
 
-                SafeCalc("01) Sommatoria", [&](){ return to_string(ops.calcoloSommatoria(datiScelti)); });
-                SafeCalc("02) Produttoria", [&](){ return to_string(ops.calcoloProduttoria(datiScelti)); });
-                SafeCalc("03) Media Aritmetica", [&](){ return to_string(ops.calcoloMediaAritmetica(datiScelti)); });
-                SafeCalc("04) Media Geometrica", [&](){ return to_string(ops.calcoloMediaGeometrica(datiScelti)); });
-                SafeCalc("05) Media Armonica", [&](){ return to_string(ops.calcoloMediaArmonica(datiScelti)); });
-                SafeCalc("06) Media Quadratica", [&](){ return to_string(ops.calcoloMediaQuadratica(datiScelti)); });
-                SafeCalc("07) Deviazione Standard", [&](){ return to_string(ops.calcoloDeviazioneStandard(datiScelti)); });
-                SafeCalc("08) Varianza", [&](){ return to_string(ops.calcoloVarianza(datiScelti)); });
-                SafeCalc("09) Mediana", [&](){ return to_string(ops.calcoloMediana(datiScelti)); });
-                SafeCalc("10) Moda", [&](){ return to_string(ops.calcoloModa(datiScelti)); });
-                
-                SafeCalc("11) Frequenza Assoluta", [&]() {
-                    auto freq = ops.calcoloFrequenzaAssoluta(datiScelti);
-                    stringstream ss;
-                    for (auto const& val_count : freq) {
-                        ss << "Dato " << val_count.first << " -> " << val_count.second << " volte\n";
-                    }
-                    string result = ss.str();
-                    if (!result.empty()) result.pop_back(); // rimuove l'ultimo \n
-                    return result.empty() ? string("N/A") : result;
-                });
-
-                SafeCalc("12) Frequenza Relativa", [&]() {
-                    auto freqAss = ops.calcoloFrequenzaAssoluta(datiScelti);
-                    auto freqRel = ops.calcoloFrequenzaRelativa(freqAss);
-                    stringstream ss;
-                    for (auto const& val_rel : freqRel) {
-                        ss << "Dato " << val_rel.first << " -> " << val_rel.second << "%\n";
-                    }
-                    string result = ss.str();
-                    if (!result.empty()) result.pop_back(); // rimuove l'ultimo \n
-                    return result.empty() ? string("N/A") : result;
-                });
-
-                ImGui::EndTable();
+            // Punti dati
+            for (size_t i = 0; i < vecX.size(); i++) {
+                ImVec2 pos = Converti(vecX[i], vecY[i]);
+                draw_list->AddCircleFilled(pos, 3.0f, IM_COL32(100, 200, 255, 220));
             }
+
+            // Punto delle medie (cerchio giallo con alone)
+            ImVec2 pm = Converti(media_x, media_y);
+            draw_list->AddCircleFilled(pm, 6.0f, IM_COL32(255, 230, 120, 255));
+            draw_list->AddCircle(pm, 10.0f, IM_COL32(255, 200, 50, 160), 16, 1.5f);
+
+            ImGui::Dummy(graph_size);
+            ImGui::Spacing();
+            ImGui::Text("X = %s   (Min: %.2f, Max: %.2f)",
+                datasetCaricato.headers[colonnaX].c_str(), min_x, max_x);
+            ImGui::Text("Y = %s   (Min: %.2f, Max: %.2f)",
+                datasetCaricato.headers[colonnaY].c_str(), min_y, max_y);
+            ImGui::TextColored(ImVec4(1.0f, 0.9f, 0.47f, 1.0f),
+                "Cerchio giallo = Punto medio (%.4f, %.4f)", media_x, media_y);
+            ImGui::Text("N = %zu coppie di valori.", vecX.size());
+
         }
-        
-        ImGui::Spacing();
-        ImGui::Separator();
-        ImGui::Spacing();
-
-        // Grafico Relazionale (Scatter Plot)
-        static int colonnaX = 0;
-        static int colonnaY = 0;
-        if (colonnaX >= datasetCaricato.columns.size()) colonnaX = 0;
-        if (colonnaY >= datasetCaricato.columns.size()) colonnaY = 0;
-
-        ImGui::Text("Grafico Relazionale (Confronto tra 2 Feature)");
-        ImGui::Combo("Asse X (Es. Età)", &colonnaX, nomiColonne.data(), nomiColonne.size());
-        ImGui::Combo("Asse Y (Es. Peso)", &colonnaY, nomiColonne.data(), nomiColonne.size());
-
-        if (ImGui::Button("Disegna Grafico di Dispersione")) {
-            ImGui::OpenPopup("ScatterPlotPopup");
+        else {
+            ImGui::TextColored(ImVec4(1, 0, 0, 1),
+                "Errore: dimensioni delle colonne incompatibili o vuote.");
         }
 
-        if (ImGui::BeginPopupModal("ScatterPlotPopup", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
-            ImGui::Text("Confronto tra '%s' (X) e '%s' (Y)", datasetCaricato.headers[colonnaX].c_str(), datasetCaricato.headers[colonnaY].c_str());
-            
-            vector<float>& vecX = datasetCaricato.columns[colonnaX];
-            vector<float>& vecY = datasetCaricato.columns[colonnaY];
+        ImGui::Spacing();
+        if (ImGui::Button("Chiudi", ImVec2(120, 0)))
+            ImGui::CloseCurrentPopup();
+        ImGui::EndPopup();
+    }
 
-            if (vecX.size() > 0 && vecX.size() == vecY.size()) {
-                float media_x = ops.calcoloMediaAritmetica(vecX);
-                float media_y = ops.calcoloMediaAritmetica(vecY);
-                float covarianza = ops.calcoloCovarianza(vecX, vecY);
-                float coefficiente_bravais_pearson = ops.calcoloCoefficienteDiCorrelazioneDiBravaisPearson(vecX, vecY);
-                float coefficiente_y_su_x = ops.calcoloCoefficienteAngolareRettaRegressioneYsuX(vecX, vecY);
-                float coefficiente_x_su_y = ops.calcoloCoefficienteAngolareRettaRegressioneXsuY(vecX, vecY);
-                float intercetta_y_su_x = ops.calcoloIntercettaRettaRegressioneYsuX(vecX, vecY);
-                float intercetta_x_su_y = ops.calcoloIntercettaRettaRegressioneXsuY(vecX, vecY);
-                float min_x = *min_element(vecX.begin(), vecX.end());
-                float max_x = *max_element(vecX.begin(), vecX.end());
-                float min_y = *min_element(vecY.begin(), vecY.end());
-                float max_y = *max_element(vecY.begin(), vecY.end());
+    // ======================================================================
+    // POPUP 2 — Rette di regressione (punti sfumati + rette + statistiche)
+    // ======================================================================
+    if (ImGui::BeginPopupModal("RegressionLinesPopup", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
 
-                if (min_x == max_x) { min_x -= 1; max_x += 1; }
-                if (min_y == max_y) { min_y -= 1; max_y += 1; }
+        ImGui::Text("Regressione: '%s' (X)  vs  '%s' (Y)",
+            datasetCaricato.headers[colonnaX].c_str(),
+            datasetCaricato.headers[colonnaY].c_str());
+
+        vector<float>& vecX = datasetCaricato.columns[colonnaX];
+        vector<float>& vecY = datasetCaricato.columns[colonnaY];
+
+        if (vecX.size() > 0 && vecX.size() == vecY.size()) {
+
+            float media_x = ops.calcoloMediaAritmetica(vecX);
+            float media_y = ops.calcoloMediaAritmetica(vecY);
+            float covarianza = ops.calcoloCovarianza(vecX, vecY);
+            float coeff_bravais_pearson = ops.calcoloCoefficienteDiCorrelazioneDiBravaisPearson(vecX, vecY);
+            float coeff_y_su_x = ops.calcoloCoefficienteAngolareRettaRegressioneYsuX(vecX, vecY);
+            float coeff_x_su_y = ops.calcoloCoefficienteAngolareRettaRegressioneXsuY(vecX, vecY);
+            float intercetta_y_su_x = ops.calcoloIntercettaRettaRegressioneYsuX(vecX, vecY);
+            float intercetta_x_su_y = ops.calcoloIntercettaRettaRegressioneXsuY(vecX, vecY);
+            float min_x = *min_element(vecX.begin(), vecX.end());
+            float max_x = *max_element(vecX.begin(), vecX.end());
+            float min_y = *min_element(vecY.begin(), vecY.end());
+            float max_y = *max_element(vecY.begin(), vecY.end());
+
+            if (min_x == max_x) { min_x -= 1.0f; max_x += 1.0f; }
+            if (min_y == max_y) { min_y -= 1.0f; max_y += 1.0f; }
+
+            ImVec2 screen_size = ImGui::GetIO().DisplaySize;
+            ImVec2 graph_size(
+                max(screen_size.x * 0.6f, 400.0f),
+                max(screen_size.y * 0.5f, 300.0f));
+
+            ImDrawList* draw_list = ImGui::GetWindowDrawList();
+            ImVec2 p = ImGui::GetCursorScreenPos();
+
+            auto Converti = [&](float x, float y) -> ImVec2 {
+                return {
+                    p.x + ((x - min_x) / (max_x - min_x)) * graph_size.x,
+                    p.y + ((y - min_y) / (max_y - min_y)) * graph_size.y
+                };
+                };
+
+            DisegnaSfondoGrafico(draw_list, p, graph_size);
+
+            // Punti dati (opacità ridotta per non coprire le rette)
+            for (size_t i = 0; i < vecX.size(); i++) {
+                ImVec2 pos = Converti(vecX[i], vecY[i]);
+                draw_list->AddCircleFilled(pos, 2.5f, IM_COL32(100, 200, 255, 140));
+            }
+
+            // Punto delle medie
+            ImVec2 pm = Converti(media_x, media_y);
+            draw_list->AddCircleFilled(pm, 5.0f, IM_COL32(255, 230, 120, 255));
+
+            // Retta Y su X  (rossa)
+            ImVec2 p1 = Converti(min_x, coeff_y_su_x * min_x + intercetta_y_su_x);
+            ImVec2 p2 = Converti(max_x, coeff_y_su_x * max_x + intercetta_y_su_x);
+
+            // Forza ordine corretto sullo schermo (importantissimo)
+            if (p1.x > p2.x) std::swap(p1, p2);
+
+            draw_list->AddLine(p1, p2, IM_COL32(255, 80, 80, 255), 2.0f);
+
+            // Retta X su Y  (viola)
+            if (coeff_x_su_y != 0.0f) {
+                float y0_xsy = (min_x - intercetta_x_su_y) / coeff_x_su_y;
+                float y1_xsy = (max_x - intercetta_x_su_y) / coeff_x_su_y;
+                draw_list->AddLine(Converti(min_x, y0_xsy), Converti(max_x, y1_xsy),
+                    IM_COL32(140, 90, 255, 255), 2.0f);
+            }
+            else {
+                draw_list->AddLine(Converti(media_x, min_y), Converti(media_x, max_y),
+                    IM_COL32(140, 90, 255, 255), 2.0f);
+            }
+
+            ImGui::Dummy(graph_size);
+            ImGui::Spacing();
+
+            // Legenda colori
+            ImGui::TextColored(ImVec4(1.0f, 0.31f, 0.31f, 1.0f), "[Rosso]");
+            ImGui::SameLine(); ImGui::Text("Retta Y su X");
+            ImGui::SameLine(); ImGui::Text("   ");
+            ImGui::SameLine();
+            ImGui::TextColored(ImVec4(0.55f, 0.35f, 1.0f, 1.0f), "[Viola]");
+            ImGui::SameLine(); ImGui::Text("Retta X su Y");
+
+            ImGui::Spacing();
+            ImGui::Separator();
+            ImGui::Spacing();
+
+            // Statistiche
+            ImGui::Text("Punto medio:             (%.4f,  %.4f)", media_x, media_y);
+            ImGui::Text("Covarianza:              %.4f", covarianza);
+            ImGui::Text("Coeff. Bravais-Pearson:  %.4f", coeff_bravais_pearson);
+            ImGui::Spacing();
+            ImGui::TextColored(ImVec4(1.0f, 0.31f, 0.31f, 1.0f), "Y su X:");
+            ImGui::Text("  y - %.4f = %.4f * (x - %.4f)", media_y, coeff_y_su_x, media_x);
+            ImGui::Text("  Forma esplicita:  y = %.4f x + %.4f", coeff_y_su_x, intercetta_y_su_x);
+            ImGui::Spacing();
+            ImGui::TextColored(ImVec4(0.55f, 0.35f, 1.0f, 1.0f), "X su Y:");
+            ImGui::Text("  x - %.4f = %.4f * (y - %.4f)", media_x, coeff_x_su_y, media_y);
+            ImGui::Text("  Forma esplicita:  x = %.4f y + %.4f", coeff_x_su_y, intercetta_x_su_y);
+
+        }
+        else {
+            ImGui::TextColored(ImVec4(1, 0, 0, 1),
+                "Errore: dimensioni delle colonne incompatibili o vuote.");
+        }
+
+        ImGui::Spacing();
+        if (ImGui::Button("Chiudi", ImVec2(120, 0)))
+            ImGui::CloseCurrentPopup();
+        ImGui::EndPopup();
+    }
+
+    ImGui::Spacing();
+    ImGui::Separator();
+    ImGui::Spacing();
+
+    // ------------------------------------------------------------------
+    // Sezione: istogramma avanzato (due feature)
+    // ------------------------------------------------------------------
+    if (!datiScelti.empty()) {
+
+        static int modalitaGrafici = 1;  // 0 = valori singoli, 1 = intervalli
+        ImGui::Text("Impostazioni Visualizzazione per '%s':",
+            datasetCaricato.headers[colonnaSelezionata].c_str());
+        ImGui::RadioButton("Raggruppa in intervalli", &modalitaGrafici, 1);
+        ImGui::SameLine();
+        ImGui::RadioButton("Singoli valori (frequenza)", &modalitaGrafici, 0);
+
+        static int numCustomBins = 4;
+        if (modalitaGrafici == 1)
+            ImGui::SliderInt("Numero di Intervalli", &numCustomBins, 2, 20);
+
+        vector<float> datiOrdinati = datiScelti;
+        sort(datiOrdinati.begin(), datiOrdinati.end());
+        float min_val = datiOrdinati.front();
+        float max_val = datiOrdinati.back();
+        if (min_val == max_val) { min_val -= 1.0f; max_val += 1.0f; }
+
+        ImGui::Spacing();
+
+        static int featureX_Histo = 0;
+        static int featureY_Histo = 0;
+        if (featureX_Histo >= (int)datasetCaricato.columns.size()) featureX_Histo = 0;
+        if (featureY_Histo >= (int)datasetCaricato.columns.size()) featureY_Histo = 0;
+
+        ImGui::Text("Istogramma a due Feature:");
+        ImGui::Combo("Asse X (Categoria)##histo", &featureX_Histo, nomiColonne.data(), (int)nomiColonne.size());
+        ImGui::Combo("Asse Y (Valore Bar)##histo", &featureY_Histo, nomiColonne.data(), (int)nomiColonne.size());
+
+        if (ImGui::Button("Mostra Istogramma Avanzato"))
+            ImGui::OpenPopup("BarChartPopup");
+
+        // ===== Popup Istogramma =====
+        if (ImGui::BeginPopupModal("BarChartPopup", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
+
+            ImGui::Text("Istogramma: X='%s'  Y='%s' (media per gruppo)",
+                datasetCaricato.headers[featureX_Histo].c_str(),
+                datasetCaricato.headers[featureY_Histo].c_str());
+
+            vector<float>& colX = datasetCaricato.columns[featureX_Histo];
+            vector<float>& colY = datasetCaricato.columns[featureY_Histo];
+
+            if (colX.size() > 0 && colX.size() == colY.size()) {
+
+                vector<float>  bar_values;
+                vector<string> bar_labels;
+                float max_y_bar = 0.0001f;
+
+                if (modalitaGrafici == 1) {
+                    float mn_x = *min_element(colX.begin(), colX.end());
+                    float mx_x = *max_element(colX.begin(), colX.end());
+                    float rng = (mx_x - mn_x > 0.0f) ? (mx_x - mn_x) : 1.0f;
+
+                    vector<float> sum_y(numCustomBins, 0.0f);
+                    vector<int>   cnt_y(numCustomBins, 0);
+
+                    for (size_t k = 0; k < colX.size(); k++) {
+                        int bi = (int)(((colX[k] - mn_x) / rng) * numCustomBins);
+                        bi = max(0, min(numCustomBins - 1, bi));
+                        sum_y[bi] += colY[k];
+                        cnt_y[bi]++;
+                    }
+
+                    for (int k = 0; k < numCustomBins; k++) {
+                        float media = cnt_y[k] > 0 ? sum_y[k] / cnt_y[k] : 0.0f;
+                        bar_values.push_back(media);
+
+                        char buf[64];
+                        snprintf(buf, sizeof(buf), "%.1f-%.1f",
+                            mn_x + k * rng / numCustomBins,
+                            mn_x + (k + 1) * rng / numCustomBins);
+                        bar_labels.push_back(buf);
+
+                        if (media > max_y_bar) max_y_bar = media;
+                    }
+                }
+                else {
+                    map<float, vector<float>> grouped;
+                    for (size_t k = 0; k < colX.size(); k++)
+                        grouped[colX[k]].push_back(colY[k]);
+
+                    for (auto const& pair : grouped) {
+                        float sum = 0;
+                        for (float v : pair.second) sum += v;
+                        float avg = sum / pair.second.size();
+                        bar_values.push_back(avg);
+
+                        char buf[32];
+                        snprintf(buf, sizeof(buf), "%.1f", pair.first);
+                        bar_labels.push_back(buf);
+
+                        if (avg > max_y_bar) max_y_bar = avg;
+                    }
+                }
+
+                max_y_bar *= 1.15f;
 
                 ImVec2 screen_size = ImGui::GetIO().DisplaySize;
-                ImVec2 graph_size(screen_size.x * 0.6f, screen_size.y * 0.5f);
-                if (graph_size.x < 400.0f) graph_size.x = 400.0f;
-                if (graph_size.y < 300.0f) graph_size.y = 300.0f;
+                ImVec2 graph_size(
+                    max(screen_size.x * 0.7f, 600.0f),
+                    max(screen_size.y * 0.55f, 300.0f));
 
                 ImDrawList* draw_list = ImGui::GetWindowDrawList();
                 ImVec2 p = ImGui::GetCursorScreenPos();
-                auto ConvertiInCoordinateGrafico = [&](float x, float y) {
-                    float norm_x = (x - min_x) / (max_x - min_x);
-                    float norm_y = 1.0f - ((y - min_y) / (max_y - min_y));
-                    return ImVec2(p.x + norm_x * graph_size.x, p.y + norm_y * graph_size.y);
-                };
-                
-                // Disegna sfondo grafico
-                draw_list->AddRectFilled(p, ImVec2(p.x + graph_size.x, p.y + graph_size.y), IM_COL32(50, 50, 50, 255));
-                draw_list->AddRect(p, ImVec2(p.x + graph_size.x, p.y + graph_size.y), IM_COL32(200, 200, 200, 255));
 
-                // Disegna i punti
-                for (size_t i = 0; i < vecX.size(); i++) {
-                    float norm_x = (vecX[i] - min_x) / (max_x - min_x);
-                    float norm_y = 1.0f - ((vecY[i] - min_y) / (max_y - min_y)); // Invertito perché Y va verso il basso
-                    
-                    ImVec2 pos(p.x + norm_x * graph_size.x, p.y + norm_y * graph_size.y);
-                    draw_list->AddCircleFilled(pos, 3.0f, IM_COL32(100, 200, 255, 255));
-                }
+                draw_list->AddRectFilled(p, ImVec2(p.x + graph_size.x, p.y + graph_size.y),
+                    IM_COL32(30, 30, 30, 255));
 
-                ImVec2 punto_medie = ConvertiInCoordinateGrafico(media_x, media_y);
-                draw_list->AddCircleFilled(punto_medie, 5.0f, IM_COL32(255, 230, 120, 255));
+                const float margin_bottom = 40.0f;
+                const float margin_left = 60.0f;
+                ImVec2 origin(p.x + margin_left, p.y + graph_size.y - margin_bottom);
 
-                float y_inizio_retta_y_su_x = coefficiente_y_su_x * min_x + intercetta_y_su_x;
-                float y_fine_retta_y_su_x = coefficiente_y_su_x * max_x + intercetta_y_su_x;
-                draw_list->AddLine(
-                    ConvertiInCoordinateGrafico(min_x, y_inizio_retta_y_su_x),
-                    ConvertiInCoordinateGrafico(max_x, y_fine_retta_y_su_x),
-                    IM_COL32(255, 80, 80, 255),
-                    2.0f
-                );
+                draw_list->AddLine(ImVec2(origin.x, p.y), origin,
+                    IM_COL32(200, 200, 200, 255), 2.0f);
+                draw_list->AddLine(origin, ImVec2(p.x + graph_size.x, origin.y),
+                    IM_COL32(200, 200, 200, 255), 2.0f);
 
-                if (coefficiente_x_su_y != 0.0f) {
-                    float y_inizio_retta_x_su_y = (min_x - intercetta_x_su_y) / coefficiente_x_su_y;
-                    float y_fine_retta_x_su_y = (max_x - intercetta_x_su_y) / coefficiente_x_su_y;
-                    draw_list->AddLine(
-                        ConvertiInCoordinateGrafico(min_x, y_inizio_retta_x_su_y),
-                        ConvertiInCoordinateGrafico(max_x, y_fine_retta_x_su_y),
-                        IM_COL32(140, 90, 255, 255),
-                        2.0f
-                    );
-                }
-                else {
-                    draw_list->AddLine(
-                        ConvertiInCoordinateGrafico(media_x, min_y),
-                        ConvertiInCoordinateGrafico(media_x, max_y),
-                        IM_COL32(140, 90, 255, 255),
-                        2.0f
-                    );
+                char maxLabelY[32];
+                snprintf(maxLabelY, sizeof(maxLabelY), "%.2f", max_y_bar);
+                draw_list->AddText(ImVec2(p.x + 5.0f, p.y + 5.0f),
+                    IM_COL32(255, 255, 255, 255), maxLabelY);
+                draw_list->AddText(ImVec2(p.x + 5.0f, origin.y - 15.0f),
+                    IM_COL32(255, 255, 255, 255), "0.00");
+
+                int n_bars = (int)bar_values.size();
+                if (n_bars > 0) {
+                    float dw = graph_size.x - margin_left - 20.0f;
+                    float dh = graph_size.y - margin_bottom - 20.0f;
+                    float bw = dw / n_bars;
+                    float bpad = bw * 0.2f;
+
+                    for (int i = 0; i < n_bars; i++) {
+                        float bar_h = (bar_values[i] / max_y_bar) * dh;
+                        ImVec2 pmin(origin.x + i * bw + bpad, origin.y - bar_h);
+                        ImVec2 pmax(origin.x + (i + 1) * bw - bpad, origin.y - 1.0f);
+
+                        draw_list->AddRectFilled(pmin, pmax, IM_COL32(50, 150, 255, 255), 2.0f);
+                        draw_list->AddRect(pmin, pmax, IM_COL32(200, 200, 200, 100), 2.0f);
+
+                        if (bar_h > 15.0f) {
+                            char valBuf[32];
+                            snprintf(valBuf, sizeof(valBuf), "%.1f", bar_values[i]);
+                            float tw = ImGui::CalcTextSize(valBuf).x;
+                            float center_x = pmin.x + (pmax.x - pmin.x) * 0.5f;
+                            draw_list->AddText(ImVec2(center_x - tw * 0.5f, pmin.y - 15.0f),
+                                IM_COL32(255, 255, 100, 255), valBuf);
+                        }
+
+                        if (n_bars <= 15 || (i % (n_bars / 10 + 1) == 0)) {
+                            float tw = ImGui::CalcTextSize(bar_labels[i].c_str()).x;
+                            float center_x = pmin.x + (pmax.x - pmin.x) * 0.5f;
+                            draw_list->AddText(ImVec2(center_x - tw * 0.5f, origin.y + 5.0f),
+                                IM_COL32(200, 200, 200, 255), bar_labels[i].c_str());
+                        }
+                    }
                 }
 
                 ImGui::Dummy(graph_size);
-                ImGui::Text("X = %s (Min: %.2f, Max: %.2f)", datasetCaricato.headers[colonnaX].c_str(), min_x, max_x);
-                ImGui::Text("Y = %s (Min: %.2f, Max: %.2f)", datasetCaricato.headers[colonnaY].c_str(), min_y, max_y);
-                ImGui::Text("Punto medio: (%.4f, %.4f)", media_x, media_y);
-                ImGui::Text("Covarianza: %.4f", covarianza);
-                ImGui::Text("Coeff. Bravais-Pearson: %.4f", coefficiente_bravais_pearson);
-                ImGui::Text("Retta Y su X: y - %.4f = %.4f (x - %.4f)", media_y, coefficiente_y_su_x, media_x);
-                ImGui::Text("Forma esplicita Y su X: y = %.4f x + %.4f", coefficiente_y_su_x, intercetta_y_su_x);
-                ImGui::Text("Retta X su Y: x - %.4f = %.4f (y - %.4f)", media_x, coefficiente_x_su_y, media_y);
-                ImGui::Text("Forma esplicita X su Y: x = %.4f y + %.4f", coefficiente_x_su_y, intercetta_x_su_y);
-            } else {
-                ImGui::TextColored(ImVec4(1, 0, 0, 1), "Errore: Dimensioni delle colonne incompatibili o vuote.");
+
+            }
+            else {
+                ImGui::TextColored(ImVec4(1, 0, 0, 1),
+                    "Errore: dimensioni colonne incompatibili o vuote.");
             }
 
-            if (ImGui::Button("Chiudi Grafico", ImVec2(120, 0))) {
+            ImGui::Spacing();
+            if (ImGui::Button("Chiudi Grafico", ImVec2(120, 0)))
                 ImGui::CloseCurrentPopup();
-            }
             ImGui::EndPopup();
         }
 
@@ -346,323 +632,139 @@ void SchermataUploadDati(bool& upload_file_dati) {
         ImGui::Separator();
         ImGui::Spacing();
 
-        if (!datiScelti.empty()) {
-            static int modalitaGrafici = 1; // 0 = Valori Singoli, 1 = Intervalli (Binning)
-            ImGui::Text("Impostazioni Visualizzazione per la singola feature '%s':", datasetCaricato.headers[colonnaSelezionata].c_str());
-            ImGui::RadioButton("Raggruppa in intervalli", &modalitaGrafici, 1); ImGui::SameLine();
-            ImGui::RadioButton("Singoli valori (frequenza)", &modalitaGrafici, 0);
+        // ------------------------------------------------------------------
+        // Sezione: grafico a torta
+        // ------------------------------------------------------------------
+        static float radiusPieChart = 100.0f;
 
-            static int numCustomBins = 4;
-            if (modalitaGrafici == 1) {
-                ImGui::SliderInt("Numero di Intervalli", &numCustomBins, 2, 20);
+        ImGui::Text("Grafico a Torta — Feature: %s",
+            datasetCaricato.headers[colonnaSelezionata].c_str());
+        ImGui::SliderFloat("Zoom (Raggio)", &radiusPieChart, 50.0f, 400.0f);
+        ImGui::Spacing();
+
+        ImDrawList* draw_list = ImGui::GetWindowDrawList();
+        ImVec2 p = ImGui::GetCursorScreenPos();
+        ImVec2 pie_center = ImVec2(p.x + radiusPieChart + 10.0f, p.y + radiusPieChart);
+        const float TWO_PI = 6.28318530717958647692f;
+
+        float a_min = 0.0f;
+        float a_max = 0.0f;
+
+        if (modalitaGrafici == 1) {
+
+            int   num_bins = numCustomBins;
+            float range = max_val - min_val;
+            if (range <= 0.0f) range = 1.0f;
+
+            vector<int> bins(num_bins, 0);
+            for (float v : datiScelti) {
+                int bi = (int)(((v - min_val) / range) * num_bins);
+                bi = max(0, min(num_bins - 1, bi));
+                bins[bi]++;
             }
 
-            // Ordiniamo i dati per la singola feature selected
-            vector<float> datiOrdinati = datiScelti;
-            sort(datiOrdinati.begin(), datiOrdinati.end());
+            for (int i = 0; i < num_bins; i++) {
+                if (bins[i] == 0) continue;
+                a_max = a_min + ((float)bins[i] / datiScelti.size()) * TWO_PI;
 
-            float min_val = datiOrdinati.front();
-            float max_val = datiOrdinati.back();
+                float r, g, b;
+                ImGui::ColorConvertHSVtoRGB((float)i / num_bins, 0.8f, 0.8f, r, g, b);
+                ImU32 color = ImGui::GetColorU32(ImVec4(r, g, b, 1.0f));
 
-            // Preveniamo crash di divisione per zero in caso di intervallo nullo
-            if (min_val == max_val) {
-                min_val -= 1.0f;
-                max_val += 1.0f;
+                draw_list->PathLineTo(pie_center);
+                draw_list->PathArcTo(pie_center, radiusPieChart, a_min, a_max, 20);
+                draw_list->PathFillConvex(color);
+                a_min = a_max;
             }
 
-            ImGui::Spacing();
-            static int featureX_Histo = 0;
-            static int featureY_Histo = 0;
-            if (featureX_Histo >= datasetCaricato.columns.size()) featureX_Histo = 0;
-            if (featureY_Histo >= datasetCaricato.columns.size()) featureY_Histo = 0;
+            ImGui::Dummy(ImVec2(radiusPieChart * 2.0f + 20.0f, radiusPieChart * 2.0f));
+            ImGui::SameLine();
 
-            ImGui::Text("Istogramma a due Feature:");
-            ImGui::Combo("Asse X (Categoria)", &featureX_Histo, nomiColonne.data(), nomiColonne.size());
-            ImGui::Combo("Asse Y (Valore Bar)", &featureY_Histo, nomiColonne.data(), nomiColonne.size());
-            
-            if (ImGui::Button("Mostra Istogramma Avanzato")) {
-                ImGui::OpenPopup("BarChartPopup");
-            }
+            float offset_y = p.y + (radiusPieChart * 2.0f -
+                num_bins * ImGui::GetTextLineHeightWithSpacing()) * 0.5f;
+            if (offset_y < p.y) offset_y = p.y;
+            ImGui::SetCursorScreenPos(ImVec2(ImGui::GetCursorScreenPos().x, offset_y));
 
-            if (ImGui::BeginPopupModal("BarChartPopup", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
-                ImGui::Text("Istogramma: Asse X ('%s'), Asse Y ('%s' Media/Somma)", datasetCaricato.headers[featureX_Histo].c_str(), datasetCaricato.headers[featureY_Histo].c_str());
-                
-                vector<float>& colX = datasetCaricato.columns[featureX_Histo];
-                vector<float>& colY = datasetCaricato.columns[featureY_Histo];
+            ImGui::BeginGroup();
+            for (int i = 0; i < num_bins; i++) {
+                float bin_min = min_val + i * range / num_bins;
+                float bin_max = min_val + (i + 1) * range / num_bins;
 
-                if (colX.size() > 0 && colX.size() == colY.size()) {
-                    vector<float> bar_values;
-                    vector<string> bar_labels;
-                    float max_y_bar = 0.0001f;
+                float r, g, b;
+                ImGui::ColorConvertHSVtoRGB((float)i / num_bins, 0.8f, 0.8f, r, g, b);
+                ImU32 color = ImGui::GetColorU32(ImVec4(r, g, b, 1.0f));
 
-                    if (modalitaGrafici == 1) { // Raggruppa in intervalli
-                        float mn_x = *min_element(colX.begin(), colX.end());
-                        float mx_x = *max_element(colX.begin(), colX.end());
-                        float rng = mx_x - mn_x;
-                        if (rng <= 0.0f) rng = 1.0f;
-                        
-                        vector<float> sum_y(numCustomBins, 0.0f);
-                        vector<int> count_y(numCustomBins, 0);
-
-                        for (size_t k = 0; k < colX.size(); k++) {
-                            int bin_idx = (int)(((colX[k] - mn_x) / rng) * numCustomBins);
-                            if (bin_idx >= numCustomBins) bin_idx = numCustomBins - 1;
-                            if (bin_idx < 0) bin_idx = 0;
-                            sum_y[bin_idx] += colY[k];
-                            count_y[bin_idx]++;
-                        }
-                        
-                        for (int k = 0; k < numCustomBins; k++) {
-                            float media = count_y[k] > 0 ? (sum_y[k] / count_y[k]) : 0.0f;
-                            bar_values.push_back(media);
-                            
-                            float val_min = mn_x + (k * rng / numCustomBins);
-                            float val_max = mn_x + ((k + 1) * rng / numCustomBins);
-                            
-                            char buf[64];
-                            snprintf(buf, sizeof(buf), "%.1f-%.1f", val_min, val_max);
-                            bar_labels.push_back(buf);
-
-                            if (media > max_y_bar) max_y_bar = media;
-                        }
-                    } else { // Singoli valori (valore unico su X crescente)
-                        map<float, vector<float>> groupedY;
-                        for (size_t k = 0; k < colX.size(); k++) {
-                            groupedY[colX[k]].push_back(colY[k]);
-                        }
-                        
-                        for (auto const& pair : groupedY) {
-                            float sum = 0;
-                            for (float v : pair.second) sum += v;
-                            float avg = sum / pair.second.size();
-                            bar_values.push_back(avg);
-                            
-                            char buf[32];
-                            snprintf(buf, sizeof(buf), "%.1f", pair.first);
-                            bar_labels.push_back(buf);
-
-                            if (avg > max_y_bar) max_y_bar = avg;
-                        }
-                    }
-
-                    // Aggiungiamo un piccolo margine per l'asse Y
-                    max_y_bar *= 1.15f;
-
-                    ImVec2 screen_size = ImGui::GetIO().DisplaySize;
-                    ImVec2 graph_size(screen_size.x * 0.7f, screen_size.y * 0.55f);
-                    if (graph_size.x < 600.0f) graph_size.x = 600.0f;
-                    if (graph_size.y < 300.0f) graph_size.y = 300.0f;
-
-                    ImDrawList* draw_list = ImGui::GetWindowDrawList();
-                    ImVec2 p = ImGui::GetCursorScreenPos();
-                    
-                    // Disegna sfondo grafico
-                    draw_list->AddRectFilled(p, ImVec2(p.x + graph_size.x, p.y + graph_size.y), IM_COL32(30, 30, 30, 255));
-                    
-                    // Assi
-                    float margin_bottom = 40.0f;
-                    float margin_left = 60.0f;
-                    ImVec2 origin(p.x + margin_left, p.y + graph_size.y - margin_bottom);
-                    
-                    draw_list->AddLine(ImVec2(origin.x, p.y), origin, IM_COL32(200, 200, 200, 255), 2.0f); // Y Asse
-                    draw_list->AddLine(origin, ImVec2(p.x + graph_size.x, origin.y), IM_COL32(200, 200, 200, 255), 2.0f); // X Asse
-                    
-                    // Label Y Max
-                    char maxLabelY[32];
-                    snprintf(maxLabelY, sizeof(maxLabelY), "%.2f", max_y_bar);
-                    draw_list->AddText(ImVec2(p.x + 5.0f, p.y + 5.0f), IM_COL32(255, 255, 255, 255), maxLabelY);
-                    draw_list->AddText(ImVec2(p.x + 5.0f, origin.y - 15.0f), IM_COL32(255, 255, 255, 255), "0.00");
-
-                    // Barre
-                    int n_bars = bar_values.size();
-                    if (n_bars > 0) {
-                        float drawing_width = graph_size.x - margin_left - 20.0f;
-                        float drawing_height = graph_size.y - margin_bottom - 20.0f;
-                        float bar_width = drawing_width / n_bars;
-                        float bar_padding = bar_width * 0.2f;
-
-                        for (int i = 0; i < n_bars; i++) {
-                            float bar_h = (bar_values[i] / max_y_bar) * drawing_height;
-                            ImVec2 p_min(origin.x + (i * bar_width) + bar_padding, origin.y - bar_h);
-                            ImVec2 p_max(origin.x + ((i + 1) * bar_width) - bar_padding, origin.y - 1.0f); // -1.0f base offset per non coprire asse
-                            
-                            ImU32 color = IM_COL32(50, 150, 255, 255);
-                            draw_list->AddRectFilled(p_min, p_max, color, 2.0f);
-                            draw_list->AddRect(p_min, p_max, IM_COL32(200, 200, 200, 100), 2.0f);
-                            
-                            // Values text just above the bar
-                            if (bar_h > 15.0f) {
-                                char valBuf[32];
-                                snprintf(valBuf, sizeof(valBuf), "%.1f", bar_values[i]);
-                                float text_width = ImGui::CalcTextSize(valBuf).x;
-                                float center_x = p_min.x + ((p_max.x - p_min.x) * 0.5f);
-                                draw_list->AddText(ImVec2(center_x - (text_width * 0.5f), p_min.y - 15.0f), IM_COL32(255, 255, 100, 255), valBuf);
-                            }
-
-                            // Disegniamo alcune etichette X in base a quante ce ne sono
-                            if (n_bars <= 15 || (i % (n_bars / 10 + 1) == 0)) {
-                                float text_width = ImGui::CalcTextSize(bar_labels[i].c_str()).x;
-                                float center_x = p_min.x + ((p_max.x - p_min.x) * 0.5f);
-                                draw_list->AddText(ImVec2(center_x - (text_width * 0.5f), origin.y + 5.0f), IM_COL32(200, 200, 200, 255), bar_labels[i].c_str());
-                            }
-                        }
-                    }
-
-                    ImGui::Dummy(graph_size);
-
-                } else {
-                    ImGui::TextColored(ImVec4(1, 0, 0, 1), "Errore: Dimensioni colonne incompatibili o vuote.");
-                }
-
-                if (ImGui::Button("Chiudi Grafico", ImVec2(120, 0))) {
-                    ImGui::CloseCurrentPopup();
-                }
-                ImGui::EndPopup();
-            }
-
-            ImGui::Spacing();
-            ImGui::Separator();
-            ImGui::Spacing();
-            
-            static float radiusPieChart = 100.0f;
-
-            ImGui::Text("Grafico a Torta della singola Feature: %s", datasetCaricato.headers[colonnaSelezionata].c_str());
-            ImGui::SliderFloat("Zoom (Raggio)", &radiusPieChart, 50.0f, 400.0f);
-            
-            ImGui::Spacing();
-
-            ImDrawList* draw_list = ImGui::GetWindowDrawList();
-            ImVec2 p = ImGui::GetCursorScreenPos();
-            ImVec2 pie_center = ImVec2(p.x + radiusPieChart + 10.0f, p.y + radiusPieChart);
-
-            float a_min = 0.0f;
-            float a_max = 0.0f;
-
-            if (modalitaGrafici == 1) {
-                int num_bins = numCustomBins;
-                vector<int> bins(num_bins, 0);
-                float range = max_val - min_val;
-                if (range <= 0.0f) range = 1.0f;
-                
-                for (float v : datiScelti) {
-                    int bin_idx = (int)(((v - min_val) / range) * num_bins);
-                    if (bin_idx >= num_bins) bin_idx = num_bins - 1;
-                    if (bin_idx < 0) bin_idx = 0;
-                    bins[bin_idx]++;
-                }
-
-                for (int i = 0; i < num_bins; i++) {
-                    if (bins[i] == 0) continue;
-                    a_max = a_min + ((float)bins[i] / datiScelti.size()) * (3.14159265358979323846f * 2.0f);
-                    
-                    float r, g, b;
-                    ImGui::ColorConvertHSVtoRGB((float)i / num_bins, 0.8f, 0.8f, r, g, b);
-                    ImU32 color = ImGui::GetColorU32(ImVec4(r, g, b, 1.0f));
-
-                    // Disegna lo spicchio
-                    draw_list->PathLineTo(pie_center);
-                    draw_list->PathArcTo(pie_center, radiusPieChart, a_min, a_max, 20);
-                    draw_list->PathFillConvex(color);
-                    
-                    a_min = a_max;
-                }
-
-                // Riserviamo lo spazio nell'interfaccia affinchè i controlli successivi non scavalchino il grafico
-                ImGui::Dummy(ImVec2(radiusPieChart * 2.0f + 20.0f, radiusPieChart * 2.0f));
-                
-                // Legenda a lato
+                ImVec2 pos = ImGui::GetCursorScreenPos();
+                draw_list->AddRectFilled(pos, ImVec2(pos.x + 12.0f, pos.y + 12.0f), color);
+                ImGui::Dummy(ImVec2(15.0f, 12.0f));
                 ImGui::SameLine();
-                float offset_y = p.y + (radiusPieChart * 2.0f - (num_bins * ImGui::GetTextLineHeightWithSpacing())) * 0.5f;
-                if (offset_y < p.y) offset_y = p.y;
-                ImGui::SetCursorScreenPos(ImVec2(ImGui::GetCursorScreenPos().x, offset_y));
-
-                ImGui::BeginGroup();
-                for (int i = 0; i < num_bins; i++) {
-                    float bin_min = min_val + (i * range / num_bins);
-                    float bin_max = min_val + ((i + 1) * range / num_bins);
-                    
-                    float r, g, b;
-                    ImGui::ColorConvertHSVtoRGB((float)i / num_bins, 0.8f, 0.8f, r, g, b);
-                    ImU32 color = ImGui::GetColorU32(ImVec4(r, g, b, 1.0f));
-
-                    ImVec2 pos = ImGui::GetCursorScreenPos();
-                    draw_list->AddRectFilled(pos, ImVec2(pos.x + 12.0f, pos.y + 12.0f), color);
-                    ImGui::Dummy(ImVec2(15.0f, 12.0f)); 
-                    ImGui::SameLine();
-                    ImGui::Text("[%.2f - %.2f]: %d (%.1f%%)", bin_min, bin_max, bins[i], (float)bins[i] / datiScelti.size() * 100.0f);
-                }
-                ImGui::EndGroup();
-            } else {
-                // Modalità Valori Singoli
-                map<float, int> frequenze;
-                for (float v : datiScelti) frequenze[v]++;
-
-                int i = 0;
-                int total_unique = (int)frequenze.size();
-                for (auto const& val_count : frequenze) {
-                    float val = val_count.first;
-                    int count = val_count.second;
-
-                    a_max = a_min + ((float)count / datiScelti.size()) * (3.14159265358979323846f * 2.0f);
-                    
-                    float r, g, b;
-                    ImGui::ColorConvertHSVtoRGB((float)i / total_unique, 0.8f, 0.8f, r, g, b);
-                    ImU32 color = ImGui::GetColorU32(ImVec4(r, g, b, 1.0f));
-
-                    // Disegna lo spicchio
-                    draw_list->PathLineTo(pie_center);
-                    // Aumentiamo i segmenti dell'arco se lo spicchio è più grande
-                    int segments = (int)(20.0f * ((float)count / datiScelti.size()));
-                    if (segments < 3) segments = 3;
-
-                    draw_list->PathArcTo(pie_center, radiusPieChart, a_min, a_max, segments);
-                    draw_list->PathFillConvex(color);
-                    
-                    a_min = a_max;
-                    i++;
-                }
-
-                // Spazio dedicato al grafico
-                ImGui::Dummy(ImVec2(radiusPieChart * 2.0f + 20.0f, radiusPieChart * 2.0f));
-
-                // Legenda a lato in un riquadro scrollabile se ci sono troppi valori
-                ImGui::SameLine();
-                float group_height = total_unique * ImGui::GetTextLineHeightWithSpacing();
-                float panel_height = radiusPieChart * 2.0f;
-                if (panel_height > 600.0f) panel_height = 600.0f;
-
-                ImGui::SetCursorScreenPos(ImVec2(ImGui::GetCursorScreenPos().x, p.y));
-                ImGui::BeginChild("PieLegend", ImVec2(0, panel_height), true);
-                i = 0;
-                for (auto const& val_count : frequenze) {
-                    float val = val_count.first;
-                    int count = val_count.second;
-
-                    float r, g, b;
-                    ImGui::ColorConvertHSVtoRGB((float)i / total_unique, 0.8f, 0.8f, r, g, b);
-                    ImU32 color = ImGui::GetColorU32(ImVec4(r, g, b, 1.0f));
-
-                    // Disegno rettangolino colorato direttamente tramite draw_list nel Child
-                    ImDrawList* child_draw_list = ImGui::GetWindowDrawList();
-                    ImVec2 pos = ImGui::GetCursorScreenPos();
-                    child_draw_list->AddRectFilled(pos, ImVec2(pos.x + 12.0f, pos.y + 12.0f), color);
-                    ImGui::Dummy(ImVec2(15.0f, 12.0f)); 
-                    ImGui::SameLine();
-                    ImGui::Text("Valore %.2f: %d (%.1f%%)", val, count, (float)count / datiScelti.size() * 100.0f);
-                    i++;
-                }
-                ImGui::EndChild();
+                ImGui::Text("[%.2f - %.2f]: %d (%.1f%%)",
+                    bin_min, bin_max, bins[i],
+                    (float)bins[i] / datiScelti.size() * 100.0f);
             }
+            ImGui::EndGroup();
+
+        }
+        else {
+
+            map<float, int> frequenze;
+            for (float v : datiScelti) frequenze[v]++;
+
+            int i = 0;
+            int total_unique = (int)frequenze.size();
+
+            for (auto const& vc : frequenze) {
+                int count = vc.second;
+                a_max = a_min + ((float)count / datiScelti.size()) * TWO_PI;
+
+                float r, g, b;
+                ImGui::ColorConvertHSVtoRGB((float)i / total_unique, 0.8f, 0.8f, r, g, b);
+                ImU32 color = ImGui::GetColorU32(ImVec4(r, g, b, 1.0f));
+
+                int segments = max(3, (int)(20.0f * ((float)count / datiScelti.size())));
+                draw_list->PathLineTo(pie_center);
+                draw_list->PathArcTo(pie_center, radiusPieChart, a_min, a_max, segments);
+                draw_list->PathFillConvex(color);
+
+                a_min = a_max;
+                i++;
+            }
+
+            ImGui::Dummy(ImVec2(radiusPieChart * 2.0f + 20.0f, radiusPieChart * 2.0f));
+            ImGui::SameLine();
+
+            float panel_height = min(radiusPieChart * 2.0f, 600.0f);
+            ImGui::SetCursorScreenPos(ImVec2(ImGui::GetCursorScreenPos().x, p.y));
+            ImGui::BeginChild("PieLegend", ImVec2(0, panel_height), true);
+
+            i = 0;
+            for (auto const& vc : frequenze) {
+                float r, g, b;
+                ImGui::ColorConvertHSVtoRGB((float)i / total_unique, 0.8f, 0.8f, r, g, b);
+                ImU32 color = ImGui::GetColorU32(ImVec4(r, g, b, 1.0f));
+
+                ImDrawList* cdl = ImGui::GetWindowDrawList();
+                ImVec2 pos = ImGui::GetCursorScreenPos();
+                cdl->AddRectFilled(pos, ImVec2(pos.x + 12.0f, pos.y + 12.0f), color);
+                ImGui::Dummy(ImVec2(15.0f, 12.0f));
+                ImGui::SameLine();
+                ImGui::Text("Valore %.2f: %d (%.1f%%)",
+                    vc.first, vc.second,
+                    (float)vc.second / datiScelti.size() * 100.0f);
+                i++;
+            }
+            ImGui::EndChild();
         }
 
         ImGui::Spacing();
-        
-        // Anteprima dei file
+
+        // ------------------------------------------------------------------
+        // Anteprima dati testuali
+        // ------------------------------------------------------------------
         if (ImGui::TreeNode("Mostra i dati per la feature corrente in formato testuale")) {
             ImGui::BeginChild("ScrollingRegion", ImVec2(0, 200), true);
-            for (size_t i = 0; i < datiScelti.size(); i++) {
+            for (size_t i = 0; i < datiScelti.size(); i++)
                 ImGui::Text("Dato [%zu] = %f", i + 1, datiScelti[i]);
-            }
             ImGui::EndChild();
             ImGui::TreePop();
         }
