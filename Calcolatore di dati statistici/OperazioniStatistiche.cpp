@@ -332,9 +332,9 @@ float OperazioniStatistiche::calcoloCovarianza(vector<float> valori_x, vector<fl
 
 // Il coefficiente di correlazione di Bravais-Pearson indica la 
 // correlazione lineare tra due variabili:
-// - se è vicino a 1, le variabili sono fortemente correlate positivamente
-// - se è vicino a -1, le variabili sono fortemente correlate negativamente
-// - se è vicino a 0, le variabili non sono correlate linearmente
+// - se è vicino a 1, le variabili sono fortemente correlate positivamente (rette parallele)
+// - se è vicino a -1, le variabili sono fortemente correlate negativamente (rette parallele) 
+// - se è vicino a 0, le variabili non sono correlate linearmente (rette perpendicolari)
 
 float OperazioniStatistiche::calcoloCoefficienteDiCorrelazioneDiBravaisPearson(vector<float> valori_x, vector<float> valori_y)	
 {
