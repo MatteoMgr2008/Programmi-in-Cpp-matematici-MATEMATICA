@@ -353,9 +353,8 @@ void SchermataUploadProbabilita(bool& uploadFileProbabilita)
                 supporto_colonne,
                 marg_col));
 
-            int indice_moda_riga = 0;
-            int indice_moda_colonna = 0;
             float frequenza_massima = tb.valori[0][0];
+            vector<string> coppie_modali;
             for (int i = 0; i < R; i++)
             {
                 for (int j = 0; j < C; j++)
@@ -363,12 +362,28 @@ void SchermataUploadProbabilita(bool& uploadFileProbabilita)
                     if (tb.valori[i][j] > frequenza_massima)
                     {
                         frequenza_massima = tb.valori[i][j];
-                        indice_moda_riga = i;
-                        indice_moda_colonna = j;
+                        coppie_modali.clear();
+                        coppie_modali.push_back("(" + tb.intestazioni_righe[i] + ", " + tb.intestazioni_colonne[j] + ")");
+                    }
+                    else if (tb.valori[i][j] == frequenza_massima)
+                    {
+                        coppie_modali.push_back("(" + tb.intestazioni_righe[i] + ", " + tb.intestazioni_colonne[j] + ")");
                     }
                 }
             }
-            coppia_moda = "(" + tb.intestazioni_righe[indice_moda_riga] + ", " + tb.intestazioni_colonne[indice_moda_colonna] + ")";
+            if (coppie_modali.empty())
+            {
+                coppia_moda = "N/A";
+            }
+            else
+            {
+                coppia_moda.clear();
+                for (int i = 0; i < (int)coppie_modali.size(); i++)
+                {
+                    if (i > 0) coppia_moda += " ; ";
+                    coppia_moda += coppie_modali[i];
+                }
+            }
 
             float mediana_x = operazioni_statistiche.calcoloMedianaPonderata(supporto_righe, marg_riga);
             float mediana_y = operazioni_statistiche.calcoloMedianaPonderata(supporto_colonne, marg_col);
