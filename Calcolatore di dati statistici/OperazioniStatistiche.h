@@ -35,6 +35,10 @@ class OperazioniStatistiche : public OperazioniBase
 		float calcoloGaussiana(float valore_media, float valore_varianza, float valore_x);
 		float calcoloCovarianza(vector<float> valori_x, vector<float> valori_y);
 		float calcoloCoefficienteDiCorrelazioneDiBravaisPearson(vector<float> valori_x, vector<float> valori_y);
+		float calcoloCoefficienteAngolareRettaRegressioneYsuX(vector<float> valori_x, vector<float> valori_y);
+		float calcoloCoefficienteAngolareRettaRegressioneXsuY(vector<float> valori_x, vector<float> valori_y);
+		float calcoloIntercettaRettaRegressioneYsuX(vector<float> valori_x, vector<float> valori_y);
+		float calcoloIntercettaRettaRegressioneXsuY(vector<float> valori_x, vector<float> valori_y);
 		float calcoloDistribuzioneChiQuadrato(vector<vector<float>> valori_osservati);
 		vector<vector<float>> calcoloTabellaValoriAttesi(vector<vector<float>> valori_osservati);
 		vector<vector<float>> calcoloTabellaProbabilita(vector<vector<float>> tabella);

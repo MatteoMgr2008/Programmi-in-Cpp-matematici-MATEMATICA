@@ -249,6 +249,14 @@ void SchermataUploadDati(bool& upload_file_dati) {
             vector<float>& vecY = datasetCaricato.columns[colonnaY];
 
             if (vecX.size() > 0 && vecX.size() == vecY.size()) {
+                float media_x = ops.calcoloMediaAritmetica(vecX);
+                float media_y = ops.calcoloMediaAritmetica(vecY);
+                float covarianza = ops.calcoloCovarianza(vecX, vecY);
+                float coefficiente_bravais_pearson = ops.calcoloCoefficienteDiCorrelazioneDiBravaisPearson(vecX, vecY);
+                float coefficiente_y_su_x = ops.calcoloCoefficienteAngolareRettaRegressioneYsuX(vecX, vecY);
+                float coefficiente_x_su_y = ops.calcoloCoefficienteAngolareRettaRegressioneXsuY(vecX, vecY);
+                float intercetta_y_su_x = ops.calcoloIntercettaRettaRegressioneYsuX(vecX, vecY);
+                float intercetta_x_su_y = ops.calcoloIntercettaRettaRegressioneXsuY(vecX, vecY);
                 float min_x = *min_element(vecX.begin(), vecX.end());
                 float max_x = *max_element(vecX.begin(), vecX.end());
                 float min_y = *min_element(vecY.begin(), vecY.end());
@@ -264,6 +272,11 @@ void SchermataUploadDati(bool& upload_file_dati) {
 
                 ImDrawList* draw_list = ImGui::GetWindowDrawList();
                 ImVec2 p = ImGui::GetCursorScreenPos();
+                auto ConvertiInCoordinateGrafico = [&](float x, float y) {
+                    float norm_x = (x - min_x) / (max_x - min_x);
+                    float norm_y = 1.0f - ((y - min_y) / (max_y - min_y));
+                    return ImVec2(p.x + norm_x * graph_size.x, p.y + norm_y * graph_size.y);
+                };
                 
                 // Disegna sfondo grafico
                 draw_list->AddRectFilled(p, ImVec2(p.x + graph_size.x, p.y + graph_size.y), IM_COL32(50, 50, 50, 255));
@@ -278,9 +291,47 @@ void SchermataUploadDati(bool& upload_file_dati) {
                     draw_list->AddCircleFilled(pos, 3.0f, IM_COL32(100, 200, 255, 255));
                 }
 
+                ImVec2 punto_medie = ConvertiInCoordinateGrafico(media_x, media_y);
+                draw_list->AddCircleFilled(punto_medie, 5.0f, IM_COL32(255, 230, 120, 255));
+
+                float y_inizio_retta_y_su_x = coefficiente_y_su_x * min_x + intercetta_y_su_x;
+                float y_fine_retta_y_su_x = coefficiente_y_su_x * max_x + intercetta_y_su_x;
+                draw_list->AddLine(
+                    ConvertiInCoordinateGrafico(min_x, y_inizio_retta_y_su_x),
+                    ConvertiInCoordinateGrafico(max_x, y_fine_retta_y_su_x),
+                    IM_COL32(255, 80, 80, 255),
+                    2.0f
+                );
+
+                if (coefficiente_x_su_y != 0.0f) {
+                    float y_inizio_retta_x_su_y = (min_x - intercetta_x_su_y) / coefficiente_x_su_y;
+                    float y_fine_retta_x_su_y = (max_x - intercetta_x_su_y) / coefficiente_x_su_y;
+                    draw_list->AddLine(
+                        ConvertiInCoordinateGrafico(min_x, y_inizio_retta_x_su_y),
+                        ConvertiInCoordinateGrafico(max_x, y_fine_retta_x_su_y),
+                        IM_COL32(140, 90, 255, 255),
+                        2.0f
+                    );
+                }
+                else {
+                    draw_list->AddLine(
+                        ConvertiInCoordinateGrafico(media_x, min_y),
+                        ConvertiInCoordinateGrafico(media_x, max_y),
+                        IM_COL32(140, 90, 255, 255),
+                        2.0f
+                    );
+                }
+
                 ImGui::Dummy(graph_size);
                 ImGui::Text("X = %s (Min: %.2f, Max: %.2f)", datasetCaricato.headers[colonnaX].c_str(), min_x, max_x);
                 ImGui::Text("Y = %s (Min: %.2f, Max: %.2f)", datasetCaricato.headers[colonnaY].c_str(), min_y, max_y);
+                ImGui::Text("Punto medio: (%.4f, %.4f)", media_x, media_y);
+                ImGui::Text("Covarianza: %.4f", covarianza);
+                ImGui::Text("Coeff. Bravais-Pearson: %.4f", coefficiente_bravais_pearson);
+                ImGui::Text("Retta Y su X: y - %.4f = %.4f (x - %.4f)", media_y, coefficiente_y_su_x, media_x);
+                ImGui::Text("Forma esplicita Y su X: y = %.4f x + %.4f", coefficiente_y_su_x, intercetta_y_su_x);
+                ImGui::Text("Retta X su Y: x - %.4f = %.4f (y - %.4f)", media_x, coefficiente_x_su_y, media_y);
+                ImGui::Text("Forma esplicita X su Y: x = %.4f y + %.4f", coefficiente_x_su_y, intercetta_x_su_y);
             } else {
                 ImGui::TextColored(ImVec4(1, 0, 0, 1), "Errore: Dimensioni delle colonne incompatibili o vuote.");
             }

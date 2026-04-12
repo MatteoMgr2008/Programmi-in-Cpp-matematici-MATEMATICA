@@ -215,6 +215,50 @@ float OperazioniStatistiche::calcoloCoefficienteDiCorrelazioneDiBravaisPearson(v
 	return risultato_coefficiente_Bravais_Pearson;
 }
 
+float OperazioniStatistiche::calcoloCoefficienteAngolareRettaRegressioneYsuX(vector<float> valori_x, vector<float> valori_y)
+{
+	float varianza_x = this->calcoloVarianza(valori_x);
+	float coefficiente_angolare = 0.0f;
+	if (varianza_x != 0.0f)
+	{
+		coefficiente_angolare = this->calcoloCovarianza(valori_x, valori_y) / varianza_x;
+	}
+	this->risultato_corrente = { pair<vector<float>, vector<float>>{valori_x, valori_y}, "coefficiente angolare retta regressione Y su X", coefficiente_angolare };
+	return coefficiente_angolare;
+}
+
+float OperazioniStatistiche::calcoloCoefficienteAngolareRettaRegressioneXsuY(vector<float> valori_x, vector<float> valori_y)
+{
+	float varianza_y = this->calcoloVarianza(valori_y);
+	float coefficiente_angolare = 0.0f;
+	if (varianza_y != 0.0f)
+	{
+		coefficiente_angolare = this->calcoloCovarianza(valori_x, valori_y) / varianza_y;
+	}
+	this->risultato_corrente = { pair<vector<float>, vector<float>>{valori_x, valori_y}, "coefficiente angolare retta regressione X su Y", coefficiente_angolare };
+	return coefficiente_angolare;
+}
+
+float OperazioniStatistiche::calcoloIntercettaRettaRegressioneYsuX(vector<float> valori_x, vector<float> valori_y)
+{
+	float media_x = this->calcoloMediaAritmetica(valori_x);
+	float media_y = this->calcoloMediaAritmetica(valori_y);
+	float coefficiente_angolare = this->calcoloCoefficienteAngolareRettaRegressioneYsuX(valori_x, valori_y);
+	float intercetta = media_y - coefficiente_angolare * media_x;
+	this->risultato_corrente = { pair<vector<float>, vector<float>>{valori_x, valori_y}, "intercetta retta regressione Y su X", intercetta };
+	return intercetta;
+}
+
+float OperazioniStatistiche::calcoloIntercettaRettaRegressioneXsuY(vector<float> valori_x, vector<float> valori_y)
+{
+	float media_x = this->calcoloMediaAritmetica(valori_x);
+	float media_y = this->calcoloMediaAritmetica(valori_y);
+	float coefficiente_angolare = this->calcoloCoefficienteAngolareRettaRegressioneXsuY(valori_x, valori_y);
+	float intercetta = media_x - coefficiente_angolare * media_y;
+	this->risultato_corrente = { pair<vector<float>, vector<float>>{valori_x, valori_y}, "intercetta retta regressione X su Y", intercetta };
+	return intercetta;
+}
+
 float OperazioniStatistiche::calcoloDistribuzioneChiQuadrato(vector<vector<float>> valori_osservati)	
 {
 	float risultato_chi_quadrato = 0.0f;
