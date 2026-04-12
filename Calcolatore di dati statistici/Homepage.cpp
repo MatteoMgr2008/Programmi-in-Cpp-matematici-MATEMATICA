@@ -84,7 +84,7 @@ void Homepage(bool& upload_file_dati, bool& visualizza_funzioni_statistiche, boo
         upload_file_dati = true; // Imposta la variabile true per il caricamento del file dati CSV/XLSX
     }
 	if (ImGui::IsItemHovered()) {
-		string testo_tooltip_pulsante_1 = "Carica un file CSV o XLSX contenente dei dati da analizzare. Il file deve essere formattato correttamente per essere accettato dal software."; // Testo del tooltip per il pulsante 1 (fornisce ulteriori dettagli sulla funzione del pulsante)
+		string testo_tooltip_pulsante_1 = "Carica un file CSV contenente dei dati da analizzare. Il file deve essere formattato correttamente per essere accettato dal software."; // Testo del tooltip per il pulsante 1 (fornisce ulteriori dettagli sulla funzione del pulsante)
 		float larghezza_tooltip_pulsante_1 = ImGui::CalcTextSize(testo_tooltip_pulsante_1.c_str()).x + 20.0f; // Calcola la larghezza del tooltip per il pulsante 1 in base al testo
         ImGui::SetNextWindowSize(ImVec2(larghezza_tooltip_pulsante_1, 0), ImGuiCond_Always); // Imposta la larghezza del tooltip per il pulsante 1
         ImGui::BeginTooltip(); // Inizia la finestra del tooltip per il pulsante 1
