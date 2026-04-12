@@ -293,9 +293,10 @@ void SchermataUploadDati(bool& upload_file_dati) {
             auto Converti = [&](float x, float y) -> ImVec2 {
                 return {
                     p.x + ((x - min_x) / (max_x - min_x)) * graph_size.x,
-                    p.y + ((y - min_y) / (max_y - min_y)) * graph_size.y
+                    p.y + (1.0f - (y - min_y) / (max_y - min_y)) * graph_size.y
                 };
                 };
+
             DisegnaSfondoGrafico(draw_list, p, graph_size);
 
             // Punti dati
@@ -372,7 +373,7 @@ void SchermataUploadDati(bool& upload_file_dati) {
             auto Converti = [&](float x, float y) -> ImVec2 {
                 return {
                     p.x + ((x - min_x) / (max_x - min_x)) * graph_size.x,
-                    p.y + ((y - min_y) / (max_y - min_y)) * graph_size.y
+                    p.y + (1.0f - (y - min_y) / (max_y - min_y)) * graph_size.y
                 };
                 };
 
@@ -389,13 +390,10 @@ void SchermataUploadDati(bool& upload_file_dati) {
             draw_list->AddCircleFilled(pm, 5.0f, IM_COL32(255, 230, 120, 255));
 
             // Retta Y su X  (rossa)
-            ImVec2 p1 = Converti(min_x, coeff_y_su_x * min_x + intercetta_y_su_x);
-            ImVec2 p2 = Converti(max_x, coeff_y_su_x * max_x + intercetta_y_su_x);
-
-            // Forza ordine corretto sullo schermo (importantissimo)
-            if (p1.x > p2.x) std::swap(p1, p2);
-
-            draw_list->AddLine(p1, p2, IM_COL32(255, 80, 80, 255), 2.0f);
+            float y0_ysx = coeff_y_su_x * min_x + intercetta_y_su_x;
+            float y1_ysx = coeff_y_su_x * max_x + intercetta_y_su_x;
+            draw_list->AddLine(Converti(min_x, y0_ysx), Converti(max_x, y1_ysx),
+                IM_COL32(255, 80, 80, 255), 2.0f);
 
             // Retta X su Y  (viola)
             if (coeff_x_su_y != 0.0f) {
