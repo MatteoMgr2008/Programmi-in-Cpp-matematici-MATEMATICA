@@ -7,6 +7,8 @@ OperazioniStatistiche::OperazioniStatistiche()
 	this->risultato_corrente = { vector<float>{}, "", 0.0f };
 }
 
+// La media aritmetica è la somma dei valori divisa per il numero totale di valori
+
 float OperazioniStatistiche::calcoloMediaAritmetica(vector<float> valori)
 {	
 	float risultato_media_aritmetica = calcoloSommatoria(valori) / valori.size();
@@ -14,6 +16,8 @@ float OperazioniStatistiche::calcoloMediaAritmetica(vector<float> valori)
 	return risultato_media_aritmetica;
 }
 
+// La media geometrica è la radice n-esima del prodotto dei valori, 
+// dove n è il numero totale di valori
 float OperazioniStatistiche::calcoloMediaGeometrica(vector<float> valori)
 {
 	float risultato_media_geometrica = pow(calcoloProduttoria(valori), 1.0f / valori.size());
@@ -21,18 +25,23 @@ float OperazioniStatistiche::calcoloMediaGeometrica(vector<float> valori)
 	return risultato_media_geometrica;
 }
 
+// La media armonica è il numero totale di valori diviso per la somma 
+// dei reciproci dei valori
+
 float OperazioniStatistiche::calcoloMediaArmonica(vector<float> valori)
 {
 	vector<float> valori_originali = valori;
 	for (int i = 0; i < valori.size(); i++)
 	{
-		valori[i] = 1.0f / valori[i];
+		valori[i] = 1.0f / valori[i]; // reciproco del valore
 	}
 	float risultato_media_armonica = valori.size() / calcoloSommatoria(valori);
 	this->risultato_corrente = { valori_originali, "media armonica", risultato_media_armonica };
 	return risultato_media_armonica;
 }
 
+// La media quadratica è la radice quadrata della media aritmetica 
+// dei quadrati dei valori
 float OperazioniStatistiche::calcoloMediaQuadratica(vector<float> valori)
 {
 	vector<float> valori_originali = valori;
@@ -44,6 +53,9 @@ float OperazioniStatistiche::calcoloMediaQuadratica(vector<float> valori)
 	this->risultato_corrente = { valori_originali, "media quadratica", risultato_media_quadratica };
 	return risultato_media_quadratica;
 }
+
+// La media ponderata è la somma dei prodotti dei valori per i rispettivi pesi
+// divisa per la somma dei pesi
 
 float OperazioniStatistiche::calcoloMediaPonderata(vector<float> valori, vector<float> pesi)
 {
@@ -57,6 +69,9 @@ float OperazioniStatistiche::calcoloMediaPonderata(vector<float> valori, vector<
 	return risultato_media_ponderata;
 }
 
+// La varianza ponderata è la media ponderata dei quadrati degli scarti dei 
+// valori dalla media ponderata
+
 float OperazioniStatistiche::calcoloVarianzaPonderata(vector<float> valori, vector<float> pesi)
 {
 	if (valori.empty() || pesi.empty() || valori.size() != pesi.size())
@@ -65,23 +80,27 @@ float OperazioniStatistiche::calcoloVarianzaPonderata(vector<float> valori, vect
 		return 0.0f;
 	}
 
-	float media_ponderata = calcoloMediaPonderata(valori, pesi);
-	float somma_pesata = 0.0f;
-	vector<float> scarti_quadratici_pesati;
+	float media = calcoloMediaPonderata(valori, pesi);
+
+	float sommaPesi = 0.0f;
+	float sommaScarti = 0.0f;
+
 	for (int i = 0; i < valori.size(); i++)
 	{
-		float scarto_quadratico_pesato = calcoloPotenza(valori[i] - media_ponderata, 2.0f) * pesi[i];
-		scarti_quadratici_pesati.push_back(scarto_quadratico_pesato);
-		somma_pesata += pesi[i];
+		float diff = valori[i] - media;
+		float quadrato = diff * diff; 
+
+		sommaScarti += quadrato * pesi[i];
+		sommaPesi += pesi[i];
 	}
 
-	float risultato_varianza_ponderata = somma_pesata != 0.0f
-		? calcoloSommatoria(scarti_quadratici_pesati) / somma_pesata
-		: 0.0f;
-	this->risultato_corrente = { pair<vector<float>, vector<float>>{valori, pesi}, "varianza ponderata", risultato_varianza_ponderata };
-	return risultato_varianza_ponderata;
+	float varianza = (sommaPesi != 0.0f) ? (sommaScarti / sommaPesi) : 0.0f;
+	this->risultato_corrente = { pair<vector<float>, vector<float>>{valori, pesi}, "varianza ponderata", varianza };
+
+	return varianza;
 }
 
+// La deviazione standard ponderata è la radice quadrata della varianza ponderata
 float OperazioniStatistiche::calcoloDeviazioneStandardPonderata(vector<float> valori, vector<float> pesi)
 {
 	float risultato_deviazione_standard_ponderata = calcoloRadice(calcoloVarianzaPonderata(valori, pesi), 2.0f);
@@ -89,6 +108,9 @@ float OperazioniStatistiche::calcoloDeviazioneStandardPonderata(vector<float> va
 	return risultato_deviazione_standard_ponderata;
 }
 
+// La mediana ponderata è il valore che divide la distribuzione dei valori in due parti uguali,
+// tenendo conto delle frequenze associate a ciascun valore ( questo è utile quando i dati sono raggruppati in 
+// classi o quando si hanno frequenze diverse per ciascun valore )
 float OperazioniStatistiche::calcoloMedianaPonderata(vector<float> valori, vector<float> frequenze)
 {
 	if (valori.empty() || frequenze.empty() || valori.size() != frequenze.size())
@@ -130,6 +152,8 @@ float OperazioniStatistiche::calcoloMedianaPonderata(vector<float> valori, vecto
 	return risultato_mediana_ponderata;
 }
 
+// La deviazione standard è la radice quadrata della varianza, 
+// che misura la dispersione dei dati rispetto alla media
 float OperazioniStatistiche::calcoloDeviazioneStandard(vector<float> valori)
 {
 	vector<float> valori_originali = valori;
@@ -143,6 +167,8 @@ float OperazioniStatistiche::calcoloDeviazioneStandard(vector<float> valori)
 	return risultato_deviazione_standard;
 }
 
+// La varianza è la media dei quadrati delle deviazioni dei valori dalla media,
+// che rappresenta la dispersione dei dati rispetto alla media
 float OperazioniStatistiche::calcoloVarianza(vector<float> valori)
 {
 	float risultato_varianza = calcoloPotenza(calcoloDeviazioneStandard(valori), 2.0f);
@@ -150,6 +176,8 @@ float OperazioniStatistiche::calcoloVarianza(vector<float> valori)
 	return risultato_varianza;
 }
 
+// La mediana è il valore che si trova al centro di un insieme di dati ordinati,
+// che divide la distribuzione dei dati in due parti uguali
 float OperazioniStatistiche::calcoloMediana(vector<float> valori)
 {
 	// ordinamento dei valori per il calcolo della mediana
@@ -179,6 +207,8 @@ float OperazioniStatistiche::calcoloMediana(vector<float> valori)
 	return risultato_mediana;
 }
 
+// La moda è il valore che si presenta con maggiore frequenza in un insieme di dati,
+
 float OperazioniStatistiche::calcoloModa(vector<float> valori)
 {
 	map<float, int> risultato_frequenza_assoluta = calcoloFrequenzaAssoluta(valori);
@@ -196,6 +226,9 @@ float OperazioniStatistiche::calcoloModa(vector<float> valori)
 	return risultato_moda;
 }
 
+// La frequenza assoluta è il numero di volte che un valore si presenta in un insieme di dati,
+// che può essere rappresentato come una mappa che associa ogni valore alla sua frequenza
+
 map<float, int> OperazioniStatistiche::calcoloFrequenzaAssoluta(vector<float> valori)
 {
 	map<float, int> risultato_frequenza_assoluta;
@@ -207,6 +240,9 @@ map<float, int> OperazioniStatistiche::calcoloFrequenzaAssoluta(vector<float> va
 	return risultato_frequenza_assoluta;
 }
 
+// La frequenza relativa è la frequenza assoluta di un valore divisa per il numero totale di valori,
+// che rappresenta la proporzione di volte che un valore si presenta in un insieme di dati
+
 map<float,int> OperazioniStatistiche::calcoloFrequenzaRelativa(map<float,int> risultato_frequenza_assoluta)
 {	
 	map<float, int> risultato_frequenza_relativa;
@@ -217,6 +253,9 @@ map<float,int> OperazioniStatistiche::calcoloFrequenzaRelativa(map<float,int> ri
 	this->risultato_corrente = { risultato_frequenza_assoluta, "frequenza relativa", risultato_frequenza_relativa };
 	return risultato_frequenza_relativa;
 }
+
+// Il percentile è il valore al di sotto del quale si trova una certa percentuale di dati 
+// in un insieme ordinato
 
 float OperazioniStatistiche::calcoloPercentile(map<float,int> risultato_frequenza_relativa, float valore_percentile)
 {
@@ -236,12 +275,17 @@ float OperazioniStatistiche::calcoloPercentile(map<float,int> risultato_frequenz
 	return risultato_percentile;
 }
 
+// Lo scarto semplice medio è la media aritmetica degli scarti assoluti dei valori dalla media,
+// che rappresenta la dispersione dei dati rispetto alla media in modo più semplice rispetto 
+// alla deviazione standard
+
 float OperazioniStatistiche::calcoloScartoSempliceMedio(vector<float> valori)
 {
 	float risultato_media_aritmetica = calcoloMediaAritmetica(valori);
 	vector<float> valori_scarti_assoluti;
 	for (int i = 0; i < (int)valori.size(); i++)
 	{
+		// Calcolo il valore assoluto
 		valori_scarti_assoluti.push_back(calcoloValoreAssoluto(valori[i] - risultato_media_aritmetica));
 	}
 	float risultato_scarto_semplice_medio = calcoloSommatoria(valori_scarti_assoluti) / (float)valori.size();
@@ -249,12 +293,17 @@ float OperazioniStatistiche::calcoloScartoSempliceMedio(vector<float> valori)
 	return risultato_scarto_semplice_medio;
 }
 
+// E' uguale alla deviazione standard  
+
 float OperazioniStatistiche::calcoloScartoQuadraticoMedio(vector<float> valori)
 {
 	float risultato_scarto_quadratico_medio = calcoloDeviazioneStandard(valori);
 	this->risultato_corrente = { valori, "scarto quadratico medio", risultato_scarto_quadratico_medio };
 	return risultato_scarto_quadratico_medio;
 }
+
+// La funzione gaussiana, o distribuzione normale, è una funzione di densità di probabilità 
+// che descrive la distribuzione dei dati intorno alla media, con una forma a campana simmetrica.
 
 float OperazioniStatistiche::calcoloGaussiana(float valore_media, float valore_varianza, float valore_x) 
 {
@@ -264,6 +313,9 @@ float OperazioniStatistiche::calcoloGaussiana(float valore_media, float valore_v
 	return risultato_gaussiana;
 }
 
+// La covarianza è una misura della relazione lineare tra due variabili, 
+// che indica se le variabili tendono a variare insieme (covarianza positiva)
+// o in modo opposto (covarianza negativa)
 float OperazioniStatistiche::calcoloCovarianza(vector<float> valori_x, vector<float>valori_y)
 {
 	float media_valori_x = this->calcoloMediaAritmetica(valori_x);
