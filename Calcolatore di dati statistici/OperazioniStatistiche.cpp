@@ -330,6 +330,12 @@ float OperazioniStatistiche::calcoloCovarianza(vector<float> valori_x, vector<fl
 	return risultato_covarianza;
 }
 
+// Il coefficiente di correlazione di Bravais-Pearson indica la 
+// correlazione lineare tra due variabili:
+// - se è vicino a 1, le variabili sono fortemente correlate positivamente
+// - se è vicino a -1, le variabili sono fortemente correlate negativamente
+// - se è vicino a 0, le variabili non sono correlate linearmente
+
 float OperazioniStatistiche::calcoloCoefficienteDiCorrelazioneDiBravaisPearson(vector<float> valori_x, vector<float> valori_y)	
 {
 	float covarianza = this->calcoloCovarianza(valori_x, valori_y);
@@ -339,6 +345,9 @@ float OperazioniStatistiche::calcoloCoefficienteDiCorrelazioneDiBravaisPearson(v
 	this->risultato_corrente = { pair<vector<float>, vector<float>>{valori_x, valori_y}, "coefficiente di correlazione di Bravais-Pearson", risultato_coefficiente_Bravais_Pearson };
 	return risultato_coefficiente_Bravais_Pearson;
 }
+
+// Il coefficiente angolare della retta di regressione Y su X rappresenta 
+// la pendenza della retta che meglio approssima la relazione lineare tra le variabili Y e X
 
 float OperazioniStatistiche::calcoloCoefficienteAngolareRettaRegressioneYsuX(vector<float> valori_x, vector<float> valori_y)
 {
@@ -352,6 +361,9 @@ float OperazioniStatistiche::calcoloCoefficienteAngolareRettaRegressioneYsuX(vec
 	return coefficiente_angolare;
 }
 
+// Il coefficiente angolare della retta di regressione X su Y rappresenta
+// la pendenza della retta che meglio approssima la relazione lineare tra le variabili X e Y
+
 float OperazioniStatistiche::calcoloCoefficienteAngolareRettaRegressioneXsuY(vector<float> valori_x, vector<float> valori_y)
 {
 	float varianza_y = this->calcoloVarianza(valori_y);
@@ -364,6 +376,8 @@ float OperazioniStatistiche::calcoloCoefficienteAngolareRettaRegressioneXsuY(vec
 	return coefficiente_angolare;
 }
 
+// L'intercetta della retta di regressione Y su X rappresenta il punto in cui la
+// retta interseca l'asse Y, ovvero il valore di Y quando X è uguale a zero
 float OperazioniStatistiche::calcoloIntercettaRettaRegressioneYsuX(vector<float> valori_x, vector<float> valori_y)
 {
 	float media_x = this->calcoloMediaAritmetica(valori_x);
@@ -374,6 +388,8 @@ float OperazioniStatistiche::calcoloIntercettaRettaRegressioneYsuX(vector<float>
 	return intercetta;
 }
 
+// L'intercetta della retta di regressione X su Y rappresenta il punto in cui la
+// retta interseca l'asse X, ovvero il valore di X quando Y è uguale a zero
 float OperazioniStatistiche::calcoloIntercettaRettaRegressioneXsuY(vector<float> valori_x, vector<float> valori_y)
 {
 	float media_x = this->calcoloMediaAritmetica(valori_x);
@@ -383,6 +399,9 @@ float OperazioniStatistiche::calcoloIntercettaRettaRegressioneXsuY(vector<float>
 	this->risultato_corrente = { pair<vector<float>, vector<float>>{valori_x, valori_y}, "intercetta retta regressione X su Y", intercetta };
 	return intercetta;
 }
+
+// La distribuzione chi quadrato è una misura della differenza tra i valori osservati 
+// e i valori attesi in una tabella 
 
 float OperazioniStatistiche::calcoloDistribuzioneChiQuadrato(vector<vector<float>> valori_osservati)	
 {
@@ -399,6 +418,10 @@ float OperazioniStatistiche::calcoloDistribuzioneChiQuadrato(vector<vector<float
 	return risultato_chi_quadrato;
 }
 
+// La tabella dei valori attesi è una matrice che contiene i valori attesi
+// per ogni cella di una tabella
+// Si calcola moltiplicando il totale della riga per il totale della colonna 
+// e dividendo per il totale dei valori osservati
 vector<vector<float>> OperazioniStatistiche::calcoloTabellaValoriAttesi(vector<vector<float>> valori_osservati)
 {
 	vector<float> totale_riga;
@@ -438,6 +461,8 @@ vector<vector<float>> OperazioniStatistiche::calcoloTabellaValoriAttesi(vector<v
 	return tabella_valori_attesi;
 }
 
+// La tabella delle probabilità è una matrice che contiene 
+// le probabilità associate a ciascuna cella di una tabella
 vector<vector<float>> OperazioniStatistiche::calcoloTabellaProbabilita(vector<vector<float>> tabella)
 {
 	float totale = 0.0f;
@@ -461,6 +486,9 @@ vector<vector<float>> OperazioniStatistiche::calcoloTabellaProbabilita(vector<ve
 	return tabella_probabilita;
 }
 
+// La distribuzione marginale è una matrice che contiene i totali di ciascuna riga e colonna 
+// di una tabella
+
 vector<vector<float>> OperazioniStatistiche::calcoloDistribuzioneMarginale(vector<vector<float>> tabella)
 {
 	vector<float> marginale_riga(tabella.size(), 0.0f);
@@ -475,6 +503,11 @@ vector<vector<float>> OperazioniStatistiche::calcoloDistribuzioneMarginale(vecto
 	this->risultato_corrente = { vector<vector<float>>{tabella}, "distribuzione marginale", tabella_distribuzione_marginale };
 	return tabella_distribuzione_marginale;
 }
+
+// La probabilità marginale è una matrice che contiene le probabilità 
+// associate a ciascuna riga e colonna di una tabella
+// Si calcola dividendo i totali di ciascuna riga e colonna 
+// per il totale dei valori della tabella
 
 vector<vector<float>> OperazioniStatistiche::calcoloProbabilitaMarginale(vector<vector<float>> tabella)
 {

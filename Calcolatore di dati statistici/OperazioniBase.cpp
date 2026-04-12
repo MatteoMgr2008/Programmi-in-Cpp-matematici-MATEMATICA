@@ -8,12 +8,16 @@ OperazioniBase::OperazioniBase()
 	this->storico_risultati_calcoli_base = list<RisultatoOperazione>();
 }
 
+// Il logaritmo di un numero è l'esponente a cui bisogna elevare una base per ottenere quel numero
+
 float OperazioniBase::calcoloLogaritmo(float valore_base, float valore_argomento)
 {
 	float risultato_logaritmo = log(valore_argomento) / log(valore_base);
 	this->storico_risultati_calcoli_base.push_back({ vector<float>{valore_base, valore_argomento}, "logaritmo (log)", risultato_logaritmo });
 	return risultato_logaritmo;
 }
+
+// La potenza di un numero è il risultato di elevare un numero (la base) a un certo esponente
 
 float OperazioniBase::calcoloPotenza(float valore_base, float valore_esponente)
 {
@@ -26,12 +30,15 @@ float OperazioniBase::calcoloPotenza(float valore_base, float valore_esponente)
 	return risultato_potenza;
 }
 
+// La radice di un numero è il valore che, elevato a un certo indice, restituisce quel numero
 float OperazioniBase::calcoloRadice(float valore_base, float valore_indice)
 {
 	float risultato_radice = pow(valore_base, 1.0f / valore_indice);
 	this->risultato_corrente = { vector<float>{valore_base, valore_indice}, "radice", risultato_radice };
 	return risultato_radice;
 }
+
+// La sommatoria è la somma di una serie di valori
 
 float OperazioniBase::calcoloSommatoria(vector<float> valori_sommatoria)
 {
@@ -44,6 +51,8 @@ float OperazioniBase::calcoloSommatoria(vector<float> valori_sommatoria)
 	return risultato_sommatoria;
 }
 
+// La produttoria è il prodotto di una serie di valori
+
 float OperazioniBase::calcoloProduttoria(vector<float> valori_produttoria)
 {
 	float risultato_produttoria = 1.0f;
@@ -55,6 +64,7 @@ float OperazioniBase::calcoloProduttoria(vector<float> valori_produttoria)
 	return risultato_produttoria;
 }
 
+// Il valore assoluto di un numero è il numero senza il suo segno 
 float OperazioniBase::calcoloValoreAssoluto(float valore_non_assoluto)
 {
 	float risultato_valore_assoluto = this->calcoloRadice(this->calcoloPotenza(valore_non_assoluto, 2.0f), 2.0f);
