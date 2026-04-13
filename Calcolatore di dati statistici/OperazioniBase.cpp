@@ -9,7 +9,6 @@ OperazioniBase::OperazioniBase()
 }
 
 // Il logaritmo di un numero è l'esponente a cui bisogna elevare una base per ottenere quel numero
-
 float OperazioniBase::calcoloLogaritmo(float valore_base, float valore_argomento)
 {
 	float risultato_logaritmo = log(valore_argomento) / log(valore_base);
@@ -18,7 +17,6 @@ float OperazioniBase::calcoloLogaritmo(float valore_base, float valore_argomento
 }
 
 // La potenza di un numero è il risultato di elevare un numero (la base) a un certo esponente
-
 float OperazioniBase::calcoloPotenza(float valore_base, float valore_esponente)
 {
 	float risultato_potenza = 1.0f;
@@ -39,7 +37,6 @@ float OperazioniBase::calcoloRadice(float valore_base, float valore_indice)
 }
 
 // La sommatoria è la somma di una serie di valori
-
 float OperazioniBase::calcoloSommatoria(vector<float> valori_sommatoria)
 {
 	float risultato_sommatoria = 0.0f;
@@ -52,7 +49,6 @@ float OperazioniBase::calcoloSommatoria(vector<float> valori_sommatoria)
 }
 
 // La produttoria è il prodotto di una serie di valori
-
 float OperazioniBase::calcoloProduttoria(vector<float> valori_produttoria)
 {
 	float risultato_produttoria = 1.0f;

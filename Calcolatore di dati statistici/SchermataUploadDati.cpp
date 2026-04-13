@@ -11,14 +11,13 @@
 
 using namespace std;
 
+// struttura per i dati CSV tabellare (colonne di float con intestazioni)
 struct CsvData {
     vector<string> headers;
     vector<vector<float>> columns;
 };
 
-// ---------------------------------------------------------------------------
-// Utility: apre Esplora File e restituisce il percorso scelto
-// ---------------------------------------------------------------------------
+// Apre Esplora File e restituisce il percorso scelto
 inline string ApriEsploraFile() {
     OPENFILENAMEA ofn;
     CHAR szFile[260] = { 0 };
@@ -37,9 +36,7 @@ inline string ApriEsploraFile() {
     return "";
 }
 
-// ---------------------------------------------------------------------------
-// Utility: legge un CSV tabellare con separatore ';'
-// ---------------------------------------------------------------------------
+// Legge un CSV tabellare con separatore ';'
 inline CsvData LeggiFileCSVTabellare(const string& percorso_file) {
     CsvData dataset;
     ifstream file(percorso_file);
@@ -77,18 +74,14 @@ inline CsvData LeggiFileCSVTabellare(const string& percorso_file) {
     return dataset;
 }
 
-// ---------------------------------------------------------------------------
-// Helper interno: disegna sfondo + bordo del grafico e restituisce la lambda
+// Disegna sfondo + bordo del grafico e restituisce la lambda
 // di conversione coordinate dati -> coordinate schermo.
-// ---------------------------------------------------------------------------
 static void DisegnaSfondoGrafico(ImDrawList* dl, ImVec2 p, ImVec2 sz) {
     dl->AddRectFilled(p, ImVec2(p.x + sz.x, p.y + sz.y), IM_COL32(40, 40, 40, 255));
     dl->AddRect(p, ImVec2(p.x + sz.x, p.y + sz.y), IM_COL32(180, 180, 180, 255));
 }
 
-// ---------------------------------------------------------------------------
 // Schermata principale
-// ---------------------------------------------------------------------------
 void SchermataUploadDati(bool& upload_file_dati) {
 
     ImGui::SetNextWindowPos(ImVec2(0, 0), ImGuiCond_Always);
@@ -99,7 +92,7 @@ void SchermataUploadDati(bool& upload_file_dati) {
         ImGuiWindowFlags_NoMove |
         ImGuiWindowFlags_NoCollapse);
 
-    if (ImGui::Button("Torna alla Homepage"))
+    if (ImGui::Button("Torna alla homepage"))
         upload_file_dati = false;
 
     ImGui::Spacing();
@@ -110,13 +103,11 @@ void SchermataUploadDati(bool& upload_file_dati) {
     ImGui::Text("I valori numerici (float) devono essere separati da punti e virgola.");
     ImGui::Spacing();
 
-    // ------------------------------------------------------------------
-    // Sezione: caricamento file
-    // ------------------------------------------------------------------
+    // Caricamento file
     static char percorsoFile[512] = "";
-    ImGui::InputText("Percorso File CSV", percorsoFile, sizeof(percorsoFile));
+    ImGui::InputText("Percorso del file CSV", percorsoFile, sizeof(percorsoFile));
     ImGui::SameLine();
-    if (ImGui::Button("Sfoglia...")) {
+    if (ImGui::Button("Scegli il file CSV...")) {
         string p = ApriEsploraFile();
         if (!p.empty())
             strcpy_s(percorsoFile, sizeof(percorsoFile), p.c_str());
@@ -127,15 +118,15 @@ void SchermataUploadDati(bool& upload_file_dati) {
     static string               statoCaricamento = "";
     static OperazioniStatistiche ops;
 
-    if (ImGui::Button("Carica ed Estrai Dati")) {
+    if (ImGui::Button("Carica ed estrai i dati dal file CSV")) {
         datasetCaricato = LeggiFileCSVTabellare(string(percorsoFile));
         colonnaSelezionata = 0;
         if (datasetCaricato.headers.empty()) {
             statoCaricamento = "Errore: impossibile leggere il file (percorso errato o file vuoto/non valido).";
         }
         else {
-            statoCaricamento = "File letto con successo! " +
-                to_string(datasetCaricato.headers.size()) + " feature(s) caricate in memoria.";
+            statoCaricamento = "File analizzato con successo! " +
+                to_string(datasetCaricato.headers.size()) + " colonne del file caricate in memoria.";
         }
     }
 
@@ -150,34 +141,30 @@ void SchermataUploadDati(bool& upload_file_dati) {
         return;
     }
 
-    // ------------------------------------------------------------------
-    // Costruiamo l'array di puntatori ai nomi colonne (usato dai Combo)
-    // ------------------------------------------------------------------
+    // Costruisce l'array di puntatori ai nomi colonne (usato dai Combo)
     vector<const char*> nomiColonne;
     for (const auto& h : datasetCaricato.headers)
         nomiColonne.push_back(h.c_str());
 
-    // Combo selezione feature per le statistiche
+    // Combo selezione colonna per le statistiche
     ImGui::Text("Seleziona la caratteristica (colonna) su cui effettuare i calcoli:");
-    ImGui::Combo("Feature", &colonnaSelezionata, nomiColonne.data(), (int)nomiColonne.size());
+    ImGui::Combo("Colonna", &colonnaSelezionata, nomiColonne.data(), (int)nomiColonne.size());
     ImGui::Spacing();
 
     if (colonnaSelezionata < 0 || colonnaSelezionata >= (int)datasetCaricato.columns.size())
         colonnaSelezionata = 0;
 
     vector<float>& datiScelti = datasetCaricato.columns[colonnaSelezionata];
-    ImGui::Text("Valori pronti per '%s' (N=%zu).",
+    ImGui::Text("Valori selezionati per '%s' (N=%zu).",
         datasetCaricato.headers[colonnaSelezionata].c_str(), datiScelti.size());
 
-    // ------------------------------------------------------------------
     // Tabella statistiche
-    // ------------------------------------------------------------------
     if (!datiScelti.empty()) {
         ImGui::Spacing();
         ImGui::Text("Elenco delle operazioni statistiche:");
         ImGui::Spacing();
 
-        if (ImGui::BeginTable("TabellaRisultati", 2,
+        if (ImGui::BeginTable("Tabella dei risultati", 2,
             ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg | ImGuiTableFlags_SizingFixedFit)) {
 
             ImGui::TableSetupColumn("Operazione", ImGuiTableColumnFlags_WidthFixed, 200.0f);
@@ -192,21 +179,21 @@ void SchermataUploadDati(bool& upload_file_dati) {
 
             auto SafeCalc = [&](const char* opName, auto calcFunc) {
                 try { AddRow(opName, calcFunc()); }
-                catch (...) { AddRow(opName, "N/A (errore intercettato)"); }
+                catch (...) { AddRow(opName, "N/A (errore)"); }
                 };
 
             SafeCalc("01) Sommatoria", [&] { return to_string(ops.calcoloSommatoria(datiScelti)); });
             SafeCalc("02) Produttoria", [&] { return to_string(ops.calcoloProduttoria(datiScelti)); });
-            SafeCalc("03) Media Aritmetica", [&] { return to_string(ops.calcoloMediaAritmetica(datiScelti)); });
-            SafeCalc("04) Media Geometrica", [&] { return to_string(ops.calcoloMediaGeometrica(datiScelti)); });
-            SafeCalc("05) Media Armonica", [&] { return to_string(ops.calcoloMediaArmonica(datiScelti)); });
-            SafeCalc("06) Media Quadratica", [&] { return to_string(ops.calcoloMediaQuadratica(datiScelti)); });
-            SafeCalc("07) Dev. Standard", [&] { return to_string(ops.calcoloDeviazioneStandard(datiScelti)); });
+            SafeCalc("03) Media aritmetica", [&] { return to_string(ops.calcoloMediaAritmetica(datiScelti)); });
+            SafeCalc("04) Media geometrica", [&] { return to_string(ops.calcoloMediaGeometrica(datiScelti)); });
+            SafeCalc("05) Media armonica", [&] { return to_string(ops.calcoloMediaArmonica(datiScelti)); });
+            SafeCalc("06) Media quadratica", [&] { return to_string(ops.calcoloMediaQuadratica(datiScelti)); });
+            SafeCalc("07) Deviazione standard", [&] { return to_string(ops.calcoloDeviazioneStandard(datiScelti)); });
             SafeCalc("08) Varianza", [&] { return to_string(ops.calcoloVarianza(datiScelti)); });
             SafeCalc("09) Mediana", [&] { return to_string(ops.calcoloMediana(datiScelti)); });
             SafeCalc("10) Moda", [&] { return to_string(ops.calcoloModa(datiScelti)); });
 
-            SafeCalc("11) Frequenza Assoluta", [&]() -> string {
+            SafeCalc("11) Frequenza assoluta", [&]() -> string {
                 auto freq = ops.calcoloFrequenzaAssoluta(datiScelti);
                 stringstream ss;
                 for (auto const& vc : freq)
@@ -216,7 +203,7 @@ void SchermataUploadDati(bool& upload_file_dati) {
                 return r.empty() ? "N/A" : r;
                 });
 
-            SafeCalc("12) Frequenza Relativa", [&]() -> string {
+            SafeCalc("12) Frequenza relativa", [&]() -> string {
                 auto fa = ops.calcoloFrequenzaAssoluta(datiScelti);
                 auto fr = ops.calcoloFrequenzaRelativa(fa);
                 stringstream ss;
@@ -235,33 +222,29 @@ void SchermataUploadDati(bool& upload_file_dati) {
     ImGui::Separator();
     ImGui::Spacing();
 
-    // ------------------------------------------------------------------
-    // Sezione: grafici relazionali (scatter + regressione)
-    // ------------------------------------------------------------------
+    // Grafici relazionali (scatter + regressione)
     static int colonnaX = 0;
     static int colonnaY = 0;
     if (colonnaX >= (int)datasetCaricato.columns.size()) colonnaX = 0;
     if (colonnaY >= (int)datasetCaricato.columns.size()) colonnaY = 0;
 
-    ImGui::Text("Grafico Relazionale (Confronto tra 2 Feature)");
+    ImGui::Text("Grafico relazionale (confronto tra 2 colonne)");
     ImGui::Combo("Asse X##rel", &colonnaX, nomiColonne.data(), (int)nomiColonne.size());
     ImGui::Combo("Asse Y##rel", &colonnaY, nomiColonne.data(), (int)nomiColonne.size());
     ImGui::Spacing();
 
-    // --- Bottone 1: solo punti ---
-    if (ImGui::Button("Disegna Grafico di Dispersione"))
-        ImGui::OpenPopup("ScatterPlotPopup");
+	// Pulsante 1: solo punti nel grafico di dispersione
+    if (ImGui::Button("Disegna il grafico di dispersione"))
+        ImGui::OpenPopup("Popup del grafico di dispersione");
 
     ImGui::SameLine();
 
-    // --- Bottone 2: rette di regressione ---
-    if (ImGui::Button("Mostra Rette di Regressione"))
-        ImGui::OpenPopup("RegressionLinesPopup");
+    // Pulsante 2: rette di regressione
+    if (ImGui::Button("Mostra le rette di regressione"))
+        ImGui::OpenPopup("Popup delle rette di regressione");
 
-    // ======================================================================
     // POPUP 1 — Scatter Plot (solo punti + punto delle medie)
-    // ======================================================================
-    if (ImGui::BeginPopupModal("ScatterPlotPopup", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
+    if (ImGui::BeginPopupModal("Popup del grafico di dispersione", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
 
         ImGui::Text("Dispersione: '%s' (X)  vs  '%s' (Y)",
             datasetCaricato.headers[colonnaX].c_str(),
@@ -312,12 +295,12 @@ void SchermataUploadDati(bool& upload_file_dati) {
 
             ImGui::Dummy(graph_size);
             ImGui::Spacing();
-            ImGui::Text("X = %s   (Min: %.2f, Max: %.2f)",
+            ImGui::Text("X = %s   (min: %.2f, max: %.2f)",
                 datasetCaricato.headers[colonnaX].c_str(), min_x, max_x);
-            ImGui::Text("Y = %s   (Min: %.2f, Max: %.2f)",
+            ImGui::Text("Y = %s   (min: %.2f, max: %.2f)",
                 datasetCaricato.headers[colonnaY].c_str(), min_y, max_y);
             ImGui::TextColored(ImVec4(1.0f, 0.9f, 0.47f, 1.0f),
-                "Cerchio giallo = Punto medio (%.4f, %.4f)", media_x, media_y);
+                "Cerchio giallo = punto medio (%.4f, %.4f)", media_x, media_y);
             ImGui::Text("N = %zu coppie di valori.", vecX.size());
 
         }
@@ -332,10 +315,8 @@ void SchermataUploadDati(bool& upload_file_dati) {
         ImGui::EndPopup();
     }
 
-    // ======================================================================
     // POPUP 2 — Rette di regressione (punti sfumati + rette + statistiche)
-    // ======================================================================
-    if (ImGui::BeginPopupModal("RegressionLinesPopup", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
+    if (ImGui::BeginPopupModal("Popup delle rette di regressione", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
 
         ImGui::Text("Regressione: '%s' (X)  vs  '%s' (Y)",
             datasetCaricato.headers[colonnaX].c_str(),
@@ -425,7 +406,7 @@ void SchermataUploadDati(bool& upload_file_dati) {
             // Statistiche
             ImGui::Text("Punto medio:             (%.4f,  %.4f)", media_x, media_y);
             ImGui::Text("Covarianza:              %.4f", covarianza);
-            ImGui::Text("Coeff. Bravais-Pearson:  %.4f", coeff_bravais_pearson);
+            ImGui::Text("Coefficente di Bravais-Pearson:  %.4f", coeff_bravais_pearson);
             ImGui::Spacing();
             ImGui::TextColored(ImVec4(1.0f, 0.31f, 0.31f, 1.0f), "Y su X:");
             ImGui::Text("  y - %.4f = %.4f * (x - %.4f)", media_y, coeff_y_su_x, media_x);
@@ -451,13 +432,11 @@ void SchermataUploadDati(bool& upload_file_dati) {
     ImGui::Separator();
     ImGui::Spacing();
 
-    // ------------------------------------------------------------------
-    // Sezione: istogramma avanzato (due feature)
-    // ------------------------------------------------------------------
+    // istogramma avanzato (due colonne)
     if (!datiScelti.empty()) {
 
         static int modalitaGrafici = 1;  // 0 = valori singoli, 1 = intervalli
-        ImGui::Text("Impostazioni Visualizzazione per '%s':",
+        ImGui::Text("Impostazioni visualizzazione per '%s':",
             datasetCaricato.headers[colonnaSelezionata].c_str());
         ImGui::RadioButton("Raggruppa in intervalli", &modalitaGrafici, 1);
         ImGui::SameLine();
@@ -465,7 +444,7 @@ void SchermataUploadDati(bool& upload_file_dati) {
 
         static int numCustomBins = 4;
         if (modalitaGrafici == 1)
-            ImGui::SliderInt("Numero di Intervalli", &numCustomBins, 2, 20);
+            ImGui::SliderInt("Numero di intervalli", &numCustomBins, 2, 20);
 
         vector<float> datiOrdinati = datiScelti;
         sort(datiOrdinati.begin(), datiOrdinati.end());
@@ -480,15 +459,15 @@ void SchermataUploadDati(bool& upload_file_dati) {
         if (featureX_Histo >= (int)datasetCaricato.columns.size()) featureX_Histo = 0;
         if (featureY_Histo >= (int)datasetCaricato.columns.size()) featureY_Histo = 0;
 
-        ImGui::Text("Istogramma a due Feature:");
+        ImGui::Text("Istogramma a due colonne:");
         ImGui::Combo("Asse X (Categoria)##histo", &featureX_Histo, nomiColonne.data(), (int)nomiColonne.size());
         ImGui::Combo("Asse Y (Valore Bar)##histo", &featureY_Histo, nomiColonne.data(), (int)nomiColonne.size());
 
-        if (ImGui::Button("Mostra Istogramma Avanzato"))
-            ImGui::OpenPopup("BarChartPopup");
+        if (ImGui::Button("Mostra il grafico istogramma avanzato"))
+            ImGui::OpenPopup("Popup istogramma avanzato");
 
-        // ===== Popup Istogramma =====
-        if (ImGui::BeginPopupModal("BarChartPopup", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
+        // Popup istogramma
+        if (ImGui::BeginPopupModal("Popup istogramma avanzato", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
 
             ImGui::Text("Istogramma: X='%s'  Y='%s' (media per gruppo)",
                 datasetCaricato.headers[featureX_Histo].c_str(),
@@ -621,7 +600,7 @@ void SchermataUploadDati(bool& upload_file_dati) {
             }
 
             ImGui::Spacing();
-            if (ImGui::Button("Chiudi Grafico", ImVec2(120, 0)))
+            if (ImGui::Button("Chiudi il popup grafico", ImVec2(120, 0)))
                 ImGui::CloseCurrentPopup();
             ImGui::EndPopup();
         }
@@ -630,9 +609,7 @@ void SchermataUploadDati(bool& upload_file_dati) {
         ImGui::Separator();
         ImGui::Spacing();
 
-        // ------------------------------------------------------------------
         // Sezione: grafico a torta
-        // ------------------------------------------------------------------
         static float radiusPieChart = 100.0f;
 
         ImGui::Text("Grafico a Torta — Feature: %s",
