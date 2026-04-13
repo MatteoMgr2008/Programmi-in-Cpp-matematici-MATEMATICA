@@ -468,8 +468,7 @@ void SchermataUploadProbabilita(bool& uploadFileProbabilita)
     int gdl = (R - 1) * (C - 1);
     ImGui::Text("Chi quadro (χ²)");
     ImGui::Spacing();
-    if (ImGui::BeginTable("TabellaChi2", 2,
-        ImGuiTableFlags_Borders | ImGuiTableFlags_SizingFixedFit))
+    if (ImGui::BeginTable("TabellaChi2", 2, ImGuiTableFlags_Borders | ImGuiTableFlags_SizingFixedFit))
     {
         ImGui::TableSetupColumn("Statistica", ImGuiTableColumnFlags_WidthFixed, 200.0f);
         ImGui::TableSetupColumn("Valore", ImGuiTableColumnFlags_WidthFixed, 150.0f);
@@ -490,10 +489,62 @@ void SchermataUploadProbabilita(bool& uploadFileProbabilita)
         ImGui::EndTable();
     }
 
-	// Calcolo moda e mediana per frequenze osservate (non per probabilità) 
+	// Calcolo moda e mediana per frequenze osservate per ogni riga e colonna
+    ImGui::Spacing(); ImGui::Separator(); ImGui::Spacing();
+    ImGui::Text("Moda e Mediana Marginale (per ogni Riga e Colonna)");
 
+    OperazioniStatistiche op_stat;
+    
+    // Righe
+    if (ImGui::BeginTable("ModaMedianaRighe", 3, ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg | ImGuiTableFlags_SizingFixedFit))
+    {
+        ImGui::TableSetupColumn("Riga", ImGuiTableColumnFlags_WidthFixed, 100.0f);
+        ImGui::TableSetupColumn("Moda", ImGuiTableColumnFlags_WidthFixed, 120.0f);
+        ImGui::TableSetupColumn("Mediana", ImGuiTableColumnFlags_WidthFixed, 120.0f);
+        ImGui::TableHeadersRow();
 
+        for (int i = 0; i < R; i++)
+        {
+            ImGui::TableNextRow();
+            ImGui::TableSetColumnIndex(0); ImGui::Text("%s", tb.intestazioni_righe[i].c_str());
+            
+            float moda_riga = op_stat.calcoloModa(tb.valori[i]);
+            float mediana_riga = op_stat.calcoloMediana(tb.valori[i]);
 
+            ImGui::TableSetColumnIndex(1); ImGui::Text("%.4f", moda_riga);
+            ImGui::TableSetColumnIndex(2); ImGui::Text("%.4f", mediana_riga);
+        }
+        ImGui::EndTable();
+    }
+
+    ImGui::Spacing();
+
+    // Colonne
+    if (ImGui::BeginTable("ModaMedianaColonne", 3, ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg | ImGuiTableFlags_SizingFixedFit))
+    {
+        ImGui::TableSetupColumn("Colonna", ImGuiTableColumnFlags_WidthFixed, 100.0f);
+        ImGui::TableSetupColumn("Moda", ImGuiTableColumnFlags_WidthFixed, 120.0f);
+        ImGui::TableSetupColumn("Mediana", ImGuiTableColumnFlags_WidthFixed, 120.0f);
+        ImGui::TableHeadersRow();
+
+        for (int j = 0; j < C; j++)
+        {
+            ImGui::TableNextRow();
+            ImGui::TableSetColumnIndex(0); ImGui::Text("%s", tb.intestazioni_colonne[j].c_str());
+            
+            vector<float> colonna;
+            for(int i = 0; i < R; i++) {
+                colonna.push_back(tb.valori[i][j]);
+            }
+
+            float moda_colonna = op_stat.calcoloModa(colonna);
+            float mediana_colonna = op_stat.calcoloMediana(colonna);
+
+            ImGui::TableSetColumnIndex(1); ImGui::Text("%.4f", moda_colonna);
+            ImGui::TableSetColumnIndex(2); ImGui::Text("%.4f", mediana_colonna);
+        }
+        ImGui::EndTable();
+    }
 
     ImGui::Spacing(); ImGui::Separator(); ImGui::Spacing();
 
