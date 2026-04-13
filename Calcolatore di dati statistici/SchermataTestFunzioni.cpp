@@ -216,7 +216,7 @@ void SchermataTestFunzioni(bool& test_funzioni_statistiche) {
                 }
                 else if (operazioneSelezionata == 15) {
                     map<float, int> freq_ass = operazioni_statistiche.calcoloFrequenzaAssoluta(lista_val);
-                    map<float, int> freq_rel = operazioni_statistiche.calcoloFrequenzaRelativa(freq_ass);
+                    map<float, float> freq_rel = operazioni_statistiche.calcoloFrequenzaRelativa(freq_ass);
                     string out = "Freq.Ass.: ";
                     for (auto& c : freq_ass)
                         out += to_string(c.first) + ":" + to_string(c.second) + "  ";
@@ -227,7 +227,7 @@ void SchermataTestFunzioni(bool& test_funzioni_statistiche) {
                 }
                 else if (operazioneSelezionata == 16) {
                     map<float, int> freq_ass = operazioni_statistiche.calcoloFrequenzaAssoluta(lista_val);
-                    map<float, int> freq_rel = operazioni_statistiche.calcoloFrequenzaRelativa(freq_ass);
+                    map<float, float> freq_rel = operazioni_statistiche.calcoloFrequenzaRelativa(freq_ass);
                     risultatoTesto = to_string(operazioni_statistiche.calcoloPercentile(freq_rel, valore_percentile));
                 }
                 else if (operazioneSelezionata == 17) {

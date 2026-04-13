@@ -30,9 +30,9 @@ class OperazioniStatistiche : public OperazioniBase
 		float calcoloVarianza(vector<float> valori);
 		float calcoloMediana(vector<float> valori);
 		float calcoloModa(vector<float> valori);
-		map<float,int> calcoloFrequenzaRelativa(map<float, int> risultato_frequenza_assoluta);
+		map<float,float> calcoloFrequenzaRelativa(map<float, int> risultato_frequenza_assoluta);
 		map<float,int> calcoloFrequenzaAssoluta(vector<float> valori);
-		float calcoloPercentile(map<float,int> risultato_frequenza_relativa, float valore_percentile);
+		float calcoloPercentile(map<float,float> risultato_frequenza_relativa, float valore_percentile);
 		float calcoloScartoQuadraticoMedio(vector<float> valori);
 		float calcoloScartoSempliceMedio(vector<float> valori);
 		float calcoloGaussiana(float valore_media, float valore_varianza, float valore_x);

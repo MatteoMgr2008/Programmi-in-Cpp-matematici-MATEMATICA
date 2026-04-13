@@ -14,8 +14,10 @@ struct RisultatoOperazione
 	variant<
 		pair<vector<float>, vector<float>>,
 		pair<map<float, int>, float>,
+		pair<map<float, float>, float>,
 		vector<float>,
 		map<float, int>,
+		map<float, float>,
 		vector<vector<float>>
 	> valori_operazione;
 
@@ -23,6 +25,7 @@ struct RisultatoOperazione
 	variant<
 		float, 
 		map<float, int>,
+		map<float, float>,
 		vector<vector<float>>
 	> risultato_operazione;
 };

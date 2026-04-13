@@ -190,8 +190,6 @@ void SchermataUploadDati(bool& upload_file_dati) {
             SafeCalc("06) Media quadratica", [&] { return to_string(ops.calcoloMediaQuadratica(datiScelti)); });
             SafeCalc("07) Deviazione standard", [&] { return to_string(ops.calcoloDeviazioneStandard(datiScelti)); });
             SafeCalc("08) Varianza", [&] { return to_string(ops.calcoloVarianza(datiScelti)); });
-            SafeCalc("09) Mediana", [&] { return to_string(ops.calcoloMediana(datiScelti)); });
-            SafeCalc("10) Moda", [&] { return to_string(ops.calcoloModa(datiScelti)); });
 
             SafeCalc("11) Frequenza assoluta", [&]() -> string {
                 auto freq = ops.calcoloFrequenzaAssoluta(datiScelti);
@@ -208,7 +206,7 @@ void SchermataUploadDati(bool& upload_file_dati) {
                 auto fr = ops.calcoloFrequenzaRelativa(fa);
                 stringstream ss;
                 for (auto const& vr : fr)
-                    ss << "Dato " << vr.first << " -> " << vr.second << "%\n";
+                    ss << "Dato " << vr.first << " -> " << vr.second*100 << "%\n";
                 string r = ss.str();
                 if (!r.empty()) r.pop_back();
                 return r.empty() ? "N/A" : r;

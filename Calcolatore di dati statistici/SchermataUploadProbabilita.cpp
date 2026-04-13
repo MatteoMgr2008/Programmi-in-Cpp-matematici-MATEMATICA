@@ -479,8 +479,8 @@ void SchermataUploadProbabilita(bool& uploadFileProbabilita)
         ImGui::TableSetColumnIndex(1); ImGui::Text("%.4f", chi2);
 
         ImGui::TableNextRow();
-        ImGui::TableSetColumnIndex(0); ImGui::Text("Gradi di liberta (R-1)x(C-1)");
-        ImGui::TableSetColumnIndex(1); ImGui::Text("%d", gdl);
+        ImGui::TableSetColumnIndex(0); ImGui::Text("Controllo indipendenza");
+        ImGui::TableSetColumnIndex(1); ImGui::Text("%.4f", chi2/totale);
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0); ImGui::Text("Totale osservazioni (N)");

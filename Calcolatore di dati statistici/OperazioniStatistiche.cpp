@@ -232,9 +232,9 @@ map<float, int> OperazioniStatistiche::calcoloFrequenzaAssoluta(vector<float> va
 
 // La frequenza relativa è la frequenza assoluta di un valore divisa per il numero totale di valori,
 // che rappresenta la proporzione di volte che un valore si presenta in un insieme di dati
-map<float,int> OperazioniStatistiche::calcoloFrequenzaRelativa(map<float,int> risultato_frequenza_assoluta)
+map<float,float> OperazioniStatistiche::calcoloFrequenzaRelativa(map<float,int> risultato_frequenza_assoluta)
 {	
-	map<float, int> risultato_frequenza_relativa;
+	map<float, float> risultato_frequenza_relativa;
 	for (auto& coppia : risultato_frequenza_assoluta)	
 	{
 		risultato_frequenza_relativa[coppia.first] = (float)coppia.second / risultato_frequenza_assoluta.size();
@@ -245,7 +245,7 @@ map<float,int> OperazioniStatistiche::calcoloFrequenzaRelativa(map<float,int> ri
 
 // Il percentile è il valore al di sotto del quale si trova una certa percentuale di dati 
 // in un insieme ordinato
-float OperazioniStatistiche::calcoloPercentile(map<float,int> risultato_frequenza_relativa, float valore_percentile)
+float OperazioniStatistiche::calcoloPercentile(map<float,float> risultato_frequenza_relativa, float valore_percentile)
 {
 	float frequenza_cumulata = 0.0f;
 	for (auto& coppia : risultato_frequenza_relativa)
@@ -254,12 +254,12 @@ float OperazioniStatistiche::calcoloPercentile(map<float,int> risultato_frequenz
 		if (frequenza_cumulata >= valore_percentile)
 		{
 			float risultato_percentile = coppia.first;
-			this->risultato_corrente = { pair<map<float,int>, float>{risultato_frequenza_relativa, valore_percentile}, "percentile", risultato_percentile };
+			this->risultato_corrente = { pair<map<float,float>, float>{risultato_frequenza_relativa, valore_percentile}, "percentile", risultato_percentile };
 			return risultato_percentile;
 		}
 	}
 	float risultato_percentile = 0.0f;
-	this->risultato_corrente = { pair<map<float,int>, float>{risultato_frequenza_relativa, valore_percentile}, "percentile", risultato_percentile };
+	this->risultato_corrente = { pair<map<float,float>, float>{risultato_frequenza_relativa, valore_percentile}, "percentile", risultato_percentile };
 	return risultato_percentile;
 }
 
