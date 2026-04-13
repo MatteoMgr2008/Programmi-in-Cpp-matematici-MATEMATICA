@@ -13,9 +13,9 @@ using namespace std;
 
 // ── struttura per la tabella bivariata ──────────────────────────────────────
 struct TabellaBivariata {
-    vector<string>          intestazioni_colonne; // es. Fumatore, NonFumatore
-    vector<string>          intestazioni_righe;   // es. M, F
-    vector<vector<float>>   valori;               // frequenze osservate
+    vector<string>          intestazioni_colonne;
+    vector<string>          intestazioni_righe;   
+    vector<vector<float>>   valori;               
 };
 
 struct StatisticheDescrittive {
@@ -507,12 +507,15 @@ void SchermataUploadProbabilita(bool& uploadFileProbabilita)
         {
             ImGui::TableNextRow();
             ImGui::TableSetColumnIndex(0); ImGui::Text("%s", tb.intestazioni_righe[i].c_str());
-            
-            float moda_riga = op_stat.calcoloModa(tb.valori[i]);
-            float mediana_riga = op_stat.calcoloMediana(tb.valori[i]);
 
-            ImGui::TableSetColumnIndex(1); ImGui::Text("%.4f", moda_riga);
-            ImGui::TableSetColumnIndex(2); ImGui::Text("%.4f", mediana_riga);
+            int id_moda = (int)op_stat.calcoloModa(tb.valori[i]);
+            int id_mediana = (int)op_stat.calcoloMediana(tb.valori[i]);
+
+            string moda_riga = (id_moda >= 0 && id_moda < C) ? tb.intestazioni_colonne[id_moda] : "N/A";
+            string mediana_riga = (id_mediana >= 0 && id_mediana < C) ? tb.intestazioni_colonne[id_mediana] : "N/A";
+
+            ImGui::TableSetColumnIndex(1); ImGui::Text("%s", moda_riga.c_str());
+            ImGui::TableSetColumnIndex(2); ImGui::Text("%s", mediana_riga.c_str());
         }
         ImGui::EndTable();
     }
@@ -531,17 +534,20 @@ void SchermataUploadProbabilita(bool& uploadFileProbabilita)
         {
             ImGui::TableNextRow();
             ImGui::TableSetColumnIndex(0); ImGui::Text("%s", tb.intestazioni_colonne[j].c_str());
-            
+
             vector<float> colonna;
             for(int i = 0; i < R; i++) {
                 colonna.push_back(tb.valori[i][j]);
             }
 
-            float moda_colonna = op_stat.calcoloModa(colonna);
-            float mediana_colonna = op_stat.calcoloMediana(colonna);
+            int id_moda = (int)op_stat.calcoloModa(colonna);
+            int id_mediana = (int)op_stat.calcoloMediana(colonna);
 
-            ImGui::TableSetColumnIndex(1); ImGui::Text("%.4f", moda_colonna);
-            ImGui::TableSetColumnIndex(2); ImGui::Text("%.4f", mediana_colonna);
+            string moda_colonna = (id_moda >= 0 && id_moda < R) ? tb.intestazioni_righe[id_moda] : "N/A";
+            string mediana_colonna = (id_mediana >= 0 && id_mediana < R) ? tb.intestazioni_righe[id_mediana] : "N/A";
+
+            ImGui::TableSetColumnIndex(1); ImGui::Text("%s", moda_colonna.c_str());
+            ImGui::TableSetColumnIndex(2); ImGui::Text("%s", mediana_colonna.c_str());
         }
         ImGui::EndTable();
     }

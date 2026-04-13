@@ -177,50 +177,40 @@ float OperazioniStatistiche::calcoloVarianza(vector<float> valori)
 }
 
 // La mediana è il valore che si trova al centro di un insieme di dati ordinati,
-// che divide la distribuzione dei dati in due parti uguali
+// in un vettore di frequenze restituisce l'indice corrispondente
 float OperazioniStatistiche::calcoloMediana(vector<float> valori)
 {
-	// ordinamento dei valori per il calcolo della mediana
+	float totale = 0.0f;
+	for (float v : valori) totale += v;
+
+	float cumulata = 0.0f;
+	float risultato_mediana = 0.0f;
 	for (int i = 0; i < (int)valori.size(); i++)
 	{
-		for (int j = 0; j < (int)valori.size() - 1; j++)
+		cumulata += valori[i];
+		if (cumulata >= totale / 2.0f)
 		{
-			if (valori[j] > valori[j + 1])
-			{
-				swap(valori[j], valori[j + 1]); // ordinamento dei valori con l'algoritmo bubble sort (scambio di posizione tra i valori)
-			}
+			risultato_mediana = (float)i;
+			break;
 		}
-	}
-
-	// calcolo della mediana
-	float risultato_mediana = 0.0f;
-	// Se il numero di valori è pari, la mediana è la media dei due valori centrali
-	if (valori.size() % 2 == 0)
-	{
-		risultato_mediana = (valori[valori.size() / 2 - 1] + valori[valori.size() / 2]) / 2.0f;
-	}
-	// Se il numero di valori è dispari, la mediana è il valore centrale
-	else
-	{
-		risultato_mediana = valori[valori.size() / 2];
 	}
 
 	this->risultato_corrente = { valori, "mediana", risultato_mediana };
 	return risultato_mediana;
 }
 
-// La moda è il valore che si presenta con maggiore frequenza in un insieme di dati
+// La moda è il valore che si presenta con maggiore frequenza in un insieme di dati,
+// in un vettore di frequenze restituisce l'indice del massimo
 float OperazioniStatistiche::calcoloModa(vector<float> valori)
 {
-	map<float, int> risultato_frequenza_assoluta = calcoloFrequenzaAssoluta(valori);
+	float frequenza_massima = -1.0f;
 	float risultato_moda = 0.0f;
-	int frequenza_massima = 0;
-	for (auto& coppia : risultato_frequenza_assoluta)
+	for (int i = 0; i < (int)valori.size(); i++)
 	{
-		if (coppia.second > frequenza_massima)
+		if (valori[i] > frequenza_massima)
 		{
-			frequenza_massima = coppia.second;
-			risultato_moda = coppia.first;
+			frequenza_massima = valori[i];
+			risultato_moda = (float)i;
 		}
 	}
 	this->risultato_corrente = { valori, "moda", risultato_moda };
