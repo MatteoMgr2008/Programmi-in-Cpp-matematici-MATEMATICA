@@ -188,6 +188,13 @@
   <ItemGroup>
     <Image Include="Calcolatore di dati statistici.ico" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\..\..\..\..\..\Downloads\Tabella esercizio 1 della simulazione del modulo 5.csv" />
+    <None Include="..\..\..\..\..\..\..\Downloads\Tabella esercizio 1 della simulazione del modulo 5.xlsx" />
+    <None Include="..\..\..\..\..\..\..\Downloads\Tabella esercizio 2 della simulazione del modulo 5.csv" />
+    <None Include="..\..\..\..\..\..\..\Downloads\Tabella esercizio 2 della simulazione del modulo 5.xlsx" />
+    <None Include="dati_statistici_pazienti_esempio.csv" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

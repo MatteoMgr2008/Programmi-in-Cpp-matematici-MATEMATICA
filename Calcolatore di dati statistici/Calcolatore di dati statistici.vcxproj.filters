@@ -124,4 +124,21 @@
       <Filter>File di risorse</Filter>
     </Image>
   </ItemGroup>
+  <ItemGroup>
+    <None Include="dati_statistici_pazienti_esempio.csv">
+      <Filter>File di origine</Filter>
+    </None>
+    <None Include="..\..\..\..\..\..\..\Downloads\Tabella esercizio 1 della simulazione del modulo 5.csv">
+      <Filter>File di origine</Filter>
+    </None>
+    <None Include="..\..\..\..\..\..\..\Downloads\Tabella esercizio 1 della simulazione del modulo 5.xlsx">
+      <Filter>File di origine</Filter>
+    </None>
+    <None Include="..\..\..\..\..\..\..\Downloads\Tabella esercizio 2 della simulazione del modulo 5.csv">
+      <Filter>File di origine</Filter>
+    </None>
+    <None Include="..\..\..\..\..\..\..\Downloads\Tabella esercizio 2 della simulazione del modulo 5.xlsx">
+      <Filter>File di origine</Filter>
+    </None>
+  </ItemGroup>
 </Project>
