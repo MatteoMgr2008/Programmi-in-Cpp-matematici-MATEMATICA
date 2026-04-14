@@ -614,9 +614,9 @@ void SchermataUploadDati(bool& upload_file_dati) {
         // Sezione: grafico a torta
         static float radiusPieChart = 100.0f;
 
-        ImGui::Text("Grafico a Torta — Feature: %s",
+        ImGui::Text("Grafico a torta — colonna: %s",
             datasetCaricato.headers[colonnaSelezionata].c_str());
-        ImGui::SliderFloat("Zoom (Raggio)", &radiusPieChart, 50.0f, 400.0f);
+        ImGui::SliderFloat("Zoom (raggio)", &radiusPieChart, 50.0f, 400.0f);
         ImGui::Spacing();
 
         ImDrawList* draw_list = ImGui::GetWindowDrawList();
@@ -735,10 +735,8 @@ void SchermataUploadDati(bool& upload_file_dati) {
 
         ImGui::Spacing();
 
-        // ------------------------------------------------------------------
         // Anteprima dati testuali
-        // ------------------------------------------------------------------
-        if (ImGui::TreeNode("Mostra i dati per la feature corrente in formato testuale")) {
+        if (ImGui::TreeNode("Mostra i dati per la colonna corrente in formato testuale")) {
             ImGui::BeginChild("ScrollingRegion", ImVec2(0, 200), true);
             for (size_t i = 0; i < datiScelti.size(); i++)
                 ImGui::Text("Dato [%zu] = %f", i + 1, datiScelti[i]);
