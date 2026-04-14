@@ -125,7 +125,13 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
             // Mostra la schermata per l'upload dei file di probabilità
 			SchermataUploadProbabilita(upload_file_probabilita);
         }
-        else if (uscita_software == true) {
+        else {
+            // Mostra la schermata principale (homepage)
+            Homepage(upload_file_dati, visualizza_funzioni_statistiche, uscita_software, test_funzioni_statistiche, upload_file_probabilita);
+        }
+
+		// Condizione per mostrare il popup di conferma dell'uscita dal software in qualsiasi schermata ci si trovi
+        if (uscita_software == true) {
             // Mostra la schermata per l'uscita dal software
 
 			// Variabili statiche per gestire l'animazione di apertura e chiusura del popup di uscita dal software
@@ -148,19 +154,16 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
                 }
             }
 
-			// Mostra la schermata principale (homepage) sotto il popup di uscita dal software, in modo da non lasciare lo sfondo vuoto
-            Homepage(upload_file_dati, visualizza_funzioni_statistiche, uscita_software, test_funzioni_statistiche, upload_file_probabilita);
-
 			// Variabili necessarie per la schermata di uscita dal software
             string messaggio_conferma_uscita = "Sei sicuro di voler uscire dal software?";
 			float grandezza_font_messaggio_uscita = 1.2f; // Grandezza del font per il messaggio di conferma dell'uscita dal software
-			float grandezza_font_pulsante_uscita = 1.0f; // Grandezza del font per i pulsanti di conferma e annullamento dell'uscita dal software
-			float larghezza_pulsante_uscita = 150.0f; // Larghezza dei pulsanti di uscita del popup
-			float altezza_pulsante_uscita = 40.0f; // Altezza dei pulsanti di uscita del popup
-			float spaziatura_pulsante_uscita = 8.0f; // Spaziatura tra i pulsanti di uscita del popup
+			float grandezza_font_pulsante_uscita = 1.1f; // Grandezza del font per i pulsanti di conferma e annullamento dell'uscita dal software
             float larghezza_popup_uscita = 684.0f; // Larghezza del popup di uscita
+            float larghezza_pulsante_uscita = 160.0f; // Larghezza dei pulsanti di uscita del popup
+			float altezza_pulsante_uscita = 40.0f; // Altezza dei pulsanti di uscita del popup
             float altezza_popup_uscita = 103.0f; // Altezza del popup di uscita
-            
+            float spaziatura_pulsante_uscita = 8.0f; // Spaziatura tra i pulsanti di uscita del popup
+
 			// Apre un popup per confermare l'uscita dal software
             ImGui::OpenPopup("Uscita dal software");
 
@@ -186,18 +189,21 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
             
 			        // Imposta i pulsanti di conferma e annullamento per l'uscita dal software
 			        ImGui::SetWindowFontScale(grandezza_font_pulsante_uscita); // imposta la grandezza del font per i pulsanti di uscita
+                    float altezza_testo_pulsante_uscita = ImGui::GetTextLineHeight() * grandezza_font_pulsante_uscita; // Altezza del testo all'interno dei pulsanti di uscita del popup (in base alla grandezza del font)
+                    float padding_verticale_popup_uscita = (altezza_pulsante_uscita - altezza_testo_pulsante_uscita) / 2.0f; // Padding verticale interno del popup di uscita (spazio tra il bordo del popup e il contenuto)
                     ImGui::SetCursorPosX((larghezza_popup_uscita - larghezza_pulsante_uscita * 2 - spaziatura_pulsante_uscita) / 2); // Centra i bottoni orizzontalmente nella finestra di uscita
-                    
+
                     // Pulsante "Sì, confermo" - colore verde
                     ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.18f, 0.55f, 0.18f, 1.0f)); // Verde normale
                     ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.22f, 0.70f, 0.22f, 1.0f)); // Verde più chiaro all'hover
                     ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.13f, 0.40f, 0.13f, 1.0f)); // Verde più scuro quando premuto
                     ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 10.0f); // Rounding di base dei bordi del pulsante
+                    ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0.0f, padding_verticale_popup_uscita));
                     if (ImGui::Button("Sì, confermo", ImVec2(larghezza_pulsante_uscita, altezza_pulsante_uscita))) {
 				        glfwSetWindowShouldClose(window, GLFW_TRUE); // Chiude la finestra e termina il programma
 			        }
                     ImGui::PopStyleColor(3); // Rimuove i 3 colori del pulsante verde
-                    ImGui::PopStyleVar(); // Rimuove il rounding dei bordi del pulsante
+                    ImGui::PopStyleVar(2); // Rimuove il rounding dei bordi del pulsante
 					ImGui::SameLine(0.0f, spaziatura_pulsante_uscita); // Aggiunge una spaziatura orizzontale tra i due pulsanti
 
                     // Pulsante "No, annulla" - colore rosso
@@ -205,11 +211,12 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
                     ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.85f, 0.22f, 0.22f, 1.0f)); // Rosso più chiaro all'hover
                     ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.55f, 0.13f, 0.13f, 1.0f)); // Rosso più scuro quando premuto
                     ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 10.0f); // Rounding di base dei bordi del pulsante
+                    ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0.0f, padding_verticale_popup_uscita));
                     if (ImGui::Button("No, annulla", ImVec2(larghezza_pulsante_uscita, altezza_pulsante_uscita))) {
 						chiusura_popup_in_corso = true; // Avvia l'animazione di chiusura del popup di uscita
 			        }
                     ImGui::PopStyleColor(3); // Rimuove i 3 colori del pulsante rosso
-                    ImGui::PopStyleVar(); // Rimuove il rounding dei bordi del pulsante
+                    ImGui::PopStyleVar(2); // Rimuove il rounding dei bordi del pulsante
                 }
 
 			    // Termina il popup di uscita dal software
@@ -218,10 +225,6 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 
 			// Rimuove lo stile del popup di uscita dal software
             ImGui::PopStyleColor();
-        }
-        else {
-			// Mostra la schermata principale (homepage)
-			Homepage(upload_file_dati, visualizza_funzioni_statistiche, uscita_software, test_funzioni_statistiche, upload_file_probabilita);
         }
 
         // Rendering ImGui

@@ -8,11 +8,14 @@ void SchermataVisualizzaFunzioni(bool& visualizza_funzioni_statistiche) {
     ImGui::SetNextWindowPos(ImVec2(0, 0), ImGuiCond_Always);
     ImGui::SetNextWindowSize(ImGui::GetIO().DisplaySize, ImGuiCond_Always);
 
-    ImGui::Begin("Lista delle Funzioni", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse);
+    ImGui::Begin("Lista delle funzioni base e statistiche esistenti", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse);
 
-    if (ImGui::Button("Torna alla Homepage")) {
-        visualizza_funzioni_statistiche = false; // Torna alla home
+    // Pulsante per tornare alla Homepage
+    ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 10.0f); // Rounding di base dei bordi del pulsante
+    if (ImGui::Button(ICON_FA_ARROW_LEFT "  Torna alla Homepage")) {
+        visualizza_funzioni_statistiche = false;
     }
+    ImGui::PopStyleVar();
 
     ImGui::Spacing();
     ImGui::Separator();

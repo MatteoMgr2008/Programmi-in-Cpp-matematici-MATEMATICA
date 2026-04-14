@@ -41,11 +41,14 @@ vector<vector<float>> ConvertitoreMatriceDaFloat(const string& input) {
 void SchermataTestFunzioni(bool& test_funzioni_statistiche) {
     ImGui::SetNextWindowPos(ImVec2(0, 0), ImGuiCond_Always);
     ImGui::SetNextWindowSize(ImGui::GetIO().DisplaySize, ImGuiCond_Always);
-    ImGui::Begin("Test Funzioni", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse);
+    ImGui::Begin("Schermata test funzioni base e statistiche", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse);
 
+	// Pulsante per tornare alla Homepage
+    ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 10.0f); // Rounding di base dei bordi del pulsante
     if (ImGui::Button(ICON_FA_ARROW_LEFT "  Torna alla Homepage")) {
         test_funzioni_statistiche = false;
     }
+    ImGui::PopStyleVar();
 
     ImGui::Spacing();
     ImGui::Spacing();
@@ -161,7 +164,8 @@ void SchermataTestFunzioni(bool& test_funzioni_statistiche) {
 
 	// Pulsante per calcolare il risultato in base all'operazione selezionata dal menù a tendina
     if (operazioneSelezionata != 0) {
-        if (ImGui::Button("Calcola Risultato")) {
+        ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 10.0f); // Rounding di base dei bordi del pulsante
+        if (ImGui::Button("Calcola il risultato")) {
             try {
                 vector<float> lista_val = ConvertitoreListaDaFloat(string(inputValori));
                 vector<float> lista_val_x = ConvertitoreListaDaFloat(string(inputValoriX));
@@ -182,7 +186,7 @@ void SchermataTestFunzioni(bool& test_funzioni_statistiche) {
                 }
                 else if (lista_val.empty() &&
                     operazioneSelezionata >= 5 && operazioneSelezionata <= 18) {
-                    risultatoTesto = "Errore: lista di valori vuota o non valida.";
+                    risultatoTesto = "Errore: la lista di valori è vuota oppure non valida.";
                 }
                 else if (operazioneSelezionata == 5) {
                     risultatoTesto = to_string(operazioni_statistiche.calcoloSommatoria(lista_val));
@@ -217,10 +221,10 @@ void SchermataTestFunzioni(bool& test_funzioni_statistiche) {
                 else if (operazioneSelezionata == 15) {
                     map<float, int> freq_ass = operazioni_statistiche.calcoloFrequenzaAssoluta(lista_val);
                     map<float, float> freq_rel = operazioni_statistiche.calcoloFrequenzaRelativa(freq_ass);
-                    string out = "Freq.Ass.: ";
+                    string out = "Frequenza assoluta: ";
                     for (auto& c : freq_ass)
                         out += to_string(c.first) + ":" + to_string(c.second) + "  ";
-                    out += " | Freq.Rel.: ";
+                    out += " | Frequenza relativa: ";
                     for (auto& c : freq_rel)
                         out += to_string(c.first) + ":" + to_string(c.second) + "  ";
                     risultatoTesto = out;
@@ -241,33 +245,33 @@ void SchermataTestFunzioni(bool& test_funzioni_statistiche) {
                 }
                 else if (operazioneSelezionata == 20) {
                     if (lista_val_x.empty() || lista_val_y.empty())
-                        risultatoTesto = "Errore: lista X o Y vuota.";
+                        risultatoTesto = "Errore: la lista X o Y è vuota.";
                     else if (lista_val_x.size() != lista_val_y.size())
-                        risultatoTesto = "Errore: lista X e Y devono avere la stessa lunghezza.";
+                        risultatoTesto = "Errore: le liste X e Y devono avere la stessa lunghezza.";
                     else
                         risultatoTesto = to_string(operazioni_statistiche.calcoloCovarianza(lista_val_x, lista_val_y));
                 }
                 else if (operazioneSelezionata == 21) {
                     if (lista_val_x.empty() || lista_val_y.empty())
-                        risultatoTesto = "Errore: lista X o Y vuota.";
+                        risultatoTesto = "Errore: la lista X o Y è vuota.";
                     else if (lista_val_x.size() != lista_val_y.size())
-                        risultatoTesto = "Errore: lista X e Y devono avere la stessa lunghezza.";
+                        risultatoTesto = "Errore: le liste X e Y devono avere la stessa lunghezza.";
                     else
                         risultatoTesto = to_string(operazioni_statistiche.calcoloCoefficienteDiCorrelazioneDiBravaisPearson(lista_val_x, lista_val_y));
                 }
                 else if (operazioneSelezionata == 22) {
                     if (matrice.empty())
-                        risultatoTesto = "Errore: matrice vuota o non valida.";
+                        risultatoTesto = "Errore: la matrice è vuota oppure non valida.";
                     else
                         risultatoTesto = to_string(operazioni_statistiche.calcoloDistribuzioneChiQuadrato(matrice));
                 }
                 else if (operazioneSelezionata == 23) {
                     if (matrice.empty()) {
-                        risultatoTesto = "Errore: matrice vuota o non valida.";
+                        risultatoTesto = "Errore: la matrice è vuota oppure non valida.";
                     }
                     else {
                         vector<vector<float>> tabella = operazioni_statistiche.calcoloTabellaValoriAttesi(matrice);
-                        string out = "Tabella valori attesi: ";
+                        string out = "Tabella dei valori attesi: ";
                         for (int i = 0; i < (int)tabella.size(); i++) {
                             out += "[";
                             for (int j = 0; j < (int)tabella[i].size(); j++) {
@@ -281,11 +285,11 @@ void SchermataTestFunzioni(bool& test_funzioni_statistiche) {
                 }
 				else if (operazioneSelezionata == 24) {
                     if (matrice.empty()) {
-                        risultatoTesto = "Errore: matrice vuota o non valida.";
+                        risultatoTesto = "Errore: la matrice è vuota oppure non valida.";
                     }
                     else {
                         vector<vector<float>> tabella_prob = operazioni_statistiche.calcoloTabellaProbabilita(matrice);
-                        string out = "Tabella probabilità: ";
+                        string out = "Tabella delle probabilità: ";
                         for (int i = 0; i < (int)tabella_prob.size(); i++) {
                             out += "[";
                             for (int j = 0; j < (int)tabella_prob[i].size(); j++) {
@@ -299,7 +303,7 @@ void SchermataTestFunzioni(bool& test_funzioni_statistiche) {
                 }
                 else if (operazioneSelezionata == 25) {
                     if (matrice.empty()) {
-                        risultatoTesto = "Errore: matrice vuota o non valida.";
+                        risultatoTesto = "Errore: la matrice è vuota oppure non valida.";
                     }
                     else {
                         vector<vector<float>> distribuzione_marginale = operazioni_statistiche.calcoloDistribuzioneMarginale(matrice);
@@ -317,7 +321,7 @@ void SchermataTestFunzioni(bool& test_funzioni_statistiche) {
                 }
                 else if (operazioneSelezionata == 26) {
                     if (matrice.empty()) {
-                        risultatoTesto = "Errore: matrice vuota o non valida.";
+                        risultatoTesto = "Errore: la matrice è vuota oppure non valida.";
                     }
                     else {
                         vector<vector<float>> probabilita_marginale = operazioni_statistiche.calcoloProbabilitaMarginale(matrice);
@@ -334,14 +338,17 @@ void SchermataTestFunzioni(bool& test_funzioni_statistiche) {
                     }
                 }
             }
+			// Gestione di eventuali errori durante il calcolo
             catch (...) {
                 risultatoTesto = "Errore durante il calcolo.";
             }
-        }
+		}
+		// Fine del pulsante per calcolare il risultato
+        ImGui::PopStyleVar();
     }
 
     ImGui::Spacing();
-    ImGui::TextColored(ImVec4(0.2f, 1.0f, 0.2f, 1.0f), "Risultato: %s", risultatoTesto.c_str());
+	ImGui::TextColored(ImVec4(0.2f, 1.0f, 0.2f, 1.0f), "Risultato: %s", risultatoTesto.c_str()); // Visualizza il risultato del calcolo in verde
 
     ImGui::End();
 }

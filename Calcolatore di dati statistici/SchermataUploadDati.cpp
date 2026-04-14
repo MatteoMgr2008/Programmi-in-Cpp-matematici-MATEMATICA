@@ -17,7 +17,7 @@ struct CsvData {
     vector<vector<float>> columns;
 };
 
-// Apre Esplora File e restituisce il percorso scelto
+// Apre Esplora File e restituisce il percorso scelto (path <percorso del file>) dall'utente, oppure stringa vuota se l'utente annulla l'operazione.
 inline string ApriEsploraFile() {
     OPENFILENAMEA ofn;
     CHAR szFile[260] = { 0 };
@@ -36,7 +36,7 @@ inline string ApriEsploraFile() {
     return "";
 }
 
-// Legge un CSV tabellare con separatore ';'
+// Legge un CSV tabellare con separatore ';' e restituisce una struttura CsvData contenente intestazioni e colonne di float
 inline CsvData LeggiFileCSVTabellare(const string& percorso_file) {
     CsvData dataset;
     ifstream file(percorso_file);
@@ -56,7 +56,7 @@ inline CsvData LeggiFileCSVTabellare(const string& percorso_file) {
             cella.erase(cella.find_last_not_of(" \t\r\n") + 1);
 
             if (is_first_line) {
-                dataset.headers.push_back(cella.empty() ? "Feature " + to_string(col_idx + 1) : cella);
+                dataset.headers.push_back(cella.empty() ? "Colonna " + to_string(col_idx + 1) : cella);
                 dataset.columns.push_back(vector<float>());
             }
             else {
@@ -86,14 +86,18 @@ void SchermataUploadDati(bool& upload_file_dati) {
 
     ImGui::SetNextWindowPos(ImVec2(0, 0), ImGuiCond_Always);
     ImGui::SetNextWindowSize(ImGui::GetIO().DisplaySize, ImGuiCond_Always);
-    ImGui::Begin("Caricamento File CSV", nullptr,
+    ImGui::Begin("Importazione file CSV per analisi dati statistici", nullptr,
         ImGuiWindowFlags_NoTitleBar |
         ImGuiWindowFlags_NoResize |
         ImGuiWindowFlags_NoMove |
         ImGuiWindowFlags_NoCollapse);
 
-    if (ImGui::Button("Torna alla homepage"))
+    // Pulsante per tornare alla Homepage
+    ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 10.0f); // Rounding di base dei bordi del pulsante
+    if (ImGui::Button(ICON_FA_ARROW_LEFT "  Torna alla Homepage")) {
         upload_file_dati = false;
+    }
+    ImGui::PopStyleVar();
 
     ImGui::Spacing();
     ImGui::Separator();

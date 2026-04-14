@@ -269,8 +269,12 @@ void SchermataUploadProbabilita(bool& uploadFileProbabilita)
         ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize |
         ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse);
 
-    if (ImGui::Button("Torna alla Homepage"))
+    // Pulsante per tornare alla Homepage
+    ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 10.0f); // Rounding di base dei bordi del pulsante
+    if (ImGui::Button(ICON_FA_ARROW_LEFT "  Torna alla Homepage")) {
         uploadFileProbabilita = false;
+    }
+    ImGui::PopStyleVar();
 
     ImGui::Spacing(); ImGui::Separator(); ImGui::Spacing();
     ImGui::Text("Carica un file CSV con tabella di contingenza bivariata.");
