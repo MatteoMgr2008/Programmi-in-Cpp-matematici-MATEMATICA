@@ -182,8 +182,150 @@ void Homepage(bool& upload_file_dati, bool& visualizza_funzioni_statistiche, boo
 	}
     ImGui::PopStyleColor(3); // Ripristina i colori originali
 
-	// Ripristina lo stile originale dei pulsanti (rounding)
+    // Ripristina lo stile originale dei pulsanti (rounding)
     ImGui::PopStyleVar();
+
+    // Footer fisso con margine dal fondo per i crediti del software
+    float altezza_footer_crediti_software = 30.0f;
+    float distanza_margine_finestra_software = 2.0f;
+    float posizione_Y_footer = ImGui::GetWindowHeight() - altezza_footer_crediti_software - distanza_margine_finestra_software;
+    ImGui::SetCursorPosY(posizione_Y_footer);
+
+    ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(0.08f, 0.08f, 0.08f, 1.0f));
+    ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 1.0f, 1.0f, 1.0f));
+
+    ImGui::BeginChild("FooterBar", ImVec2(ImGui::GetWindowWidth(), altezza_footer_crediti_software), false,
+        ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
+
+    // Dimensione della finestra del software (usata per posizionare il footer dei crediti del software)
+    ImVec2 dimensione_finestra_software = ImGui::GetWindowSize();
+
+    // Calcola la posizione Y centrata per il testo nella barra footer
+    float posizione_Y_testo_footer = (altezza_footer_crediti_software - ImGui::GetFontSize()) * 0.5f;
+
+    // Testo iniziale
+    string Testo_crediti_inizio = "Il software calcolatore di dati statistici è un software libero (open source). Il codice sorgente e' disponibile su ";
+    string Testo_crediti_mezzo = " | Sviluppato e ideato da Matteo Magrino (";
+    string Testo_crediti_fine = ")";
+
+    // Calcola la larghezza totale per centrare tutto
+    float larghezza_testo_crediti_inizio = ImGui::CalcTextSize(Testo_crediti_inizio.c_str()).x;
+    float larghezza_testo_crediti_github = ImGui::CalcTextSize("GitHub").x;
+    float larghezza_testo_crediti_mezzo = ImGui::CalcTextSize(Testo_crediti_mezzo.c_str()).x;
+    float larghezza_testo_crediti_nome = ImGui::CalcTextSize("MatteoMgr2008").x;
+    float larghezza_testo_crediti_fine = ImGui::CalcTextSize(Testo_crediti_fine.c_str()).x;
+    float larghezza_testo_crediti_totale = larghezza_testo_crediti_inizio + larghezza_testo_crediti_github + larghezza_testo_crediti_mezzo + larghezza_testo_crediti_nome + larghezza_testo_crediti_fine;
+    
+    // Posiziona il cursore per centrare tutto
+    float posizione_x_iniziale_crediti = (dimensione_finestra_software.x - larghezza_testo_crediti_totale) * 0.5f;
+    ImGui::SetCursorPosX(posizione_x_iniziale_crediti);
+
+    // Colori per i link (normale e hover)
+    ImVec4 colore_link_base = ImVec4(0.4f, 0.7f, 1.0f, 1.0f);
+    ImVec4 colore_link_hover = ImVec4(0.6f, 0.8f, 1.0f, 1.0f);
+
+    ImGui::SetCursorPosY(posizione_Y_testo_footer);
+
+    // Testo iniziale
+    ImGui::Text("%s", Testo_crediti_inizio.c_str());
+    // Link della repository di GitHub (stessa riga)
+    ImGui::SameLine(0, 0); // Senza spaziatura
+
+    ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0, 0, 0, 0)); // Colore trasparente
+    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0, 0, 0, 0)); // Colore trasparente
+    ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0, 0, 0, 0)); // Colore trasparente
+	ImGui::PushStyleColor(ImGuiCol_Text, colore_link_base); // Colore del testo per il link di GitHub
+    ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0, 0)); // Rimuove il padding
+    ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 0.0f); // Nessun bordo
+
+	string link_repository_GitHub = "https://github.com/MatteoMgr2008/Programmi-in-Cpp-matematici-MATEMATICA"; // Testo del link della repository di GitHub del software
+    if (ImGui::Button("GitHub")) {
+        // Permette l'apertura del link al repository GitHub indicato nel link
+#ifdef _WIN32
+        string comando = "start " + link_repository_GitHub;
+        system(comando.c_str());
+#elif __linux__
+        string comando = "xdg-open " + link_repository_GitHub;
+        system(comando.c_str());
+#elif __APPLE__
+        string comando = "open " + link_repository_GitHub;
+        system(comando.c_str());
+#endif
+    }
+
+    // Cambia colore se il mouse è sopra il link di GitHub
+    if (ImGui::IsItemHovered()) {
+        ImGui::PushStyleColor(ImGuiCol_Text, colore_link_hover);
+        ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
+        ImVec2 min = ImGui::GetItemRectMin();
+        ImVec2 max = ImGui::GetItemRectMax();
+        ImGui::GetWindowDrawList()->AddLine(
+            ImVec2(min.x, max.y),
+            ImVec2(max.x, max.y),
+            ImColor(0.0f, 0.6f, 1.0f, 1.0f),
+            1.0f
+        );
+        ImGui::PopStyleColor();
+    }
+
+	// Ripristina lo stile originale per il link di GitHub
+    ImGui::PopStyleVar(2);
+    ImGui::PopStyleColor(4);
+
+	// Testo di mezzo del footer (stessa riga)
+    ImGui::SameLine(0, 0);
+    ImGui::Text("%s", Testo_crediti_mezzo.c_str());
+
+	// Link nome utente GitHub (stessa riga)
+    ImGui::SameLine(0, 0);
+
+    ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0, 0, 0, 0)); // Trasparente
+    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0, 0, 0, 0)); // Trasparente
+    ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0, 0, 0, 0)); // Trasparente
+    ImGui::PushStyleColor(ImGuiCol_Text, colore_link_base);
+    ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0, 0)); // Rimuove il padding
+    ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 0.0f); // Nessun bordo
+
+    string link_profilo_GitHub = "https://github.com/MatteoMgr2008"; // Testo del link del profilo di GitHub
+    if (ImGui::Button("MatteoMgr2008")) {
+        // Permette l'apertura del link riguardante il profilo GitHub "MatteoMgr2008" (quello dello sviluppatore)
+#ifdef _WIN32
+        string comando = "start " + link_profilo_GitHub;
+        system(comando.c_str());
+#elif __linux__
+        string comando = "xdg-open " + link_profilo_GitHub;
+        system(comando.c_str());
+#elif __APPLE__
+        string comando = "open " + link_profilo_GitHub;
+        system(comando.c_str());
+#endif
+    }
+
+    // Cambia colore se il mouse è sopra il link del nome
+    if (ImGui::IsItemHovered()) {
+        ImGui::PushStyleColor(ImGuiCol_Text, colore_link_hover);
+        ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
+        ImVec2 min = ImGui::GetItemRectMin();
+        ImVec2 max = ImGui::GetItemRectMax();
+        ImGui::GetWindowDrawList()->AddLine(
+            ImVec2(min.x, max.y),
+            ImVec2(max.x, max.y),
+            ImColor(0.0f, 0.6f, 1.0f, 1.0f),
+            1.0f
+        );
+        ImGui::PopStyleColor();
+    }
+
+	ImGui::PopStyleVar(2); // Ripristina le variabili di stile originali
+    ImGui::PopStyleColor(4); // Ripristina i colori originali
+
+    // Testo finale
+    ImGui::SameLine(0, 0);
+	ImGui::Text("%s", Testo_crediti_fine.c_str()); // Testo finale del footer (sulla stessa riga)
+
+    // Fine della barra footer
+	ImGui::EndChild(); // Termina la finestra del footer
+    ImGui::PopStyleColor(2); // Ripristina i colori del footer (sfondo e testo)
     
 	// Comando di conclusione della schermata Homepage
     ImGui::End();
