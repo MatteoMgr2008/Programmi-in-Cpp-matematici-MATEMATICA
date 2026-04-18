@@ -204,16 +204,16 @@ void Homepage(bool& upload_file_dati, bool& visualizza_funzioni_statistiche, boo
     float posizione_Y_testo_footer = (altezza_footer_crediti_software - ImGui::GetFontSize()) * 0.5f;
 
     // Testo iniziale
-    string Testo_crediti_inizio = "Il software calcolatore di dati statistici è un software libero (open source). Il codice sorgente e' disponibile su ";
-    string Testo_crediti_mezzo = " | Sviluppato e ideato da Matteo Magrino (";
-    string Testo_crediti_fine = ")";
+    string testo_crediti_inizio = "Il software calcolatore di dati statistici è un software libero (open source). Il codice sorgente e' disponibile su ";
+    string testo_crediti_mezzo = " | Sviluppato e ideato da Matteo Magrino (";
+    string testo_crediti_fine = ")";
 
     // Calcola la larghezza totale per centrare tutto
-    float larghezza_testo_crediti_inizio = ImGui::CalcTextSize(Testo_crediti_inizio.c_str()).x;
+    float larghezza_testo_crediti_inizio = ImGui::CalcTextSize(testo_crediti_inizio.c_str()).x;
     float larghezza_testo_crediti_github = ImGui::CalcTextSize("GitHub").x;
-    float larghezza_testo_crediti_mezzo = ImGui::CalcTextSize(Testo_crediti_mezzo.c_str()).x;
+    float larghezza_testo_crediti_mezzo = ImGui::CalcTextSize(testo_crediti_mezzo.c_str()).x;
     float larghezza_testo_crediti_nome = ImGui::CalcTextSize("MatteoMgr2008").x;
-    float larghezza_testo_crediti_fine = ImGui::CalcTextSize(Testo_crediti_fine.c_str()).x;
+    float larghezza_testo_crediti_fine = ImGui::CalcTextSize(testo_crediti_fine.c_str()).x;
     float larghezza_testo_crediti_totale = larghezza_testo_crediti_inizio + larghezza_testo_crediti_github + larghezza_testo_crediti_mezzo + larghezza_testo_crediti_nome + larghezza_testo_crediti_fine;
     
     // Posiziona il cursore per centrare tutto
@@ -227,7 +227,8 @@ void Homepage(bool& upload_file_dati, bool& visualizza_funzioni_statistiche, boo
     ImGui::SetCursorPosY(posizione_Y_testo_footer);
 
     // Testo iniziale
-    ImGui::Text("%s", Testo_crediti_inizio.c_str());
+    ImGui::Text("%s", testo_crediti_inizio.c_str());
+
     // Link della repository di GitHub (stessa riga)
     ImGui::SameLine(0, 0); // Senza spaziatura
 
@@ -242,14 +243,14 @@ void Homepage(bool& upload_file_dati, bool& visualizza_funzioni_statistiche, boo
     if (ImGui::Button("GitHub")) {
         // Permette l'apertura del link al repository GitHub indicato nel link
 #ifdef _WIN32
-        string comando = "start " + link_repository_GitHub;
-        system(comando.c_str());
+        string comando_apertura_link = "start " + link_repository_GitHub;
+        system(comando_apertura_link.c_str());
 #elif __linux__
-        string comando = "xdg-open " + link_repository_GitHub;
-        system(comando.c_str());
+        string comando_apertura_link = "xdg-open " + link_repository_GitHub;
+        system(comando_apertura_link.c_str());
 #elif __APPLE__
-        string comando = "open " + link_repository_GitHub;
-        system(comando.c_str());
+        string comando_apertura_link = "open " + link_repository_GitHub;
+        system(comando_apertura_link.c_str());
 #endif
     }
 
@@ -257,11 +258,11 @@ void Homepage(bool& upload_file_dati, bool& visualizza_funzioni_statistiche, boo
     if (ImGui::IsItemHovered()) {
         ImGui::PushStyleColor(ImGuiCol_Text, colore_link_hover);
         ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
-        ImVec2 min = ImGui::GetItemRectMin();
-        ImVec2 max = ImGui::GetItemRectMax();
+        ImVec2 angolo_minimo = ImGui::GetItemRectMin();
+        ImVec2 angolo_massimo = ImGui::GetItemRectMax();
         ImGui::GetWindowDrawList()->AddLine(
-            ImVec2(min.x, max.y),
-            ImVec2(max.x, max.y),
+            ImVec2(angolo_minimo.x, angolo_massimo.y),
+            ImVec2(angolo_massimo.x, angolo_massimo.y),
             ImColor(0.0f, 0.6f, 1.0f, 1.0f),
             1.0f
         );
@@ -274,7 +275,7 @@ void Homepage(bool& upload_file_dati, bool& visualizza_funzioni_statistiche, boo
 
 	// Testo di mezzo del footer (stessa riga)
     ImGui::SameLine(0, 0);
-    ImGui::Text("%s", Testo_crediti_mezzo.c_str());
+    ImGui::Text("%s", testo_crediti_mezzo.c_str());
 
 	// Link nome utente GitHub (stessa riga)
     ImGui::SameLine(0, 0);
@@ -290,14 +291,14 @@ void Homepage(bool& upload_file_dati, bool& visualizza_funzioni_statistiche, boo
     if (ImGui::Button("MatteoMgr2008")) {
         // Permette l'apertura del link riguardante il profilo GitHub "MatteoMgr2008" (quello dello sviluppatore)
 #ifdef _WIN32
-        string comando = "start " + link_profilo_GitHub;
-        system(comando.c_str());
+        string comando_apertura_link = "start " + link_profilo_GitHub;
+        system(comando_apertura_link.c_str());
 #elif __linux__
-        string comando = "xdg-open " + link_profilo_GitHub;
-        system(comando.c_str());
+        string comando_apertura_link = "xdg-open " + link_profilo_GitHub;
+        system(comando_apertura_link.c_str());
 #elif __APPLE__
-        string comando = "open " + link_profilo_GitHub;
-        system(comando.c_str());
+        string comando_apertura_link = "open " + link_profilo_GitHub;
+        system(comando_apertura_link.c_str());
 #endif
     }
 
@@ -305,11 +306,11 @@ void Homepage(bool& upload_file_dati, bool& visualizza_funzioni_statistiche, boo
     if (ImGui::IsItemHovered()) {
         ImGui::PushStyleColor(ImGuiCol_Text, colore_link_hover);
         ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
-        ImVec2 min = ImGui::GetItemRectMin();
-        ImVec2 max = ImGui::GetItemRectMax();
+        ImVec2 angolo_minimo = ImGui::GetItemRectMin();
+        ImVec2 angolo_massimo = ImGui::GetItemRectMax();
         ImGui::GetWindowDrawList()->AddLine(
-            ImVec2(min.x, max.y),
-            ImVec2(max.x, max.y),
+            ImVec2(angolo_minimo.x, angolo_massimo.y),
+            ImVec2(angolo_massimo.x, angolo_massimo.y),
             ImColor(0.0f, 0.6f, 1.0f, 1.0f),
             1.0f
         );
@@ -321,7 +322,7 @@ void Homepage(bool& upload_file_dati, bool& visualizza_funzioni_statistiche, boo
 
     // Testo finale
     ImGui::SameLine(0, 0);
-	ImGui::Text("%s", Testo_crediti_fine.c_str()); // Testo finale del footer (sulla stessa riga)
+	ImGui::Text("%s", testo_crediti_fine.c_str()); // Testo finale del footer (sulla stessa riga)
 
     // Fine della barra footer
 	ImGui::EndChild(); // Termina la finestra del footer
